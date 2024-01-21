@@ -1,5 +1,3 @@
-// ignore_for_file: constant_identifier_names
-
 class SubscriptionDao {
   final String? id;
   String name;
@@ -8,11 +6,11 @@ class SubscriptionDao {
   SubscriptionType subscriptionType;
   int iconCode;
 
-  static const String DEFAULT_NAME = "Not mentionned";
-  static const double DEFAULT_PRICE = 0.0;
-  static const bool DEFAULT_IS_ACTIVE = false;
-  static const String DEFAULT_SUBSCRIPTION_TYPE = "WEEKLY";
-  static const int DEFAULT_ICON_CODE = 0;
+  static const String defaultName = "Not mentionned";
+  static const double defaultPrice = 0.0;
+  static const bool defaultIsActive = false;
+  static const String defaultSubscroptionType = "WEEKLY";
+  static const int defaultIconCode = 983915; // Default icon is a question mark
 
   SubscriptionDao(
       {this.id,
@@ -22,15 +20,14 @@ class SubscriptionDao {
       required this.subscriptionType,
       required this.iconCode});
 
-  factory SubscriptionDao.fromJson(String? id, Map<String, dynamic> json) =>
-      SubscriptionDao(
-          id: id,
-          name: json["name"] ?? DEFAULT_NAME,
-          price: json["price"] ?? DEFAULT_PRICE,
-          isActive: json["isActive"] ?? DEFAULT_IS_ACTIVE,
-          subscriptionType: SubscriptionType.values
-              .byName(json["subscriptionType"] ?? DEFAULT_SUBSCRIPTION_TYPE),
-          iconCode: json["iconCode"] ?? DEFAULT_ICON_CODE);
+  factory SubscriptionDao.fromJson(String? id, Map<String, dynamic> json) => SubscriptionDao(
+      id: id,
+      name: json["name"] ?? defaultName,
+      price: json["price"] ?? defaultPrice,
+      isActive: json["isActive"] ?? defaultIsActive,
+      subscriptionType:
+          SubscriptionType.values.byName(json["subscriptionType"] ?? defaultSubscroptionType),
+      iconCode: json["iconCode"] ?? defaultIconCode);
 
   Map<String, dynamic> toJson() => {
         "name": name,

@@ -11,8 +11,7 @@ class SubscriptionModal extends StatefulWidget {
 
   SubscriptionModal({Key? key, this.subscription})
       : nameController = TextEditingController(text: subscription?.name),
-        priceController =
-            TextEditingController(text: subscription?.price.toString()),
+        priceController = TextEditingController(text: subscription?.price.toString()),
         subscriptionTypeController =
             TextEditingController(text: subscription?.subscriptionType.name),
         super(key: key);
@@ -27,8 +26,8 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
   final _formKey = GlobalKey<FormState>();
 
   _pickIcon() async {
-    IconData? value = await FlutterIconPicker.showIconPicker(context,
-        iconPackModes: [IconPack.material]);
+    IconData? value =
+        await FlutterIconPicker.showIconPicker(context, iconPackModes: [IconPack.material]);
 
     setState(() {
       widget.subscription?.iconCode = value!.codePoint;
@@ -43,8 +42,7 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
     var element = {
       "name": widget.nameController.text,
       "price": double.parse(widget.priceController.text),
-      "isActive":
-          widget.subscription?.isActive ?? SubscriptionDao.DEFAULT_IS_ACTIVE,
+      "isActive": widget.subscription?.isActive ?? SubscriptionDao.defaultIsActive,
       "subscriptionType": widget.subscriptionTypeController.value.text,
       "iconCode": widget.subscription?.iconCode
     };
@@ -54,25 +52,21 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
           .update(element)
           .then((value) => Navigator.pop(context));
     } else {
-      db
-          .collection("/subscriptions")
-          .add(element)
-          .then((value) => Navigator.pop(context));
+      db.collection("/subscriptions").add(element).then((value) => Navigator.pop(context));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     IconData? bufferIcon = IconData(
-        widget.subscription?.iconCode ?? SubscriptionDao.DEFAULT_ICON_CODE,
+        widget.subscription?.iconCode ?? SubscriptionDao.defaultIconCode,
         fontFamily: 'MaterialIcons');
 
     return Form(
       key: _formKey,
       child: Padding(
         padding: const EdgeInsets.all(32.0),
-        child:
-            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Center(
             child: Text(
                 (widget.subscription?.id != null)
@@ -94,8 +88,8 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                     }
                     return null;
                   },
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(), labelText: 'Name'),
+                  decoration:
+                      const InputDecoration(border: OutlineInputBorder(), labelText: 'Name'),
                 ),
               ),
             ],
@@ -117,9 +111,7 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                     return null;
                   },
                   decoration: const InputDecoration(
-                      suffixText: "€",
-                      border: OutlineInputBorder(),
-                      labelText: 'Price'),
+                      suffixText: "€", border: OutlineInputBorder(), labelText: 'Price'),
                 ),
               ),
               const SizedBox(width: 16.0),
@@ -141,10 +133,8 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                       widget.subscriptionTypeController.text = value!;
                     })
                   },
-                  items: SubscriptionType.values
-                      .map<DropdownMenuItem<String>>((e) {
-                    return DropdownMenuItem<String>(
-                        value: e.name, child: Text(e.name));
+                  items: SubscriptionType.values.map<DropdownMenuItem<String>>((e) {
+                    return DropdownMenuItem<String>(value: e.name, child: Text(e.name));
                   }).toList(),
                 ),
               ),
@@ -166,8 +156,7 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                   onPressed: _saveSubscription,
                   child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                          (widget.subscription != null) ? 'Save' : 'Add'))),
+                      child: Text((widget.subscription != null) ? 'Save' : 'Add'))),
             ],
           ),
         ]),

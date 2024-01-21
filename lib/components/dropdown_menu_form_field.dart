@@ -35,8 +35,7 @@ class DropdownMenuFormField<T> extends FormField<T> {
             initialValue: initialSelection,
             autovalidateMode: autovalidateMode,
             builder: (FormFieldState<T> field) {
-              final _DropdownMenuFormFieldState<T> state =
-                  field as _DropdownMenuFormFieldState<T>;
+              final _DropdownMenuFormFieldState<T> state = field as _DropdownMenuFormFieldState<T>;
 
               return DropdownMenu<T>(
                 enabled: enabled,
@@ -71,8 +70,7 @@ class DropdownMenuFormField<T> extends FormField<T> {
 }
 
 class _DropdownMenuFormFieldState<T> extends FormFieldState<T> {
-  DropdownMenuFormField<T> get _dropdownMenuFormField =>
-      widget as DropdownMenuFormField<T>;
+  DropdownMenuFormField<T> get _dropdownMenuFormField => widget as DropdownMenuFormField<T>;
 
   @override
   void initState() {
@@ -82,7 +80,6 @@ class _DropdownMenuFormFieldState<T> extends FormFieldState<T> {
 
   @override
   void didChange(T? value) {
-    print(value);
     super.didChange(value);
     _dropdownMenuFormField.onSelected!(value);
   }
