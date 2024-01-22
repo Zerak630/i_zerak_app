@@ -5,16 +5,8 @@ import 'package:i_zerak_app/dao/subscription_dao.dart';
 
 class SubscriptionModal extends StatefulWidget {
   final SubscriptionDao? subscription;
-  final TextEditingController nameController;
-  final TextEditingController priceController;
-  final TextEditingController subscriptionTypeController;
 
-  SubscriptionModal({Key? key, this.subscription})
-      : nameController = TextEditingController(text: subscription?.name),
-        priceController = TextEditingController(text: subscription?.price.toString()),
-        subscriptionTypeController =
-            TextEditingController(text: subscription?.subscriptionType.name),
-        super(key: key);
+  const SubscriptionModal({Key? key, this.subscription}) : super(key: key);
 
   @override
   State<SubscriptionModal> createState() => _SubscriptionModalState();
@@ -25,12 +17,37 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
 
   final _formKey = GlobalKey<FormState>();
 
+  late TextEditingController nameController;
+  late TextEditingController priceController;
+  late TextEditingController subscriptionTypeController;
+
+  SubscriptionDao get subscription => widget.subscription ?? SubscriptionDao();
+
+  bool get isEditing => widget.subscription != null;
+
+  @override
+  void initState() {
+    super.initState();
+
+    nameController = TextEditingController(text: subscription.name);
+    priceController = TextEditingController(text: subscription.price.toString());
+    subscriptionTypeController = TextEditingController(text: subscription.subscriptionType.name);
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    priceController.dispose();
+    subscriptionTypeController.dispose();
+    super.dispose();
+  }
+
   _pickIcon() async {
     IconData? value =
         await FlutterIconPicker.showIconPicker(context, iconPackModes: [IconPack.material]);
 
     setState(() {
-      widget.subscription?.iconCode = value!.codePoint;
+      subscription.iconCode = value!.codePoint;
     });
   }
 
@@ -39,28 +56,27 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
       return;
     }
 
-    var element = {
-      "name": widget.nameController.text,
-      "price": double.parse(widget.priceController.text),
-      "isActive": widget.subscription?.isActive ?? SubscriptionDao.defaultIsActive,
-      "subscriptionType": widget.subscriptionTypeController.value.text,
-      "iconCode": widget.subscription?.iconCode
-    };
-    if (widget.subscription != null) {
+    subscription.name = nameController.text;
+    subscription.price = double.parse(priceController.text);
+    subscription.subscriptionType = SubscriptionType.values
+        .firstWhere((element) => element.name == subscriptionTypeController.text);
+
+    if (isEditing) {
       db
           .doc("/subscriptions/${widget.subscription?.id}")
-          .update(element)
+          .update(subscription.toJson())
           .then((value) => Navigator.pop(context));
     } else {
-      db.collection("/subscriptions").add(element).then((value) => Navigator.pop(context));
+      db
+          .collection("/subscriptions")
+          .add(subscription.toJson())
+          .then((value) => Navigator.pop(context));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    IconData? bufferIcon = IconData(
-        widget.subscription?.iconCode ?? SubscriptionDao.defaultIconCode,
-        fontFamily: 'MaterialIcons');
+    IconData? bufferIcon = IconData(subscription.iconCode, fontFamily: 'MaterialIcons');
 
     return Form(
       key: _formKey,
@@ -81,7 +97,7 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
               const SizedBox(width: 16.0),
               Expanded(
                 child: TextFormField(
-                  controller: widget.nameController,
+                  controller: nameController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter a name';
@@ -100,7 +116,7 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
               Expanded(
                 flex: 1,
                 child: TextFormField(
-                  controller: widget.priceController,
+                  controller: priceController,
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -119,7 +135,6 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                 flex: 1,
                 child: DropdownButtonFormField<String>(
                   //FIXME: DropdownButtonFormField is deprecated
-                  //FIXME: initialValue is not set up
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please select a subscription type';
@@ -130,9 +145,10 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                   isExpanded: true,
                   onChanged: (value) => {
                     setState(() {
-                      widget.subscriptionTypeController.text = value!;
+                      subscriptionTypeController.text = value!;
                     })
                   },
+                  value: subscriptionTypeController.text,
                   items: SubscriptionType.values.map<DropdownMenuItem<String>>((e) {
                     return DropdownMenuItem<String>(value: e.name, child: Text(e.name));
                   }).toList(),
@@ -156,7 +172,7 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                   onPressed: _saveSubscription,
                   child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Text((widget.subscription != null) ? 'Save' : 'Add'))),
+                      child: Text((isEditing) ? 'Save' : 'Add'))),
             ],
           ),
         ]),

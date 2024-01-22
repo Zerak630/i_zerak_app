@@ -36,15 +36,15 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
               SubscriptionDao.fromJson(doc.id, doc.data() as Map<String, dynamic>);
           if (sub.isActive) {
             switch (sub.subscriptionType) {
-              case SubscriptionType.WEEKLY:
+              case SubscriptionType.weekly:
                 _totalPerWeek += sub.price;
                 _totalPerMonth += sub.price * 4.5;
                 _totalPerYear += sub.price * 52;
-              case SubscriptionType.MONTHLY:
+              case SubscriptionType.monthly:
                 _totalPerWeek += sub.price / 4.5;
                 _totalPerMonth += sub.price;
                 _totalPerYear += sub.price * 12;
-              case SubscriptionType.YEARLY:
+              case SubscriptionType.yearly:
                 _totalPerWeek += sub.price / 52;
                 _totalPerMonth += sub.price / 12;
                 _totalPerYear += sub.price;
@@ -229,7 +229,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
           showModalBottomSheet(
               context: context,
               builder: (BuildContext context) {
-                return SubscriptionModal();
+                return const SubscriptionModal();
               });
         },
         child: const Icon(Icons.add),
@@ -239,11 +239,11 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
 
   parseDate(SubscriptionType subscriptionType) {
     switch (subscriptionType) {
-      case SubscriptionType.WEEKLY:
+      case SubscriptionType.weekly:
         return 'week';
-      case SubscriptionType.MONTHLY:
+      case SubscriptionType.monthly:
         return 'month';
-      case SubscriptionType.YEARLY:
+      case SubscriptionType.yearly:
         return 'year';
     }
   }
