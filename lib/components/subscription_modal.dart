@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:i_zerak_app/dao/subscription_dao.dart';
+import 'package:i_zerak_app/utils/custom_icon_list.dart';
 
 class SubscriptionModal extends StatefulWidget {
   final SubscriptionDao? subscription;
@@ -43,8 +44,8 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
   }
 
   _pickIcon() async {
-    IconData? value =
-        await FlutterIconPicker.showIconPicker(context, iconPackModes: [IconPack.material]);
+    IconData? value = await FlutterIconPicker.showIconPicker(context,
+        iconPackModes: [], customIconPack: customIcons);
 
     setState(() {
       subscription.iconCode = value!.codePoint;
