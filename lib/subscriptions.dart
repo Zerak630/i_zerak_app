@@ -4,9 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/components/subscription_modal.dart';
 import 'package:i_zerak_app/dao/subscription_dao.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SubscriptionsPage extends StatefulWidget {
-  const SubscriptionsPage({Key? key}) : super(key: key);
+  const SubscriptionsPage({super.key});
 
   @override
   State<SubscriptionsPage> createState() => _SubscriptionsPageState();
@@ -83,7 +84,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Subscriptions'),
+        title: Text(AppLocalizations.of(context)!.subscription_title),
       ),
       body: Column(
         children: [
@@ -120,23 +121,23 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                         ),
                       ],
                     )),
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Expanded(
-                      child: Text("/week",
+                      child: Text(AppLocalizations.of(context)!.per_week,
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontStyle: FontStyle.italic)),
+                          style: const TextStyle(fontStyle: FontStyle.italic)),
                     ),
                     Expanded(
-                      child: Text("/month",
+                      child: Text(AppLocalizations.of(context)!.per_month,
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontStyle: FontStyle.italic)),
+                          style: const TextStyle(fontStyle: FontStyle.italic)),
                     ),
                     Expanded(
-                      child: Text("/year",
+                      child: Text(AppLocalizations.of(context)!.per_year,
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontStyle: FontStyle.italic)),
+                          style: const TextStyle(fontStyle: FontStyle.italic)),
                     )
                   ],
                 )
@@ -166,7 +167,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                           title: Text(buffer[index].name,
                               style: const TextStyle(fontWeight: FontWeight.bold)),
                           subtitle: Text(
-                            "${buffer[index].price}€ / ${parseDate(buffer[index].subscriptionType)}",
+                            "${buffer[index].price}€ ${SubscriptionType.getLocaleName(context, buffer[index].subscriptionType)}",
                             style: const TextStyle(fontStyle: FontStyle.italic),
                           ),
                           leading:
@@ -174,17 +175,17 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                           trailing: PopupMenuButton(
                             itemBuilder: (BuildContext context) {
                               return [
-                                const PopupMenuItem(
+                                PopupMenuItem(
                                   value: 'edit',
                                   child: Row(
                                     children: [
-                                      Padding(
+                                      const Padding(
                                         padding: EdgeInsets.all(4.0),
                                         child: Icon(Icons.edit),
                                       ),
                                       Padding(
-                                        padding: EdgeInsets.all(4.0),
-                                        child: Text('Edit'),
+                                        padding: const EdgeInsets.all(4.0),
+                                        child: Text(AppLocalizations.of(context)!.edit),
                                       ),
                                     ],
                                   ),
@@ -201,8 +202,9 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                                       ),
                                       Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child:
-                                              Text(buffer[index].isActive ? 'Disable' : 'Enable')),
+                                          child: Text(buffer[index].isActive
+                                              ? AppLocalizations.of(context)!.disable
+                                              : AppLocalizations.of(context)!.enable)),
                                     ],
                                   ),
                                 ),
@@ -235,16 +237,5 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
         child: const Icon(Icons.add),
       ),
     );
-  }
-
-  parseDate(SubscriptionType subscriptionType) {
-    switch (subscriptionType) {
-      case SubscriptionType.weekly:
-        return 'week';
-      case SubscriptionType.monthly:
-        return 'month';
-      case SubscriptionType.yearly:
-        return 'year';
-    }
   }
 }

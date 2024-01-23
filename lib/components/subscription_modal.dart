@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:i_zerak_app/dao/subscription_dao.dart';
 import 'package:i_zerak_app/utils/custom_icon_list.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SubscriptionModal extends StatefulWidget {
   final SubscriptionDao? subscription;
 
-  const SubscriptionModal({Key? key, this.subscription}) : super(key: key);
+  const SubscriptionModal({super.key, this.subscription});
 
   @override
   State<SubscriptionModal> createState() => _SubscriptionModalState();
@@ -87,8 +88,8 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
           Center(
             child: Text(
                 (widget.subscription?.id != null)
-                    ? 'Edit the subscription'
-                    : 'Add a new subscription',
+                    ? AppLocalizations.of(context)!.edit_subscription
+                    : AppLocalizations.of(context)!.add_subscription,
                 style: Theme.of(context).textTheme.titleLarge),
           ),
           const SizedBox(height: 16.0),
@@ -101,12 +102,13 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                   controller: nameController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
+                      return AppLocalizations.of(context)!.please_enter_a_name;
                     }
                     return null;
                   },
-                  decoration:
-                      const InputDecoration(border: OutlineInputBorder(), labelText: 'Name'),
+                  decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      labelText: AppLocalizations.of(context)!.name),
                 ),
               ),
             ],
@@ -121,14 +123,16 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a price';
+                      return AppLocalizations.of(context)!.please_enter_a_price;
                     } else if (double.parse(value) < 0) {
-                      return 'Please enter a positive price';
+                      return AppLocalizations.of(context)!.please_enter_a_valid_price;
                     }
                     return null;
                   },
-                  decoration: const InputDecoration(
-                      suffixText: "€", border: OutlineInputBorder(), labelText: 'Price'),
+                  decoration: InputDecoration(
+                      suffixText: "€",
+                      border: const OutlineInputBorder(),
+                      labelText: AppLocalizations.of(context)!.price),
                 ),
               ),
               const SizedBox(width: 16.0),
@@ -138,7 +142,7 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                   //FIXME: DropdownButtonFormField is deprecated
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please select a subscription type';
+                      return AppLocalizations.of(context)!.please_select_a_frequency;
                     } else {
                       return null;
                     }
@@ -151,7 +155,9 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                   },
                   value: subscriptionTypeController.text,
                   items: SubscriptionType.values.map<DropdownMenuItem<String>>((e) {
-                    return DropdownMenuItem<String>(value: e.name, child: Text(e.name));
+                    return DropdownMenuItem<String>(
+                        value: e.name,
+                        child: Text(SubscriptionType.getLocaleAdjective(context, e)));
                   }).toList(),
                 ),
               ),
@@ -165,15 +171,17 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text("Cancel"),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                   )),
               ElevatedButton(
                   onPressed: _saveSubscription,
                   child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Text((isEditing) ? 'Save' : 'Add'))),
+                      child: Text((isEditing)
+                          ? AppLocalizations.of(context)!.save
+                          : AppLocalizations.of(context)!.add))),
             ],
           ),
         ]),

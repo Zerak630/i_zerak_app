@@ -1,0 +1,32 @@
+{
+	"@@locale": "en",
+	"helloWorld": "Hello World!",
+	"@helloWorld": {
+		"description": "The conventional newborn programmer greeting"
+	},
+	"subscription_title": "Subscriptions",
+	"per_week": "per week",
+	"per_month": "per month",
+	"per_year": "per year",
+	"per_week_adjective": "Weekly",
+	"per_month_adjective": "Monthly",
+	"per_year_adjective": "Yearly",
+	"enable": "Enable",
+	"disable": "Disable",
+	"edit": "Edit",
+	"delete": "Delete",
+	"save": "Save",
+	"add": "Add",
+	"cancel": "Cancel",
+	"edit_subscription": "Edit a subscription",
+	"add_subscription": "Add a new subscription",
+	"name": "Name",
+	"price": "Price",
+	"frequency": "Frequency",
+	"name_placeholder": "Netflix",
+	"price_placeholder": "9.99",
+	"please_enter_a_name": "Please enter a name",
+	"please_enter_a_price": "Please enter a price",
+	"please_enter_a_valid_price": "Please enter a valid price",
+	"please_select_a_frequency": "Please select a frequency"
+}
