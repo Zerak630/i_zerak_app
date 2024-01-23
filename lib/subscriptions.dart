@@ -77,6 +77,9 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
             .doc(subscription.id)
             .update({'isActive': !subscription.isActive});
         break;
+      case 'delete':
+        db.collection('subscriptions').doc(subscription.id).delete();
+        break;
     }
   }
 
@@ -86,145 +89,160 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.subscription_title),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    transitionBuilder: (Widget child, Animation<double> animation) {
-                      return FadeTransition(
-                        opacity: Tween<double>(begin: 0, end: 1).animate(animation),
-                        child: child,
-                      );
-                    },
-                    child: Row(
-                      key: ValueKey<String>(_totalPerWeek.toString()),
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Expanded(
-                          child: Text("$_totalPerWeek€",
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headlineMedium),
-                        ),
-                        Expanded(
-                          child: Text("$_totalPerMonth€",
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headlineMedium),
-                        ),
-                        Expanded(
-                          child: Text("$_totalPerYear€",
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headlineMedium),
-                        ),
-                      ],
-                    )),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Expanded(
-                      child: Text(AppLocalizations.of(context)!.per_week,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontStyle: FontStyle.italic)),
-                    ),
-                    Expanded(
-                      child: Text(AppLocalizations.of(context)!.per_month,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontStyle: FontStyle.italic)),
-                    ),
-                    Expanded(
-                      child: Text(AppLocalizations.of(context)!.per_year,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontStyle: FontStyle.italic)),
-                    )
-                  ],
-                )
-              ],
-            ),
-          ),
-          Flexible(
-            child: StreamBuilder(
-              stream: _stream,
-              builder: (BuildContext context, AsyncSnapshot snapshot) {
-                if (snapshot.hasData) {
-                  List<SubscriptionDao> buffer = [];
-
-                  for (DocumentSnapshot doc in snapshot.data.docs) {
-                    buffer
-                        .add(SubscriptionDao.fromJson(doc.id, doc.data() as Map<String, dynamic>));
-                  }
-
-                  return ListView.builder(
-                    itemCount: buffer.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Card(
-                        color: buffer[index].isActive
-                            ? Theme.of(context).colorScheme.surface
-                            : Theme.of(context).colorScheme.surface.withOpacity(0.5),
-                        child: ListTile(
-                          title: Text(buffer[index].name,
-                              style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text(
-                            "${buffer[index].price}€ ${SubscriptionFrequency.getLocaleName(context, buffer[index].subscriptionType)}",
-                            style: const TextStyle(fontStyle: FontStyle.italic),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder: (Widget child, Animation<double> animation) {
+                        return FadeTransition(
+                          opacity: Tween<double>(begin: 0, end: 1).animate(animation),
+                          child: child,
+                        );
+                      },
+                      child: Row(
+                        key: ValueKey<String>(_totalPerWeek.toString()),
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Expanded(
+                            child: Text("$_totalPerWeek€",
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.headlineMedium),
                           ),
-                          leading:
-                              Icon(IconData(buffer[index].iconCode, fontFamily: 'MaterialIcons')),
-                          trailing: PopupMenuButton(
-                            itemBuilder: (BuildContext context) {
-                              return [
-                                PopupMenuItem(
-                                  value: 'edit',
-                                  child: Row(
-                                    children: [
+                          Expanded(
+                            child: Text("$_totalPerMonth€",
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.headlineMedium),
+                          ),
+                          Expanded(
+                            child: Text("$_totalPerYear€",
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.headlineMedium),
+                          ),
+                        ],
+                      )),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Expanded(
+                        child: Text(AppLocalizations.of(context)!.per_week,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontStyle: FontStyle.italic)),
+                      ),
+                      Expanded(
+                        child: Text(AppLocalizations.of(context)!.per_month,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontStyle: FontStyle.italic)),
+                      ),
+                      Expanded(
+                        child: Text(AppLocalizations.of(context)!.per_year,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontStyle: FontStyle.italic)),
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ),
+            Flexible(
+              child: StreamBuilder(
+                stream: _stream,
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.hasData) {
+                    List<SubscriptionDao> buffer = [];
+
+                    for (DocumentSnapshot doc in snapshot.data.docs) {
+                      buffer.add(
+                          SubscriptionDao.fromJson(doc.id, doc.data() as Map<String, dynamic>));
+                    }
+
+                    return ListView.builder(
+                      itemCount: buffer.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Card(
+                          color: buffer[index].isActive
+                              ? Theme.of(context).colorScheme.surface
+                              : Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                          child: ListTile(
+                            title: Text(buffer[index].name,
+                                style: const TextStyle(fontWeight: FontWeight.bold)),
+                            subtitle: Text(
+                              "${buffer[index].price}€ ${SubscriptionFrequency.getLocaleName(context, buffer[index].subscriptionType)}",
+                              style: const TextStyle(fontStyle: FontStyle.italic),
+                            ),
+                            leading:
+                                Icon(IconData(buffer[index].iconCode, fontFamily: 'MaterialIcons')),
+                            trailing: PopupMenuButton(
+                              itemBuilder: (BuildContext context) {
+                                return [
+                                  PopupMenuItem(
+                                    value: 'edit',
+                                    child: Row(
+                                      children: [
+                                        const Padding(
+                                          padding: EdgeInsets.all(4.0),
+                                          child: Icon(Icons.edit),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(4.0),
+                                          child: Text(AppLocalizations.of(context)!.edit),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'disable',
+                                    child: Row(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(4.0),
+                                          child: Icon(buffer[index].isActive
+                                              ? Icons.do_disturb_alt_rounded
+                                              : Icons.circle_outlined),
+                                        ),
+                                        Padding(
+                                            padding: const EdgeInsets.all(4.0),
+                                            child: Text(buffer[index].isActive
+                                                ? AppLocalizations.of(context)!.disable
+                                                : AppLocalizations.of(context)!.enable)),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'delete',
+                                    child: Row(children: [
                                       const Padding(
                                         padding: EdgeInsets.all(4.0),
-                                        child: Icon(Icons.edit),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(4.0),
-                                        child: Text(AppLocalizations.of(context)!.edit),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'disable',
-                                  child: Row(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(4.0),
-                                        child: Icon(buffer[index].isActive
-                                            ? Icons.do_disturb_alt_rounded
-                                            : Icons.circle_outlined),
+                                        child: Icon(Icons.delete),
                                       ),
                                       Padding(
                                           padding: const EdgeInsets.all(4.0),
-                                          child: Text(buffer[index].isActive
-                                              ? AppLocalizations.of(context)!.disable
-                                              : AppLocalizations.of(context)!.enable)),
-                                    ],
+                                          child: Text(AppLocalizations.of(context)!.delete)),
+                                    ]),
                                   ),
-                                ),
-                              ];
-                            },
-                            onSelected: (value) => _parseMenuValue(buffer[index], value),
+                                ];
+                              },
+                              onSelected: (value) => _parseMenuValue(buffer[index], value),
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  );
-                } else {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-              },
+                        );
+                      },
+                    );
+                  } else {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

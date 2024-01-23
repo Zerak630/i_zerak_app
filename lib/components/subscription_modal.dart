@@ -19,11 +19,11 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
 
   final _formKey = GlobalKey<FormState>();
 
-  late TextEditingController nameController;
-  late TextEditingController priceController;
-  late TextEditingController subscriptionTypeController;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _subscriptionTypeController = TextEditingController();
 
-  SubscriptionDao get subscription => widget.subscription ?? SubscriptionDao();
+  late SubscriptionDao _subscription;
 
   bool get isEditing => widget.subscription != null;
 
@@ -31,25 +31,29 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
   void initState() {
     super.initState();
 
-    nameController = TextEditingController(text: subscription.name);
-    priceController = TextEditingController(text: subscription.price.toString());
-    subscriptionTypeController = TextEditingController(text: subscription.subscriptionType.name);
+    if (isEditing) {
+      _subscription = widget.subscription!;
+      _nameController.text = _subscription.name;
+      _priceController.text = _subscription.price.toString();
+    } else {
+      _subscription = SubscriptionDao();
+    }
   }
 
   @override
   void dispose() {
-    nameController.dispose();
-    priceController.dispose();
-    subscriptionTypeController.dispose();
+    _nameController.dispose();
+    _priceController.dispose();
+    _subscriptionTypeController.dispose();
     super.dispose();
   }
 
   _pickIcon() async {
     IconData? value = await FlutterIconPicker.showIconPicker(context,
-        iconPackModes: [], customIconPack: customIcons);
+        iconSize: 50, iconPackModes: [], customIconPack: customIcons);
 
     setState(() {
-      subscription.iconCode = value!.codePoint;
+      _subscription.iconCode = value!.codePoint;
     });
   }
 
@@ -58,134 +62,136 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
       return;
     }
 
-    subscription.name = nameController.text;
-    subscription.price = double.parse(priceController.text);
-    subscription.subscriptionType = SubscriptionFrequency.values
-        .firstWhere((element) => element.name == subscriptionTypeController.text);
+    _subscription.name = _nameController.text;
+    _subscription.price = double.parse(_priceController.text);
+    _subscription.subscriptionType = SubscriptionFrequency.values
+        .firstWhere((element) => element.name == _subscriptionTypeController.text);
 
     if (isEditing) {
       db
-          .doc("/subscriptions/${widget.subscription?.id}")
-          .update(subscription.toJson())
+          .doc("/subscriptions/${_subscription.id}")
+          .update(_subscription.toJson())
           .then((value) => Navigator.pop(context));
     } else {
       db
           .collection("/subscriptions")
-          .add(subscription.toJson())
+          .add(_subscription.toJson())
           .then((value) => Navigator.pop(context));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    IconData? bufferIcon = IconData(subscription.iconCode, fontFamily: 'MaterialIcons');
+    IconData? bufferIcon = IconData(_subscription.iconCode, fontFamily: 'MaterialIcons');
 
-    return Form(
-      key: _formKey,
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Center(
-            child: Text(
-                (widget.subscription?.id != null)
-                    ? AppLocalizations.of(context)!.edit_subscription
-                    : AppLocalizations.of(context)!.add_subscription,
-                style: Theme.of(context).textTheme.titleLarge),
-          ),
-          const SizedBox(height: 16.0),
-          Row(
-            children: [
-              IconButton(onPressed: _pickIcon, icon: Icon(bufferIcon)),
-              const SizedBox(width: 16.0),
-              Expanded(
-                child: TextFormField(
-                  controller: nameController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(context)!.please_enter_a_name;
-                    }
-                    return null;
-                  },
-                  decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      labelText: AppLocalizations.of(context)!.name),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16.0),
-          Row(
-            children: [
-              Expanded(
-                flex: 1,
-                child: TextFormField(
-                  controller: priceController,
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(context)!.please_enter_a_price;
-                    } else if (double.parse(value) < 0) {
-                      return AppLocalizations.of(context)!.please_enter_a_valid_price;
-                    }
-                    return null;
-                  },
-                  decoration: InputDecoration(
-                      suffixText: "€",
-                      border: const OutlineInputBorder(),
-                      labelText: AppLocalizations.of(context)!.price),
-                ),
-              ),
-              const SizedBox(width: 16.0),
-              Expanded(
-                flex: 1,
-                child: DropdownButtonFormField<String>(
-                  //FIXME: DropdownButtonFormField is deprecated
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(context)!.please_select_a_frequency;
-                    } else {
+    return Wrap(children: [
+      Form(
+        key: _formKey,
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Center(
+              child: Text(
+                  (widget.subscription?.id != null)
+                      ? AppLocalizations.of(context)!.edit_subscription
+                      : AppLocalizations.of(context)!.add_subscription,
+                  style: Theme.of(context).textTheme.titleLarge),
+            ),
+            const SizedBox(height: 16.0),
+            Row(
+              children: [
+                IconButton(onPressed: _pickIcon, icon: Icon(bufferIcon)),
+                const SizedBox(width: 16.0),
+                Expanded(
+                  child: TextFormField(
+                    controller: _nameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return AppLocalizations.of(context)!.please_enter_a_name;
+                      }
                       return null;
-                    }
-                  },
-                  isExpanded: true,
-                  onChanged: (value) => {
-                    setState(() {
-                      subscriptionTypeController.text = value!;
-                    })
-                  },
-                  value: subscriptionTypeController.text,
-                  items: SubscriptionFrequency.values.map<DropdownMenuItem<String>>((e) {
-                    return DropdownMenuItem<String>(
-                        value: e.name,
-                        child: Text(SubscriptionFrequency.getLocaleAdjective(context, e)));
-                  }).toList(),
+                    },
+                    decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: AppLocalizations.of(context)!.name),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(AppLocalizations.of(context)!.cancel),
-                  )),
-              ElevatedButton(
-                  onPressed: _saveSubscription,
-                  child: Padding(
+              ],
+            ),
+            const SizedBox(height: 16.0),
+            Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: TextFormField(
+                    controller: _priceController,
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return AppLocalizations.of(context)!.please_enter_a_price;
+                      } else if (double.parse(value) < 0) {
+                        return AppLocalizations.of(context)!.please_enter_a_valid_price;
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                        suffixText: "€",
+                        border: const OutlineInputBorder(),
+                        labelText: AppLocalizations.of(context)!.price),
+                  ),
+                ),
+                const SizedBox(width: 16.0),
+                Expanded(
+                  flex: 1,
+                  child: DropdownButtonFormField<String>(
+                    //FIXME: DropdownButtonFormField is deprecated
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return AppLocalizations.of(context)!.please_select_a_frequency;
+                      } else {
+                        return null;
+                      }
+                    },
+                    isExpanded: true,
+                    onChanged: (value) => {
+                      setState(() {
+                        _subscriptionTypeController.text = value!;
+                      })
+                    },
+                    value: _subscription.subscriptionType.name,
+                    items: SubscriptionFrequency.values.map<DropdownMenuItem<String>>((e) {
+                      return DropdownMenuItem<String>(
+                          value: e.name,
+                          child: Text(SubscriptionFrequency.getLocaleAdjective(context, e)));
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Text((isEditing)
-                          ? AppLocalizations.of(context)!.save
-                          : AppLocalizations.of(context)!.add))),
-            ],
-          ),
-        ]),
-      ),
-    );
+                      child: Text(AppLocalizations.of(context)!.cancel),
+                    )),
+                ElevatedButton(
+                    onPressed: _saveSubscription,
+                    child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text((isEditing)
+                            ? AppLocalizations.of(context)!.save
+                            : AppLocalizations.of(context)!.add))),
+              ],
+            ),
+          ]),
+        ),
+      )
+    ]);
   }
 }
