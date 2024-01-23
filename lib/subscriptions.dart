@@ -37,15 +37,15 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
               SubscriptionDao.fromJson(doc.id, doc.data() as Map<String, dynamic>);
           if (sub.isActive) {
             switch (sub.subscriptionType) {
-              case SubscriptionType.weekly:
+              case SubscriptionFrequency.weekly:
                 _totalPerWeek += sub.price;
                 _totalPerMonth += sub.price * 4.5;
                 _totalPerYear += sub.price * 52;
-              case SubscriptionType.monthly:
+              case SubscriptionFrequency.monthly:
                 _totalPerWeek += sub.price / 4.5;
                 _totalPerMonth += sub.price;
                 _totalPerYear += sub.price * 12;
-              case SubscriptionType.yearly:
+              case SubscriptionFrequency.yearly:
                 _totalPerWeek += sub.price / 52;
                 _totalPerMonth += sub.price / 12;
                 _totalPerYear += sub.price;
@@ -167,7 +167,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                           title: Text(buffer[index].name,
                               style: const TextStyle(fontWeight: FontWeight.bold)),
                           subtitle: Text(
-                            "${buffer[index].price}€ ${SubscriptionType.getLocaleName(context, buffer[index].subscriptionType)}",
+                            "${buffer[index].price}€ ${SubscriptionFrequency.getLocaleName(context, buffer[index].subscriptionType)}",
                             style: const TextStyle(fontStyle: FontStyle.italic),
                           ),
                           leading:

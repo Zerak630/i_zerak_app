@@ -5,7 +5,7 @@ class SubscriptionDao {
   String name;
   double price;
   bool isActive;
-  SubscriptionType subscriptionType;
+  SubscriptionFrequency subscriptionType;
   int iconCode;
 
   SubscriptionDao(
@@ -13,7 +13,7 @@ class SubscriptionDao {
       this.name = "",
       this.price = 0.0,
       this.isActive = true,
-      this.subscriptionType = SubscriptionType.weekly,
+      this.subscriptionType = SubscriptionFrequency.weekly,
       this.iconCode = 983915});
 
   factory SubscriptionDao.fromJson(String? id, Map<String, dynamic> json) => SubscriptionDao(
@@ -21,7 +21,7 @@ class SubscriptionDao {
       name: json["name"],
       price: json["price"],
       isActive: json["isActive"],
-      subscriptionType: SubscriptionType.values.byName(json["subscriptionType"]),
+      subscriptionType: SubscriptionFrequency.values.byName(json["subscriptionType"]),
       iconCode: json["iconCode"]);
 
   Map<String, dynamic> toJson() => {
@@ -33,29 +33,29 @@ class SubscriptionDao {
       };
 }
 
-enum SubscriptionType {
+enum SubscriptionFrequency {
   weekly,
   monthly,
   yearly;
 
-  static String getLocaleName(context, SubscriptionType type) {
+  static String getLocaleName(context, SubscriptionFrequency type) {
     switch (type) {
-      case SubscriptionType.weekly:
+      case SubscriptionFrequency.weekly:
         return AppLocalizations.of(context)!.per_week;
-      case SubscriptionType.monthly:
+      case SubscriptionFrequency.monthly:
         return AppLocalizations.of(context)!.per_month;
-      case SubscriptionType.yearly:
+      case SubscriptionFrequency.yearly:
         return AppLocalizations.of(context)!.per_year;
     }
   }
 
-  static String getLocaleAdjective(context, SubscriptionType type) {
+  static String getLocaleAdjective(context, SubscriptionFrequency type) {
     switch (type) {
-      case SubscriptionType.weekly:
+      case SubscriptionFrequency.weekly:
         return AppLocalizations.of(context)!.per_week_adjective;
-      case SubscriptionType.monthly:
+      case SubscriptionFrequency.monthly:
         return AppLocalizations.of(context)!.per_month_adjective;
-      case SubscriptionType.yearly:
+      case SubscriptionFrequency.yearly:
         return AppLocalizations.of(context)!.per_year_adjective;
     }
   }

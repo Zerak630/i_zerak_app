@@ -60,7 +60,7 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
 
     subscription.name = nameController.text;
     subscription.price = double.parse(priceController.text);
-    subscription.subscriptionType = SubscriptionType.values
+    subscription.subscriptionType = SubscriptionFrequency.values
         .firstWhere((element) => element.name == subscriptionTypeController.text);
 
     if (isEditing) {
@@ -154,10 +154,10 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                     })
                   },
                   value: subscriptionTypeController.text,
-                  items: SubscriptionType.values.map<DropdownMenuItem<String>>((e) {
+                  items: SubscriptionFrequency.values.map<DropdownMenuItem<String>>((e) {
                     return DropdownMenuItem<String>(
                         value: e.name,
-                        child: Text(SubscriptionType.getLocaleAdjective(context, e)));
+                        child: Text(SubscriptionFrequency.getLocaleAdjective(context, e)));
                   }).toList(),
                 ),
               ),
