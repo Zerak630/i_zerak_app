@@ -88,7 +88,8 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.subscription_title),
+        title: Text(AppLocalizations.of(context)!.subscription_title,
+            style: Theme.of(context).appBarTheme.titleTextStyle),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -114,22 +115,23 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                               child: Text("$_totalPerWeek€",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      color: _totalPerWeek > 0
-                                          ? Theme.of(context).colorScheme.secondary
-                                          : Theme.of(context).colorScheme.error,
                                       fontSize: min(MediaQuery.of(context).size.width * 0.3,
                                           Theme.of(context).textTheme.headlineMedium!.fontSize!),
                                       fontWeight: FontWeight.bold))),
                           Expanded(
-                            child: Text("$_totalPerMonth€",
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.headlineMedium),
-                          ),
+                              child: Text("$_totalPerMonth€",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: min(MediaQuery.of(context).size.width * 0.3,
+                                          Theme.of(context).textTheme.headlineMedium!.fontSize!),
+                                      fontWeight: FontWeight.bold))),
                           Expanded(
-                            child: Text("$_totalPerYear€",
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.headlineMedium),
-                          ),
+                              child: Text("$_totalPerYear€",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: min(MediaQuery.of(context).size.width * 0.3,
+                                          Theme.of(context).textTheme.headlineMedium!.fontSize!),
+                                      fontWeight: FontWeight.bold))),
                         ],
                       )),
                   Row(
@@ -173,7 +175,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                         return Card(
                           color: buffer[index].isActive
                               ? Theme.of(context).colorScheme.surface
-                              : Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                              : Theme.of(context).colorScheme.onInverseSurface,
                           child: ListTile(
                             title: Text(buffer[index].name,
                                 style: const TextStyle(fontWeight: FontWeight.bold)),

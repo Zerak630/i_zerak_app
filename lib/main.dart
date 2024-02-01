@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:i_zerak_app/firebase_options.dart';
 import 'package:i_zerak_app/subscriptions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:i_zerak_app/theme/darktheme_default.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,10 +23,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'iZerak',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
-          useMaterial3: true,
-        ),
+        theme: CustomThemes.brightDefault,
+        darkTheme: CustomThemes.darkDefault,
         localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
