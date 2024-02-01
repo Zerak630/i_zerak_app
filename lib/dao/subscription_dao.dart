@@ -19,7 +19,7 @@ class SubscriptionDao {
   factory SubscriptionDao.fromJson(String? id, Map<String, dynamic> json) => SubscriptionDao(
       id: id,
       name: json["name"],
-      price: json["price"],
+      price: double.parse(json["price"].toString()),
       isActive: json["isActive"],
       subscriptionType: SubscriptionFrequency.values.byName(json["subscriptionType"]),
       iconCode: json["iconCode"]);

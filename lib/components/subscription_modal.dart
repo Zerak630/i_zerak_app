@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 import 'package:i_zerak_app/dao/subscription_dao.dart';
 import 'package:i_zerak_app/utils/custom_icon_list.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SubscriptionModal extends StatefulWidget {
   final SubscriptionDao? subscription;
@@ -35,6 +35,7 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
       _subscription = widget.subscription!;
       _nameController.text = _subscription.name;
       _priceController.text = _subscription.price.toString();
+      _subscriptionTypeController.text = _subscription.subscriptionType.name;
     } else {
       _subscription = SubscriptionDao();
     }
@@ -145,6 +146,9 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                   flex: 1,
                   child: DropdownButtonFormField<String>(
                     //FIXME: DropdownButtonFormField is deprecated
+                    decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: AppLocalizations.of(context)!.frequency),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return AppLocalizations.of(context)!.please_select_a_frequency;

@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:i_zerak_app/components/subscription_modal.dart';
 import 'package:i_zerak_app/dao/subscription_dao.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SubscriptionsPage extends StatefulWidget {
   const SubscriptionsPage({super.key});
@@ -110,10 +111,15 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           Expanded(
-                            child: Text("$_totalPerWeek€",
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.headlineMedium),
-                          ),
+                              child: Text("$_totalPerWeek€",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: _totalPerWeek > 0
+                                          ? Theme.of(context).colorScheme.secondary
+                                          : Theme.of(context).colorScheme.error,
+                                      fontSize: min(MediaQuery.of(context).size.width * 0.3,
+                                          Theme.of(context).textTheme.headlineMedium!.fontSize!),
+                                      fontWeight: FontWeight.bold))),
                           Expanded(
                             child: Text("$_totalPerMonth€",
                                 textAlign: TextAlign.center,
