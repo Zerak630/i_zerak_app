@@ -1,9 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:i_zerak_app/firebase_options.dart';
-import 'package:i_zerak_app/subscriptions.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:i_zerak_app/homepage.dart';
 import 'package:i_zerak_app/theme/darktheme_default.dart';
 
 void main() async {
@@ -32,8 +32,6 @@ class MyApp extends StatelessWidget {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const SubscriptionsPage()
-        //const MyHomePage(title: 'Flutter Demo Home Page'),
-        );
+        home: const HomePage());
   }
 }

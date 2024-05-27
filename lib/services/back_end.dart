@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class BackendService {
-  final String baseUrl = 'http://2a01:e0a:563:d6d0:882:29ce:3c93:ec98:16384';
+  final String baseUrl = 'http://192.168.1.4:8080';
 
   Future<dynamic> get(String endpoint) async {
     final response = await http.get(Uri.parse('$baseUrl/$endpoint'));

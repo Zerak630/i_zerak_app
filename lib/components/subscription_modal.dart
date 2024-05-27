@@ -91,12 +91,12 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
         child: Padding(
           padding: const EdgeInsets.all(32.0),
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Center(
-              child: Text(
-                  (widget.subscription?.id != null)
-                      ? AppLocalizations.of(context)!.edit_subscription
-                      : AppLocalizations.of(context)!.add_subscription,
-                  style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              (widget.subscription?.id != null)
+                  ? AppLocalizations.of(context)!.edit_subscription
+                  : AppLocalizations.of(context)!.add_subscription,
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16.0),
             Row(

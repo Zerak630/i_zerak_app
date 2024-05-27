@@ -87,10 +87,6 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.subscription_title,
-            style: Theme.of(context).appBarTheme.titleTextStyle),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -115,21 +111,21 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                               child: Text("$_totalPerWeek€",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      fontSize: min(MediaQuery.of(context).size.width * 0.3,
+                                      fontSize: min(MediaQuery.of(context).size.width * 0.05,
                                           Theme.of(context).textTheme.headlineMedium!.fontSize!),
                                       fontWeight: FontWeight.bold))),
                           Expanded(
                               child: Text("$_totalPerMonth€",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      fontSize: min(MediaQuery.of(context).size.width * 0.3,
+                                      fontSize: min(MediaQuery.of(context).size.width * 0.05,
                                           Theme.of(context).textTheme.headlineMedium!.fontSize!),
                                       fontWeight: FontWeight.bold))),
                           Expanded(
                               child: Text("$_totalPerYear€",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      fontSize: min(MediaQuery.of(context).size.width * 0.3,
+                                      fontSize: min(MediaQuery.of(context).size.width * 0.05,
                                           Theme.of(context).textTheme.headlineMedium!.fontSize!),
                                       fontWeight: FontWeight.bold))),
                         ],
