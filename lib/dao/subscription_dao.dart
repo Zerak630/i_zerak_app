@@ -10,7 +10,7 @@ class SubscriptionDao {
 
   SubscriptionDao(
       {this.id,
-      this.name = "",
+      this.name = '',
       this.price = 0.0,
       this.isActive = true,
       this.subscriptionType = SubscriptionFrequency.weekly,
@@ -18,18 +18,18 @@ class SubscriptionDao {
 
   factory SubscriptionDao.fromJson(String? id, Map<String, dynamic> json) => SubscriptionDao(
       id: id,
-      name: json["name"],
-      price: double.parse(json["price"].toString()),
-      isActive: json["isActive"],
-      subscriptionType: SubscriptionFrequency.values.byName(json["subscriptionType"]),
-      iconCode: json["iconCode"]);
+      name: json['name'],
+      price: double.parse(json['price'].toString()),
+      isActive: json['isActive'],
+      subscriptionType: SubscriptionFrequency.values.byName(json['subscriptionType']),
+      iconCode: json['iconCode']);
 
   Map<String, dynamic> toJson() => {
-        "name": name,
-        "price": price,
-        "isActive": isActive,
-        "subscriptionType": subscriptionType.name,
-        "iconCode": iconCode
+        'name': name,
+        'price': price,
+        'isActive': isActive,
+        'subscriptionType': subscriptionType.name,
+        'iconCode': iconCode
       };
 }
 

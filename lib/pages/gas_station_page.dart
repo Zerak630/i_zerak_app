@@ -35,9 +35,11 @@ class _GasStationPageState extends State<GasStationPage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        const Text('Gas Stations'),
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.6,
+        Text(
+          'Gas Stations',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        Expanded(
           child: ListView.builder(
             itemCount: _gasStations.length,
             itemBuilder: (context, index) {

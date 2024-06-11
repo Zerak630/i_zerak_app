@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:i_zerak_app/components/subscription_modal.dart';
 import 'package:i_zerak_app/dao/subscription_dao.dart';
+import 'package:i_zerak_app/services/back_end.dart';
 
 class SubscriptionsPage extends StatefulWidget {
   const SubscriptionsPage({super.key});
@@ -25,7 +26,13 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
   @override
   void initState() {
     super.initState();
-    _stream = db.collection("subscriptions").snapshots();
+
+    final BackendService backendService = BackendService();
+    var entries = backendService.get('subscriptions');
+
+    print(entries);
+
+    _stream = db.collection('subscriptions').snapshots();
 
     _stream.listen((event) {
       if (event.docs.isNotEmpty) {
@@ -108,21 +115,21 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           Expanded(
-                              child: Text("$_totalPerWeek€",
+                              child: Text('$_totalPerWeek€',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: min(MediaQuery.of(context).size.width * 0.05,
                                           Theme.of(context).textTheme.headlineMedium!.fontSize!),
                                       fontWeight: FontWeight.bold))),
                           Expanded(
-                              child: Text("$_totalPerMonth€",
+                              child: Text('$_totalPerMonth€',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: min(MediaQuery.of(context).size.width * 0.05,
                                           Theme.of(context).textTheme.headlineMedium!.fontSize!),
                                       fontWeight: FontWeight.bold))),
                           Expanded(
-                              child: Text("$_totalPerYear€",
+                              child: Text('$_totalPerYear€',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: min(MediaQuery.of(context).size.width * 0.05,
@@ -176,7 +183,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                             title: Text(buffer[index].name,
                                 style: const TextStyle(fontWeight: FontWeight.bold)),
                             subtitle: Text(
-                              "${buffer[index].price}€ ${SubscriptionFrequency.getLocaleName(context, buffer[index].subscriptionType)}",
+                              '${buffer[index].price}€ ${SubscriptionFrequency.getLocaleName(context, buffer[index].subscriptionType)}',
                               style: const TextStyle(fontStyle: FontStyle.italic),
                             ),
                             leading:
