@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/dao/gas_station_dao.dart';
 import 'package:i_zerak_app/services/gas_service.dart';
+//import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GasStationPage extends StatefulWidget {
   final GasService service;
@@ -35,10 +36,10 @@ class _GasStationPageState extends State<GasStationPage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Text(
-          'Gas Stations',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
+        // Text(
+        //   AppLocalizations.of(context)!.gas_title,
+        //   style: Theme.of(context).textTheme.headlineSmall,
+        // ),
         Expanded(
           child: ListView.builder(
             itemCount: _gasStations.length,

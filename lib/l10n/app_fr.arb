@@ -25,5 +25,8 @@
 	"please_enter_a_name": "Veuillez entrer un nom",
 	"please_enter_a_price": "Veuillez entrer un prix",
 	"please_enter_a_valid_price": "Veuillez entrer un prix valide",
-	"please_select_a_frequency": "Veuillez choisir une fréquence"
+	"please_select_a_frequency": "Veuillez choisir une fréquence",
+	"bb_gas_stations": "Stations",
+	"bb_subscriptions": "Abonnements",
+	"gas_title": "Stations essences"
 }

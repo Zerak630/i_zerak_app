@@ -28,5 +28,8 @@
 	"please_enter_a_name": "Please enter a name",
 	"please_enter_a_price": "Please enter a price",
 	"please_enter_a_valid_price": "Please enter a valid price",
-	"please_select_a_frequency": "Please select a frequency"
+	"please_select_a_frequency": "Please select a frequency",
+	"bb_gas_stations": "Gas Stations",
+	"bb_subscriptions": "Subscriptions",
+	"gas_title": "Gas stations"
 }

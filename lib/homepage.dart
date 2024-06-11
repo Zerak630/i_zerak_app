@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:i_zerak_app/pages/gas_station_page.dart';
 import 'package:i_zerak_app/subscriptions.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -59,12 +60,12 @@ class HomePageState extends State<HomePage> {
               tabs: [
                 GButton(
                   icon: Icons.euro,
-                  text: 'Subscriptions',
+                  text: AppLocalizations.of(context)!.bb_subscriptions,
                   iconActiveColor: Theme.of(context).colorScheme.primary,
                 ),
                 GButton(
                   icon: Icons.local_gas_station,
-                  text: 'Gas stations',
+                  text: AppLocalizations.of(context)!.bb_gas_stations,
                   iconActiveColor: Theme.of(context).colorScheme.primary,
                 ),
               ]),
