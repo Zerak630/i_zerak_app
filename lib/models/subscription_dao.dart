@@ -1,14 +1,27 @@
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:hive/hive.dart';
 
-class SubscriptionDao {
+@HiveType(typeId: 0)
+class Subscription {
+  @HiveField(0)
   final String? id;
+
+  @HiveField(1)
   String name;
+
+  @HiveField(2)
   double price;
+
+  @HiveField(3)
   bool isActive;
+
+  @HiveField(4)
   SubscriptionFrequency subscriptionType;
+
+  @HiveField(5)
   int iconCode;
 
-  SubscriptionDao(
+  Subscription(
       {this.id,
       this.name = '',
       this.price = 0.0,
@@ -16,7 +29,7 @@ class SubscriptionDao {
       this.subscriptionType = SubscriptionFrequency.weekly,
       this.iconCode = 983915});
 
-  factory SubscriptionDao.fromJson(String? id, Map<String, dynamic> json) => SubscriptionDao(
+  factory Subscription.fromJson(String? id, Map<String, dynamic> json) => Subscription(
       id: id,
       name: json['name'],
       price: double.parse(json['price'].toString()),
@@ -33,9 +46,13 @@ class SubscriptionDao {
       };
 }
 
+@HiveType(typeId: 1)
 enum SubscriptionFrequency {
+  @HiveField(0)
   weekly,
+  @HiveField(1)
   monthly,
+  @HiveField(2)
   yearly;
 
   static String getLocaleName(context, SubscriptionFrequency type) {

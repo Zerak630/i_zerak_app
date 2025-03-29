@@ -1,12 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_iconpicker/flutter_iconpicker.dart';
-import 'package:i_zerak_app/dao/subscription_dao.dart';
-import 'package:i_zerak_app/utils/custom_icon_list.dart';
+import 'package:hive/hive.dart';
+import 'package:i_zerak_app/models/subscription_dao.dart';
 
 class SubscriptionModal extends StatefulWidget {
-  final SubscriptionDao? subscription;
+  final Subscription? subscription;
 
   const SubscriptionModal({super.key, this.subscription});
 
@@ -23,7 +22,7 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _subscriptionTypeController = TextEditingController();
 
-  late SubscriptionDao _subscription;
+  late Subscription _subscription;
 
   bool get isEditing => widget.subscription != null;
 
@@ -37,7 +36,7 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
       _priceController.text = _subscription.price.toString();
       _subscriptionTypeController.text = _subscription.subscriptionType.name;
     } else {
-      _subscription = SubscriptionDao();
+      _subscription = Subscription();
     }
   }
 
@@ -50,15 +49,15 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
   }
 
   _pickIcon() async {
-    IconData? value = await FlutterIconPicker.showIconPicker(context,
-        iconSize: 50, iconPackModes: [], customIconPack: customIcons);
+    // IconData? value = await FlutterIconPicker.showIconPicker(context,
+    //     iconSize: 50, iconPackModes: [], customIconPack: customIcons);
 
-    setState(() {
-      _subscription.iconCode = value!.codePoint;
-    });
+    // setState(() {
+    //   _subscription.iconCode = value!.codePoint;
+    // });
   }
 
-  _saveSubscription() {
+  _saveSubscription() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -68,17 +67,8 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
     _subscription.subscriptionType = SubscriptionFrequency.values
         .firstWhere((element) => element.name == _subscriptionTypeController.text);
 
-    if (isEditing) {
-      db
-          .doc("/subscriptions/${_subscription.id}")
-          .update(_subscription.toJson())
-          .then((value) => Navigator.pop(context));
-    } else {
-      db
-          .collection("/subscriptions")
-          .add(_subscription.toJson())
-          .then((value) => Navigator.pop(context));
-    }
+    var box = Hive.box<Subscription>('subscriptions');
+    await box.put(_subscription.id, _subscription);
   }
 
   @override

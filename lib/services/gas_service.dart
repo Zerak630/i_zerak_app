@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:i_zerak_app/dao/gas_station_dao.dart';
+import 'package:i_zerak_app/models/gas_station_dao.dart';
 
 class GasService {
   final http.Client client;

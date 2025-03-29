@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:i_zerak_app/dao/gas_station_dao.dart';
+import 'package:i_zerak_app/models/gas_station_dao.dart';
 import 'package:i_zerak_app/services/gas_service.dart';
 //import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

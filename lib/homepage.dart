@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:i_zerak_app/pages/gas_station_page.dart';
-import 'package:i_zerak_app/subscriptions.dart';
+import 'package:i_zerak_app/pages/subscriptions/subscriptions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomePage extends StatefulWidget {
@@ -78,7 +78,7 @@ class HomePageState extends State<HomePage> {
 Widget _getActivePage(int index) {
   switch (index) {
     case 0:
-      return const SubscriptionsPage();
+      return SubscriptionsPage();
     case 1:
       return GasStationPage();
     default:

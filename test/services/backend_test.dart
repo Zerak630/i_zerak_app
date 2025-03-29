@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:i_zerak_app/dao/subscription_dao.dart';
+import 'package:i_zerak_app/models/subscription_dao.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -19,7 +19,7 @@ void main() {
 
     print(response.body);
 
-    final sub = SubscriptionDao.fromJson(null, jsonDecode(response.body));
+    final sub = Subscription.fromJson(null, jsonDecode(response.body));
 
     print(sub.toString());
 

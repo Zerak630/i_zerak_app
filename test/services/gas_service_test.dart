@@ -1,5 +1,5 @@
 import 'package:http/http.dart' as http;
-import 'package:i_zerak_app/dao/gas_station_dao.dart';
+import 'package:i_zerak_app/models/gas_station_dao.dart';
 import 'package:i_zerak_app/services/gas_service.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -23,17 +23,17 @@ void main() {
   });
 
   group(
-      "Testing GasStationService methods",
+      'Testing GasStationService methods',
       () => {
-            test("Request should retrieve data", () async {
+            test('Request should retrieve data', () async {
               expectLater(await GasService(client: client).getGasStationById(stationId),
                   isA<GasStationDao>());
             }),
-            test("Request should parse data correctly", () async {
+            test('Request should parse data correctly', () async {
               final sub = await GasService(client: client).getGasStationById(stationId);
 
               expect(sub.id, stationId);
-              expect(sub.location, "ZI EcoparcSaint Lambert des Levées, Saumur");
+              expect(sub.location, 'ZI EcoparcSaint Lambert des Levées, Saumur');
             })
           });
 }
