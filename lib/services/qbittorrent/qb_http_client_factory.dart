@@ -14,10 +14,18 @@ typedef CertificateInspector = void Function(String sha256Fingerprint);
 String certificateFingerprint(X509Certificate certificate) =>
     sha256.convert(certificate.der).toString();
 
-/// Accepte indifferemment `AB:CD:...`, `abcd...` et le prefixe
-/// `SHA256 Fingerprint=` que colle `openssl`.
-String normalizeFingerprint(String raw) =>
-    raw.replaceAll(RegExp(r'[^0-9a-fA-F]'), '').toLowerCase();
+/// Accepte indifferemment `AB:CD:...`, `abcd...` et la ligne complete
+/// `SHA256 Fingerprint=AB:CD:...` que produit `openssl`.
+///
+/// Le libelle doit etre retire *avant* de filtrer les caracteres
+/// hexadecimaux : « SHA256 Fingerprint= » en contient lui-meme (A, 2, 5, 6, F,
+/// e), qui se retrouveraient sinon colles en tete de l'empreinte, laquelle ne
+/// correspondrait alors jamais.
+String normalizeFingerprint(String raw) {
+  final separator = raw.lastIndexOf('=');
+  final withoutLabel = separator == -1 ? raw : raw.substring(separator + 1);
+  return withoutLabel.replaceAll(RegExp(r'[^0-9a-fA-F]'), '').toLowerCase();
+}
 
 /// Comparaison a duree constante : une comparaison naive divulgue, par son
 /// temps d'execution, le nombre d'octets corrects en tete.
