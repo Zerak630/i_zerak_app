@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:i_zerak_app/pages/gas_station_page.dart';
 import 'package:i_zerak_app/pages/settings/settings_page.dart';
+import 'package:i_zerak_app/pages/torrents/torrents_page.dart';
 import 'package:i_zerak_app/pages/subscriptions/subscriptions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -70,7 +71,7 @@ class HomePageState extends State<HomePage> {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: GNav(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              gap: 8,
+              gap: 4,
               padding: const EdgeInsets.all(16.0),
               onTabChange: (index) => setState(() => _selectedIndex = index),
               selectedIndex: _selectedIndex,
@@ -78,6 +79,11 @@ class HomePageState extends State<HomePage> {
                 GButton(
                   icon: Icons.euro,
                   text: AppLocalizations.of(context)!.bb_subscriptions,
+                  iconActiveColor: Theme.of(context).colorScheme.primary,
+                ),
+                GButton(
+                  icon: Icons.download,
+                  text: AppLocalizations.of(context)!.bb_torrents,
                   iconActiveColor: Theme.of(context).colorScheme.primary,
                 ),
                 GButton(
@@ -97,6 +103,8 @@ Widget _getActivePage(int index) {
     case 0:
       return SubscriptionsPage();
     case 1:
+      return const TorrentsPage();
+    case 2:
       return GasStationPage();
     default:
       throw Exception('Invalid index');

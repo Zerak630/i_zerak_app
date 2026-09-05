@@ -11,6 +11,7 @@ import 'package:i_zerak_app/services/repositories/interfaces/i_credentials.dart'
 import 'package:i_zerak_app/services/repositories/interfaces/i_server_config.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
 import 'package:i_zerak_app/services/repositories/secure/secure_credentials_store.dart';
+import 'package:i_zerak_app/services/tmdb/tmdb_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -42,6 +43,13 @@ Future<void> setupServiceLocator() async {
   getIt.registerLazySingleton<QbService>(() => QbService(
         config: getIt<IServerConfig>(),
         credentials: getIt<ICredentials>(),
+      ));
+
+  // TMDB est une API publique en HTTPS : elle utilise le client generique, pas
+  // le client epingle sur le certificat du serveur auto-heberge.
+  getIt.registerLazySingleton<TmdbService>(() => TmdbService(
+        credentials: getIt<ICredentials>(),
+        client: getIt<http.Client>(),
       ));
 }
 
