@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Le trafic vers le serveur auto-hebergé passe par HTTPS (certificat auto-signé
+  épinglé côté application via dart:io, donc validé par BoringSSL et non par les
+  trust-anchors Android). Ce fichier ne sert qu'à interdire le HTTP en clair pour
+  tout le reste de l'application.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

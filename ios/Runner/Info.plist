@@ -47,5 +47,7 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSLocalNetworkUsageDescription</key>
+		<string>iZerak se connecte à votre serveur qBittorrent et à l'agent de supervision sur votre réseau local.</string>
 	</dict>
 </plist>
