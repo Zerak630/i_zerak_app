@@ -28,5 +28,13 @@
 	"please_select_a_frequency": "Veuillez choisir une fréquence",
 	"bb_gas_stations": "Stations",
 	"bb_subscriptions": "Abonnements",
-	"gas_title": "Stations essences"
+	"gas_title": "Stations essences",
+	"no_subscription": "Aucun abonnement",
+	"loading_error": "Erreur : {error}",
+	"delete_confirm": "Supprimer {name} à titre définitif ?",
+	"active": "Actif",
+	"inactive": "Inactif",
+	"logo_code": "Code de l’icône",
+	"please_enter_a_logo_code": "Veuillez entrer un code d’icône",
+	"please_enter_a_valid_integer": "Veuillez entrer un entier valide"
 }

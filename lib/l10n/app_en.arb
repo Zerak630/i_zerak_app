@@ -31,5 +31,23 @@
 	"please_select_a_frequency": "Please select a frequency",
 	"bb_gas_stations": "Gas Stations",
 	"bb_subscriptions": "Subscriptions",
-	"gas_title": "Gas stations"
+	"gas_title": "Gas stations",
+	"no_subscription": "No subscription yet",
+	"loading_error": "Error: {error}",
+	"@loading_error": {
+		"placeholders": {
+			"error": { "type": "String" }
+		}
+	},
+	"delete_confirm": "Delete {name}? This cannot be undone.",
+	"@delete_confirm": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"active": "Active",
+	"inactive": "Inactive",
+	"logo_code": "Icon code",
+	"please_enter_a_logo_code": "Please enter an icon code",
+	"please_enter_a_valid_integer": "Please enter a valid integer"
 }

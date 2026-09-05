@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:i_zerak_app/main.dart';
+import 'package:i_zerak_app/services/service_locator.dart';
 import 'package:i_zerak_app/models/subscription_dao.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
 

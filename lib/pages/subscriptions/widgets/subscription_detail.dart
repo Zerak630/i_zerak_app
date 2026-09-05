@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/models/subscription_dao.dart';
-import 'package:i_zerak_app/services/subscriptions_service.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
+import 'package:i_zerak_app/services/service_locator.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SubscriptionDetailPage extends StatefulWidget {
@@ -9,10 +10,11 @@ class SubscriptionDetailPage extends StatefulWidget {
   const SubscriptionDetailPage({super.key, required this.subscription});
 
   @override
-  _SubscriptionDetailPageState createState() => _SubscriptionDetailPageState();
+  State<SubscriptionDetailPage> createState() => _SubscriptionDetailPageState();
 }
 
 class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
+  final ISubscriptions _subscriptions = getIt<ISubscriptions>();
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _priceController;
@@ -36,21 +38,64 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
     super.dispose();
   }
 
-  void _saveSubscription() {
-    if (_formKey.currentState!.validate()) {
-      // Update the subscription object
-      widget.subscription.name = _nameController.text;
-      widget.subscription.price = double.parse(_priceController.text);
-      widget.subscription.iconCode = int.parse(_logoController.text);
-      widget.subscription.subscriptionType =
-          SubscriptionFrequency.values.firstWhere((e) => e.name == _subscriptionType);
-
-      // Save the subscription using the service
-      SubscriptionService().updateSubscription(widget.subscription);
-
-      // Navigate back
-      Navigator.pop(context);
+  Future<void> _saveSubscription() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
     }
+
+    widget.subscription.name = _nameController.text;
+    widget.subscription.price =
+        double.tryParse(_priceController.text.replaceAll(',', '.')) ?? widget.subscription.price;
+    widget.subscription.iconCode =
+        int.tryParse(_logoController.text) ?? widget.subscription.iconCode;
+    widget.subscription.subscriptionType = SubscriptionFrequency.values.firstWhere(
+      (e) => e.name == _subscriptionType,
+      orElse: () => widget.subscription.subscriptionType,
+    );
+
+    // Passait par SubscriptionService.updateSubscription, dont le corps etait
+    // vide : l'ecran se fermait sans que rien ne soit enregistre.
+    await _subscriptions.updateSubscription(widget.subscription);
+
+    if (!mounted) {
+      return;
+    }
+    Navigator.pop(context, true);
+  }
+
+  Future<void> _deleteSubscription() async {
+    final id = widget.subscription.id;
+    if (id == null) {
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.delete),
+        content: Text(AppLocalizations.of(context)!.delete_confirm(widget.subscription.name)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(AppLocalizations.of(context)!.cancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+            child: Text(AppLocalizations.of(context)!.delete),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+    await _subscriptions.delete(id);
+
+    if (!mounted) {
+      return;
+    }
+    Navigator.pop(context, true);
   }
 
   @override
@@ -58,6 +103,13 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.edit_subscription),
+        actions: [
+          IconButton(
+            onPressed: widget.subscription.id == null ? null : _deleteSubscription,
+            icon: const Icon(Icons.delete_outline),
+            tooltip: AppLocalizations.of(context)!.delete,
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -101,17 +153,17 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
               TextFormField(
                 controller: _logoController,
                 decoration: InputDecoration(
-                  labelText: 'Logo Code',
-                  hintText: '123',
+                  labelText: AppLocalizations.of(context)!.logo_code,
+                  hintText: '983915',
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a logo code';
+                    return AppLocalizations.of(context)!.please_enter_a_logo_code;
                   }
                   final logoCode = int.tryParse(value);
                   if (logoCode == null) {
-                    return 'Please enter a valid integer';
+                    return AppLocalizations.of(context)!.please_enter_a_valid_integer;
                   }
                   return null;
                 },
@@ -125,7 +177,10 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                 items: SubscriptionFrequency.values.map((frequency) {
                   return DropdownMenuItem<String>(
                     value: frequency.name,
-                    child: Text(frequency.name),
+                    // Affichait la valeur brute de l'enum (« monthly »), non
+                    // traduite, alors que la modale utilisait deja le libelle
+                    // localise.
+                    child: Text(SubscriptionFrequency.getLocaleAdjective(context, frequency)),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -139,6 +194,17 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 8.0),
+              // isActive etait lu par le calcul des totaux mais aucun ecran ne
+              // permettait de le modifier.
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(widget.subscription.isActive
+                    ? AppLocalizations.of(context)!.active
+                    : AppLocalizations.of(context)!.inactive),
+                value: widget.subscription.isActive,
+                onChanged: (value) => setState(() => widget.subscription.isActive = value),
               ),
               const SizedBox(height: 16.0),
               ElevatedButton(
