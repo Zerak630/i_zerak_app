@@ -29,11 +29,10 @@ class DropdownMenuFormField<T> extends FormField<T> {
     bool? requestFocusOnTap,
     EdgeInsets? expandedInsets,
     required List<DropdownMenuEntry<T>> dropdownMenuEntries,
-    AutovalidateMode? autovalidateMode = AutovalidateMode.disabled,
+    super.autovalidateMode = AutovalidateMode.disabled,
     super.validator,
   }) : super(
             initialValue: initialSelection,
-            autovalidateMode: autovalidateMode,
             builder: (FormFieldState<T> field) {
               final _DropdownMenuFormFieldState<T> state = field as _DropdownMenuFormFieldState<T>;
 

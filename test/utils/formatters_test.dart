@@ -77,7 +77,12 @@ void main() {
   group('formatProgress', () {
     test('borne et arrondit', () {
       expect(formatProgress(0), '0.0 %');
-      expect(formatProgress(0.5555), '55.6 %');
+      expect(formatProgress(0.5), '50.0 %');
+      expect(formatProgress(0.12345), '12.3 %');
+      // 0.5555 n'est pas representable exactement : le double vaut un peu
+      // moins que 55,55, l'arrondi descend donc a 55,5. Comportement correct,
+      // fige ici pour eviter qu'on le prenne un jour pour une regression.
+      expect(formatProgress(0.5555), '55.5 %');
       expect(formatProgress(1), '100 %');
       expect(formatProgress(1.4), '100 %');
       expect(formatProgress(-0.2), '0.0 %');

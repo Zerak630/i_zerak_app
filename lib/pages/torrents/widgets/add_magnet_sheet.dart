@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/media_match_dao.dart';
 import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/services/tmdb/tmdb_service.dart';

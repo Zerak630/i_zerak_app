@@ -1,4 +1,5 @@
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter/widgets.dart';
+import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:hive/hive.dart';
 
 /// Les `TypeAdapter` correspondants sont ecrits a la main dans
@@ -64,7 +65,7 @@ enum SubscriptionFrequency {
   @HiveField(2)
   yearly;
 
-  static String getLocaleName(context, SubscriptionFrequency type) {
+  static String getLocaleName(BuildContext context, SubscriptionFrequency type) {
     switch (type) {
       case SubscriptionFrequency.weekly:
         return AppLocalizations.of(context)!.per_week;
@@ -75,7 +76,7 @@ enum SubscriptionFrequency {
     }
   }
 
-  static String getLocaleAdjective(context, SubscriptionFrequency type) {
+  static String getLocaleAdjective(BuildContext context, SubscriptionFrequency type) {
     switch (type) {
       case SubscriptionFrequency.weekly:
         return AppLocalizations.of(context)!.per_week_adjective;

@@ -5,7 +5,7 @@ import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/pages/torrents/torrents_page.dart';
 import 'package:i_zerak_app/pages/subscriptions/subscriptions.dart';
 import 'package:i_zerak_app/pages/system/system_page.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:i_zerak_app/l10n/app_localizations.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

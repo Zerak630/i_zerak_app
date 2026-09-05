@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/torrent_state.dart';
 
 /// Rendu d'un etat de torrent : icone, couleur et libelle traduit.

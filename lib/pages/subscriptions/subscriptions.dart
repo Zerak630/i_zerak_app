@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/components/subscription_modal.dart';
 import 'package:i_zerak_app/models/subscription_dao.dart';
 import 'package:i_zerak_app/pages/subscriptions/widgets/subscription_card.dart';

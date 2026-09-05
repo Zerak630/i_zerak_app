@@ -12,20 +12,37 @@ import '../__mocks__/http_client_mock.dart' as mocks;
 void main() {
   late mocks.MockClient client;
 
+  // getSavedGasStations en renvoie sept, et la page les demande toutes.
+  // L'ancienne version ne stubbait que la premiere : les six autres appels
+  // levaient MissingStubError et le test echouait systematiquement.
+  const savedStationCount = 7;
+
   setUp(() {
     client = mocks.MockClient();
 
-    when(client.get(Uri.parse(
-            'https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records?where=id%3A%2249400004%22')))
-        .thenAnswer((_) async => http.Response(
-            '{"total_count":1,"results":[{"id":49400004,"adresse":"ZI EcoparcSaint Lambert des Levées", "ville": "Saumur","gazole_prix":1.5}]}',
-            200));
+    when(client.get(any)).thenAnswer((invocation) async {
+      final uri = invocation.positionalArguments.first as Uri;
+      final id = RegExp(r'id%3A%22(\d+)%22').firstMatch(uri.toString())?.group(1) ?? '0';
+      return http.Response(
+        '{"total_count":1,"results":[{"id":$id,'
+        '"adresse":"ZI Ecoparc","ville":"Saumur","gazole_prix":1.5}]}',
+        200,
+      );
+    });
   });
 
-  testWidgets('GasStationPage renders correctly', (WidgetTester tester) async {
+  testWidgets('GasStationPage affiche une carte par station', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(home: GasStationPage(service: GasService(client: client))));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ListTile), findsNWidgets(savedStationCount));
+    expect(find.text('1.500€'), findsNWidgets(savedStationCount));
+  });
+
+  testWidgets('la page part vide avant reponse du service', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(home: GasStationPage(service: GasService(client: client))));
 
-    //expect(find.text('Gas Station'), findsOneWidget);
-    //expect(find.byType(ListView), findsOneWidget);
+    // Aucun pumpAndSettle : les futures ne sont pas encore resolus.
+    expect(find.byType(ListTile), findsNothing);
   });
 }

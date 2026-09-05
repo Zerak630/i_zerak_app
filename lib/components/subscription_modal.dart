@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 import 'package:i_zerak_app/models/subscription_dao.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
@@ -20,7 +20,6 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _subscriptionTypeController = TextEditingController();
 
   late Subscription _subscription;
 
@@ -34,7 +33,6 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
       _subscription = widget.subscription!;
       _nameController.text = _subscription.name;
       _priceController.text = _subscription.price.toString();
-      _subscriptionTypeController.text = _subscription.subscriptionType.name;
     } else {
       _subscription = Subscription();
     }
@@ -44,11 +42,10 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
   void dispose() {
     _nameController.dispose();
     _priceController.dispose();
-    _subscriptionTypeController.dispose();
     super.dispose();
   }
 
-  _pickIcon() async {
+  Future<void> _pickIcon() async {
     // IconData? value = await FlutterIconPicker.showIconPicker(context,
     //     iconSize: 50, iconPackModes: [], customIconPack: customIcons);
 
@@ -70,12 +67,8 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
 
     _subscription.name = _nameController.text;
     _subscription.price = price;
-    _subscription.subscriptionType = SubscriptionFrequency.values.firstWhere(
-      (element) => element.name == _subscriptionTypeController.text,
-      // Sans repli, valider un formulaire dont la frequence n'a pas ete touchee
-      // levait un StateError.
-      orElse: () => _subscription.subscriptionType,
-    );
+    // La frequence est ecrite directement par le menu deroulant : plus de
+    // recherche par nom, donc plus de StateError possible ici.
 
     await _subscriptions.updateSubscription(_subscription);
 
@@ -110,7 +103,7 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
             const SizedBox(height: 16.0),
             Row(
               children: [
-                IconButton(onPressed: _pickIcon, icon: Icon(bufferIcon)),
+                IconButton(onPressed: _pickIcon, icon: const Icon(bufferIcon)),
                 const SizedBox(width: 16.0),
                 Expanded(
                   child: TextFormField(
@@ -150,7 +143,7 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                       return null;
                     },
                     decoration: InputDecoration(
-                        suffixText: "€",
+                        suffixText: '€',
                         border: const OutlineInputBorder(),
                         labelText: AppLocalizations.of(context)!.price),
                   ),
@@ -158,28 +151,29 @@ class _SubscriptionModalState extends State<SubscriptionModal> {
                 const SizedBox(width: 16.0),
                 Expanded(
                   flex: 1,
-                  child: DropdownButtonFormField<String>(
-                    //FIXME: DropdownButtonFormField is deprecated
+                  // Le champ ecrivait la selection dans un controller tandis que
+                  // sa valeur affichee restait celle du modele, jamais mise a
+                  // jour : le menu revenait visuellement sur la frequence
+                  // initiale a chaque choix. Il pilote desormais le modele.
+                  child: DropdownButtonFormField<SubscriptionFrequency>(
                     decoration: InputDecoration(
                         border: const OutlineInputBorder(),
                         labelText: AppLocalizations.of(context)!.frequency),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(context)!.please_select_a_frequency;
-                      } else {
-                        return null;
-                      }
-                    },
+                    validator: (value) => value == null
+                        ? AppLocalizations.of(context)!.please_select_a_frequency
+                        : null,
                     isExpanded: true,
-                    onChanged: (value) => {
-                      setState(() {
-                        _subscriptionTypeController.text = value!;
-                      })
+                    onChanged: (value) {
+                      if (value == null) {
+                        return;
+                      }
+                      setState(() => _subscription.subscriptionType = value);
                     },
-                    value: _subscription.subscriptionType.name,
-                    items: SubscriptionFrequency.values.map<DropdownMenuItem<String>>((e) {
-                      return DropdownMenuItem<String>(
-                          value: e.name,
+                    initialValue: _subscription.subscriptionType,
+                    items: SubscriptionFrequency.values
+                        .map<DropdownMenuItem<SubscriptionFrequency>>((e) {
+                      return DropdownMenuItem<SubscriptionFrequency>(
+                          value: e,
                           child: Text(SubscriptionFrequency.getLocaleAdjective(context, e)));
                     }).toList(),
                   ),

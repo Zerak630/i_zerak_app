@@ -9,11 +9,16 @@ import 'package:i_zerak_app/services/repositories/interfaces/i_credentials.dart'
 /// par sauvegarde. Seul le magasin materiel de la plateforme convient ici.
 class SecureCredentialsStore implements ICredentials {
   static const AndroidOptions _android = AndroidOptions(
-    // Adosse le chiffrement au Keystore via AndroidX security-crypto.
-    // Impose minSdk >= 23 et android:allowBackup="false" : une restauration
-    // rapporterait les donnees chiffrees sans la cle, qui n'est pas
-    // sauvegardable.
-    encryptedSharedPreferences: true,
+    // Depuis la version 11 du paquet, le chiffrement adosse au Keystore est le
+    // comportement par defaut : AES-GCM pour les donnees, cle enveloppee en
+    // RSA-OAEP. L'ancien drapeau encryptedSharedPreferences n'existe plus.
+    //
+    // resetOnError purge le stock lorsque la cle du Keystore a ete invalidee,
+    // ce qui arrive au changement de code de deverrouillage et apres
+    // restauration sur un autre appareil. Sans cela le dechiffrement echouerait
+    // definitivement. android:allowBackup="false" reste indispensable pour la
+    // meme raison.
+    resetOnError: true,
   );
 
   static const IOSOptions _ios = IOSOptions(

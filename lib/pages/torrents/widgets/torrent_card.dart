@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/torrent_dao.dart';
 import 'package:i_zerak_app/pages/torrents/widgets/torrent_state_style.dart';
 import 'package:i_zerak_app/utils/formatters.dart';

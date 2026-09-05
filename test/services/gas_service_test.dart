@@ -22,18 +22,20 @@ void main() {
             200));
   });
 
-  group(
-      'Testing GasStationService methods',
-      () => {
-            test('Request should retrieve data', () async {
-              expectLater(await GasService(client: client).getGasStationById(stationId),
-                  isA<GasStationDao>());
-            }),
-            test('Request should parse data correctly', () async {
-              final sub = await GasService(client: client).getGasStationById(stationId);
+  // Le corps du group etait une fonction flechee renvoyant un litteral
+  // d'ensemble, ce qui fonctionnait par accident. Un corps de fonction
+  // ordinaire exprime la meme chose sans detour.
+  group('Testing GasStationService methods', () {
+    test('Request should retrieve data', () async {
+      expectLater(
+          await GasService(client: client).getGasStationById(stationId), isA<GasStationDao>());
+    });
 
-              expect(sub.id, stationId);
-              expect(sub.location, 'ZI EcoparcSaint Lambert des Levées, Saumur');
-            })
-          });
+    test('Request should parse data correctly', () async {
+      final sub = await GasService(client: client).getGasStationById(stationId);
+
+      expect(sub.id, stationId);
+      expect(sub.location, 'ZI EcoparcSaint Lambert des Levées, Saumur');
+    });
+  });
 }

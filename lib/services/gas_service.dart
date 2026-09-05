@@ -5,7 +5,7 @@ import 'package:i_zerak_app/models/gas_station_dao.dart';
 class GasService {
   final http.Client client;
 
-  GasService({client}) : client = client ?? http.Client();
+  GasService({http.Client? client}) : client = client ?? http.Client();
 
   Future<List<int>> getSavedGasStations() async {
     //TODO: Store favorite gas stations in a database

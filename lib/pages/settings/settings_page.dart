@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_exceptions.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
@@ -304,7 +304,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<int>(
-                    value: _config.pollIntervalSeconds,
+                    initialValue: _config.pollIntervalSeconds,
                     decoration: InputDecoration(
                         labelText: l10n.poll_interval, border: const OutlineInputBorder()),
                     items: const [0, 2, 3, 5, 10]

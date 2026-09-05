@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:i_zerak_app/models/subscription_dao.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:i_zerak_app/l10n/app_localizations.dart';
 
 class SubscriptionDetailPage extends StatefulWidget {
   final Subscription subscription;
@@ -170,7 +170,7 @@ class _SubscriptionDetailPageState extends State<SubscriptionDetailPage> {
               ),
               const SizedBox(height: 8.0),
               DropdownButtonFormField<String>(
-                value: _subscriptionType,
+                initialValue: _subscriptionType,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.frequency,
                 ),

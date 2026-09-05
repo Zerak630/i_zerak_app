@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/agent_dao.dart';
 import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/models/torrent_dao.dart';
@@ -298,7 +298,7 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
                   : AppLocalizations.of(context)!.storage_blocked_add,
               backgroundColor: _blockingVolume == null
                   ? null
-                  : Theme.of(context).colorScheme.surfaceVariant,
+                  : Theme.of(context).colorScheme.surfaceContainerHighest,
               child: Icon(_blockingVolume == null ? Icons.add : Icons.block),
             )
           : null,

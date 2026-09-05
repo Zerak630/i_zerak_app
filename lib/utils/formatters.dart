@@ -2,6 +2,7 @@
 ///
 /// Dart pur, sans `intl` : pas d'initialisation de locale a prevoir, et les
 /// tests restent deterministes quelle que soit la machine.
+library;
 
 const int _kilo = 1024;
 const List<String> _units = ['o', 'Ko', 'Mo', 'Go', 'To', 'Po'];

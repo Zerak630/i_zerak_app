@@ -1,6 +1,6 @@
 plugins {
     id "com.android.application"
-    id "kotlin-android"
+    id "org.jetbrains.kotlin.android"
     id "dev.flutter.flutter-gradle-plugin"
 }
 
@@ -24,16 +24,22 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.example.i_zerak_app"
-    compileSdkVersion flutter.compileSdkVersion
+    // flutter_secure_storage 11 se compile contre le SDK 37 : le projet doit
+    // viser au moins cette version, les API Android etant retrocompatibles.
+    compileSdk 37
     ndkVersion flutter.ndkVersion
 
+    // AGP 9 exige Java 11 au minimum ; 17 est la cible des outils Android
+    // actuels et de la chaine Kotlin 2.
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = '1.8'
+    kotlin {
+        compilerOptions {
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+        }
     }
 
     sourceSets {
@@ -45,8 +51,8 @@ android {
         applicationId "com.example.i_zerak_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion 24
-        targetSdkVersion flutter.targetSdkVersion
+        minSdk 24
+        targetSdk flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
