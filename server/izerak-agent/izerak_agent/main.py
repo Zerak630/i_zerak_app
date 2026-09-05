@@ -15,7 +15,7 @@ import time
 from collections import deque
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException
 
 from izerak_agent import metrics, storage
 from izerak_agent.config import AgentConfig, load
@@ -91,7 +91,6 @@ def services(_: Authenticated, settings: AgentConfig = Depends(config)) -> dict:
 def service_action(
     name: str,
     action: ServiceAction,
-    request: Request,
     _: Authenticated,
     settings: AgentConfig = Depends(config),
 ) -> dict:
