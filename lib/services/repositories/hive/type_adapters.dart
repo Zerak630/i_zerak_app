@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/models/subscription_dao.dart';
 
 /// `TypeAdapter` Hive ecrits a la main.
@@ -15,7 +16,8 @@ import 'package:i_zerak_app/models/subscription_dao.dart';
 ///   - un champ absent d'un enregistrement ancien est relu a `null`, d'ou les
 ///     valeurs de repli ci-dessous.
 ///
-/// Identifiants de type deja pris : 0 `Subscription`, 1 `SubscriptionFrequency`.
+/// Identifiants de type deja pris : 0 `Subscription`, 1 `SubscriptionFrequency`,
+/// 2 `ServerConfig`. Un identifiant libere ne doit jamais etre reattribue.
 
 class SubscriptionTypeAdapter extends TypeAdapter<Subscription> {
   @override
@@ -107,4 +109,61 @@ class SubscriptionFrequencyTypeAdapter extends TypeAdapter<SubscriptionFrequency
       other is SubscriptionFrequencyTypeAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
+}
+
+class ServerConfigTypeAdapter extends TypeAdapter<ServerConfig> {
+  @override
+  final int typeId = 2;
+
+  @override
+  ServerConfig read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+
+    return ServerConfig(
+      host: fields[0] as String? ?? '',
+      port: fields[1] as int? ?? 8080,
+      useHttps: fields[2] as bool? ?? true,
+      username: fields[3] as String? ?? '',
+      pollIntervalSeconds: fields[4] as int? ?? 3,
+      defaultSavePath: fields[5] as String?,
+      defaultCategory: fields[6] as String?,
+      pinnedCertSha256: fields[7] as String?,
+      agentPort: fields[8] as int? ?? 8081,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, ServerConfig obj) {
+    writer
+      ..writeByte(9)
+      ..writeByte(0)
+      ..write(obj.host)
+      ..writeByte(1)
+      ..write(obj.port)
+      ..writeByte(2)
+      ..write(obj.useHttps)
+      ..writeByte(3)
+      ..write(obj.username)
+      ..writeByte(4)
+      ..write(obj.pollIntervalSeconds)
+      ..writeByte(5)
+      ..write(obj.defaultSavePath)
+      ..writeByte(6)
+      ..write(obj.defaultCategory)
+      ..writeByte(7)
+      ..write(obj.pinnedCertSha256)
+      ..writeByte(8)
+      ..write(obj.agentPort);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ServerConfigTypeAdapter && runtimeType == other.runtimeType && typeId == other.typeId;
 }
