@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/models/subscription_dao.dart';
+import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_server_config_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_subscription_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/type_adapters.dart';
@@ -37,6 +38,11 @@ Future<void> setupServiceLocator() async {
       HiveServerConfigRepository(await Hive.openBox<ServerConfig>('server_config')));
 
   getIt.registerLazySingleton<ICredentials>(() => const SecureCredentialsStore());
+
+  getIt.registerLazySingleton<QbService>(() => QbService(
+        config: getIt<IServerConfig>(),
+        credentials: getIt<ICredentials>(),
+      ));
 }
 
 /// Remet le conteneur a zero. Reserve aux tests.
