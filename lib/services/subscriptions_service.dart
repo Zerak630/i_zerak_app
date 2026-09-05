@@ -31,7 +31,12 @@ class SubscriptionService implements ISubscriptions {
   }
 
   @override
-  void updateSubscription(Subscription subscription) {
+  Future<void> updateSubscription(Subscription subscription) async {
+    //TODO
+  }
+
+  @override
+  Future<void> delete(String id) async {
     //TODO
   }
 }

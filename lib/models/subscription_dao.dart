@@ -1,10 +1,16 @@
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive/hive.dart';
 
+/// Les `TypeAdapter` correspondants sont ecrits a la main dans
+/// `lib/services/repositories/hive/type_adapters.dart`. Toute modification des
+/// champs ci-dessous doit y etre repercutee.
 @HiveType(typeId: 0)
 class Subscription {
+  /// Nul tant que l'abonnement n'a pas ete enregistre une premiere fois ;
+  /// `HiveSubscriptionRepository` lui attribue alors un identifiant. Mutable
+  /// pour cette raison : un `id` final rendait toute persistance impossible.
   @HiveField(0)
-  final String? id;
+  String? id;
 
   @HiveField(1)
   String name;
@@ -21,13 +27,16 @@ class Subscription {
   @HiveField(5)
   int iconCode;
 
+  /// `Icons.subscriptions.codePoint` — repli quand aucune icone n'a ete choisie.
+  static const int defaultIconCode = 983915;
+
   Subscription(
       {this.id,
       this.name = '',
       this.price = 0.0,
       this.isActive = true,
       this.subscriptionType = SubscriptionFrequency.weekly,
-      this.iconCode = 983915});
+      this.iconCode = defaultIconCode});
 
   factory Subscription.fromJson(String? id, Map<String, dynamic> json) => Subscription(
       id: id,
