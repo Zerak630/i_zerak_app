@@ -1,0 +1,34 @@
+# Configuration de l'agent iZerak.
+# A deposer dans /etc/izerak-agent/config.yaml, en chmod 600 : ce fichier
+# contient le jeton d'authentification.
+
+# Genere par install.sh. 32 octets aleatoires en base64 url-safe.
+token: "REMPLACER_PAR_LE_JETON_GENERE"
+
+# Ecouter sur l'adresse du reseau local plutot que sur 0.0.0.0 si la machine
+# est jointe depuis l'exterieur. Ne jamais rediriger ce port depuis Internet.
+bind_host: "0.0.0.0"
+bind_port: 8081
+
+# Meme certificat que la WebUI qBittorrent : l'application n'a ainsi qu'une
+# seule empreinte a epingler pour les deux services.
+tls_certificate: "/etc/izerak-agent/qbt.crt"
+tls_private_key: "/etc/izerak-agent/qbt.key"
+
+# Liste blanche stricte. Un nom absent d'ici ne sera jamais transmis a
+# systemctl : la requete est refusee en 404 sans qu'aucun processus ne demarre.
+services:
+  - name: emby
+    unit: emby-server.service
+  - name: qbittorrent
+    unit: qbittorrent-nox.service
+  - name: syncthing
+    unit: syncthing@pi.service
+
+# Volumes surveilles. quota_bytes est un plafond que vous vous imposez,
+# independant de la capacite reelle du disque : c'est lui qui declenche
+# l'avertissement et le blocage d'ajout cote application.
+storage:
+  - path: /mnt/media
+    label: Disque Emby
+    quota_bytes: 1500000000000
