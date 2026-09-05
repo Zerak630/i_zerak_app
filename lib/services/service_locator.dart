@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:i_zerak_app/services/agent/agent_service.dart';
 import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/models/subscription_dao.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
@@ -41,6 +42,11 @@ Future<void> setupServiceLocator() async {
   getIt.registerLazySingleton<ICredentials>(() => const SecureCredentialsStore());
 
   getIt.registerLazySingleton<QbService>(() => QbService(
+        config: getIt<IServerConfig>(),
+        credentials: getIt<ICredentials>(),
+      ));
+
+  getIt.registerLazySingleton<AgentService>(() => AgentService(
         config: getIt<IServerConfig>(),
         credentials: getIt<ICredentials>(),
       ));

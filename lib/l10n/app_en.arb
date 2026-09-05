@@ -131,5 +131,55 @@
 	"state_allocating": "Allocating",
 	"state_error": "Error",
 	"state_missing_files": "Missing files",
-	"state_unknown": "Unknown"
+	"state_unknown": "Unknown",
+	"bb_system": "System",
+	"system_title": "Raspberry Pi",
+	"agent_not_configured_message": "Install the agent on the Pi, then paste its token in the settings.",
+	"uptime": "Uptime",
+	"load_average": "Load average",
+	"cpu_temp": "CPU temperature",
+	"memory": "Memory",
+	"storage_disconnected": "External disk disconnected — downloads would fill the SD card.",
+	"storage_readonly": "Mounted read-only: the disk is failing.",
+	"undervoltage_now": "Undervoltage detected right now. Check the power supply.",
+	"undervoltage_occurred": "Undervoltage occurred since boot. It explains unexplained failures.",
+	"throttling_occurred": "Thermal throttling occurred since boot.",
+	"service_start": "Start",
+	"service_stop": "Stop",
+	"service_restart": "Restart",
+	"confirm": "Confirm",
+	"service_active": "Running",
+	"service_inactive": "Stopped",
+	"service_failed": "Failed",
+	"service_activating": "Starting",
+	"service_deactivating": "Stopping",
+	"error_agent_token": "The agent refused the token",
+	"error_agent_unreachable": "Agent unreachable",
+	"storage_blocked_add": "Disk unavailable or quota reached: adding is disabled.",
+	"storage_missing": "Path {path} does not exist",
+	"@storage_missing": {
+		"placeholders": {
+			"path": { "type": "String" }
+		}
+	},
+	"storage_quota": "{used} used of {quota} allowed",
+	"@storage_quota": {
+		"placeholders": {
+			"used": { "type": "String" },
+			"quota": { "type": "String" }
+		}
+	},
+	"storage_capacity": "{free} free of {total} on the disk",
+	"@storage_capacity": {
+		"placeholders": {
+			"free": { "type": "String" },
+			"total": { "type": "String" }
+		}
+	},
+	"confirm_service_action": "This will interrupt {name}. Continue?",
+	"@confirm_service_action": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	}
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:i_zerak_app/models/agent_dao.dart';
 import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/models/torrent_dao.dart';
 import 'package:i_zerak_app/models/transfer_info_dao.dart';
@@ -10,6 +11,7 @@ import 'package:i_zerak_app/pages/torrents/widgets/add_magnet_sheet.dart';
 import 'package:i_zerak_app/pages/torrents/widgets/delete_torrent_dialog.dart';
 import 'package:i_zerak_app/pages/torrents/widgets/torrent_card.dart';
 import 'package:i_zerak_app/pages/torrents/widgets/transfer_banner.dart';
+import 'package:i_zerak_app/services/agent/agent_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_exceptions.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_server_config.dart';
@@ -29,12 +31,18 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
   final QbService _service = getIt<QbService>();
   final IServerConfig _configRepository = getIt<IServerConfig>();
   final TmdbService _tmdb = getIt<TmdbService>();
+  final AgentService _agent = getIt<AgentService>();
 
   _View _view = _View.loading;
   List<TorrentDao> _torrents = const [];
   TransferInfoDao _transfer = const TransferInfoDao();
   QbException? _error;
   ServerConfig? _config;
+
+  /// Volume qui empeche d'ajouter un telechargement : disque debranche, monte
+  /// en lecture seule, ou quota atteint. Nul quand tout va bien, ou quand
+  /// l'agent n'est pas installe.
+  StorageVolume? _blockingVolume;
 
   Timer? _timer;
 
@@ -101,12 +109,14 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
     _inFlight = true;
     try {
       final snapshot = await _service.snapshot();
+      final blocking = await _checkStorage();
       if (!mounted) {
         return;
       }
       setState(() {
         _torrents = snapshot.torrents;
         _transfer = snapshot.transfer;
+        _blockingVolume = blocking;
         _error = null;
         _view = _View.ready;
       });
@@ -138,6 +148,25 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
       });
     } finally {
       _inFlight = false;
+    }
+  }
+
+  /// Interroge l'agent sur l'etat du disque de la bibliotheque.
+  ///
+  /// L'agent est facultatif : s'il n'est pas installe ou pas joignable, on ne
+  /// bloque rien. Le garde-fou ne se declenche que sur une reponse explicite,
+  /// jamais sur une absence de reponse.
+  Future<StorageVolume?> _checkStorage() async {
+    try {
+      final volumes = await _agent.storage();
+      for (final volume in volumes) {
+        if (volume.blocksDownloads) {
+          return volume;
+        }
+      }
+      return null;
+    } on QbException {
+      return null;
     }
   }
 
@@ -183,6 +212,17 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
   Future<void> _addMagnet() async {
     final config = _config;
     if (config == null) {
+      return;
+    }
+
+    // Ajouter un telechargement alors que le disque externe est absent le
+    // ferait atterrir sur la carte SD du Pi, jusqu'a la saturer.
+    final blocking = _blockingVolume;
+    if (blocking != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(AppLocalizations.of(context)!.storage_blocked_add),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ));
       return;
     }
 
@@ -253,7 +293,13 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
       floatingActionButton: _view == _View.ready
           ? FloatingActionButton(
               onPressed: _addMagnet,
-              child: const Icon(Icons.add),
+              tooltip: _blockingVolume == null
+                  ? AppLocalizations.of(context)!.add_magnet
+                  : AppLocalizations.of(context)!.storage_blocked_add,
+              backgroundColor: _blockingVolume == null
+                  ? null
+                  : Theme.of(context).colorScheme.surfaceVariant,
+              child: Icon(_blockingVolume == null ? Icons.add : Icons.block),
             )
           : null,
     );

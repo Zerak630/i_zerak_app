@@ -4,6 +4,7 @@ import 'package:i_zerak_app/pages/gas_station_page.dart';
 import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/pages/torrents/torrents_page.dart';
 import 'package:i_zerak_app/pages/subscriptions/subscriptions.dart';
+import 'package:i_zerak_app/pages/system/system_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomePage extends StatefulWidget {
@@ -87,6 +88,11 @@ class HomePageState extends State<HomePage> {
                   iconActiveColor: Theme.of(context).colorScheme.primary,
                 ),
                 GButton(
+                  icon: Icons.developer_board,
+                  text: AppLocalizations.of(context)!.bb_system,
+                  iconActiveColor: Theme.of(context).colorScheme.primary,
+                ),
+                GButton(
                   icon: Icons.local_gas_station,
                   text: AppLocalizations.of(context)!.bb_gas_stations,
                   iconActiveColor: Theme.of(context).colorScheme.primary,
@@ -105,6 +111,8 @@ Widget _getActivePage(int index) {
     case 1:
       return const TorrentsPage();
     case 2:
+      return const SystemPage();
+    case 3:
       return GasStationPage();
     default:
       throw Exception('Invalid index');
