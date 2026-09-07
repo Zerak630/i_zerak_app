@@ -14,6 +14,36 @@ import pytest
 from izerak_agent.storage import MountInfo, probe, read_proc_mounts
 
 
+def _force_distinct_devices(monkeypatch, point: Path) -> None:
+    """Fait passer le point de montage pour un peripherique distinct du parent.
+
+    Le faux resultat delegue au vrai stat et ne surcharge que st_dev : probe()
+    appelle is_dir() avant de comparer les peripheriques, et is_dir() a besoin
+    de st_mode. Un objet ne portant que st_dev faisait echouer le test bien
+    avant la verification qu il visait.
+    """
+
+    class _PartialStat:
+        def __init__(self, real, dev: int) -> None:
+            self._real = real
+            self.st_dev = dev
+
+        def __getattr__(self, name):
+            return getattr(self._real, name)
+
+    real_stat = Path.stat
+
+    def fake_stat(self, *args, **kwargs):
+        result = real_stat(self, *args, **kwargs)
+        if self == point:
+            return _PartialStat(result, 42)
+        if self == point.parent:
+            return _PartialStat(result, 1)
+        return result
+
+    monkeypatch.setattr(Path, "stat", fake_stat)
+
+
 def test_repertoire_absent(tmp_path: Path) -> None:
     status = probe(str(tmp_path / "inexistant"), "Disque Emby")
     assert status.mounted is False
@@ -53,20 +83,7 @@ def test_volume_monte_calcule_le_quota(tmp_path: Path, monkeypatch) -> None:
 
     monkeypatch.setattr("izerak_agent.storage.os.path.ismount", lambda _: True)
 
-    class _Stat:
-        def __init__(self, dev: int) -> None:
-            self.st_dev = dev
-
-    real_stat = Path.stat
-
-    def fake_stat(self, *args, **kwargs):  # noqa: ANN001, ANN002, ANN003
-        if self == point:
-            return _Stat(42)
-        if self == point.parent:
-            return _Stat(1)
-        return real_stat(self, *args, **kwargs)
-
-    monkeypatch.setattr(Path, "stat", fake_stat)
+    _force_distinct_devices(monkeypatch, point)
     monkeypatch.setattr(
         "izerak_agent.storage.shutil.disk_usage",
         lambda _: type("Usage", (), {"total": 2000, "used": 750, "free": 1250})(),
@@ -94,20 +111,7 @@ def test_lecture_seule_est_signalee(tmp_path: Path, monkeypatch) -> None:
 
     monkeypatch.setattr("izerak_agent.storage.os.path.ismount", lambda _: True)
 
-    class _Stat:
-        def __init__(self, dev: int) -> None:
-            self.st_dev = dev
-
-    real_stat = Path.stat
-
-    def fake_stat(self, *args, **kwargs):  # noqa: ANN001, ANN002, ANN003
-        if self == point:
-            return _Stat(42)
-        if self == point.parent:
-            return _Stat(1)
-        return real_stat(self, *args, **kwargs)
-
-    monkeypatch.setattr(Path, "stat", fake_stat)
+    _force_distinct_devices(monkeypatch, point)
     monkeypatch.setattr(
         "izerak_agent.storage.shutil.disk_usage",
         lambda _: type("Usage", (), {"total": 10, "used": 1, "free": 9})(),

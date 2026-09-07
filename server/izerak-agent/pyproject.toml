@@ -2,7 +2,11 @@
 name = "izerak-agent"
 version = "1.0.0"
 description = "Agent de supervision du Raspberry Pi pour l'application iZerak"
-requires-python = ">=3.11"
+# 3.9 est la version de Raspberry Pi OS Bullseye, celle du Pi cible. Les
+# annotations paresseuses (from __future__ import annotations) rendent le reste
+# du code compatible ; voir la note en tete de main.py pour la contrainte que
+# cela impose aux signatures exposees a FastAPI.
+requires-python = ">=3.9"
 dependencies = [
     "fastapi>=0.110",
     "uvicorn>=0.27",

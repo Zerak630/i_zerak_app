@@ -13,7 +13,7 @@ from __future__ import annotations
 import hmac
 import time
 from collections import deque
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 
@@ -31,7 +31,20 @@ _recent_actions: deque[float] = deque()
 
 app = FastAPI(title="iZerak agent", version=VERSION, docs_url=None, redoc_url=None)
 
-_config: AgentConfig | None = None
+# Ce fichier evite volontairement la syntaxe « X | None » (PEP 604) au profit de
+# « Optional[X] ».
+#
+# Ailleurs dans le paquet, « from __future__ import annotations » rend les
+# annotations paresseuses : elles restent des chaines et ne sont jamais
+# evaluees. FastAPI, lui, les resout a l'execution pour construire ses
+# dependances et ses modeles. Sur Python 3.9 — la version de Raspberry Pi OS
+# Bullseye — cette evaluation echoue :
+#
+#   TypeError: Unable to evaluate type annotation 'Annotated[str | None, ...]'
+#
+# Toute nouvelle signature exposee a FastAPI doit donc s'en tenir a Optional et
+# Union.
+_config: Optional[AgentConfig] = None
 
 
 def config() -> AgentConfig:
@@ -42,7 +55,7 @@ def config() -> AgentConfig:
 
 
 def require_token(
-    authorization: Annotated[str | None, Header()] = None,
+    authorization: Annotated[Optional[str], Header()] = None,
     settings: AgentConfig = Depends(config),
 ) -> None:
     """Verifie le jeton porteur.
