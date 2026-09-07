@@ -1,8 +1,6 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:i_zerak_app/firebase_options.dart';
 import 'package:i_zerak_app/homepage.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 import 'package:i_zerak_app/theme/darktheme_default.dart';
@@ -11,10 +9,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await setupServiceLocator();
-
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
 
   runApp(const MyApp());
 }
