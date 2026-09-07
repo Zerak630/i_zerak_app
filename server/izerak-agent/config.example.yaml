@@ -1,5 +1,5 @@
 # Configuration de l'agent iZerak.
-# A deposer dans /etc/izerak-agent/config.yaml, en chmod 600 : ce fichier
+# A deposer dans /etc/izerak-agent/config.yaml, en chmod 640 : ce fichier
 # contient le jeton d'authentification.
 
 # Genere par install.sh. 32 octets aleatoires en base64 url-safe.
@@ -11,24 +11,27 @@ bind_host: "0.0.0.0"
 bind_port: 8081
 
 # Meme certificat que la WebUI qBittorrent : l'application n'a ainsi qu'une
-# seule empreinte a epingler pour les deux services.
-tls_certificate: "/etc/izerak-agent/qbt.crt"
-tls_private_key: "/etc/izerak-agent/qbt.key"
+# seule empreinte a epingler pour les deux services. Le compte de l'agent doit
+# appartenir au groupe izerak-cert pour lire la cle privee ; install.sh s'en
+# charge.
+tls_certificate: "/etc/ssl/izerak/izerak.crt"
+tls_private_key: "/etc/ssl/izerak/izerak.key"
 
 # Liste blanche stricte. Un nom absent d'ici ne sera jamais transmis a
 # systemctl : la requete est refusee en 404 sans qu'aucun processus ne demarre.
+# Toute unite ajoutee ici doit l'etre aussi dans izerak-agent.sudoers.
 services:
   - name: emby
-    unit: emby-server.service
+    unit: emby.service
   - name: qbittorrent
     unit: qbittorrent-nox.service
   - name: syncthing
-    unit: syncthing@pi.service
+    unit: syncthing@theo.service
 
 # Volumes surveilles. quota_bytes est un plafond que vous vous imposez,
-# independant de la capacite reelle du disque : c'est lui qui declenche
-# l'avertissement et le blocage d'ajout cote application.
+# independant de la capacite reelle du disque : c'est lui que l'application
+# affiche, et c'est son depassement qui bloque l'ajout de telechargements.
 storage:
-  - path: /mnt/media
+  - path: /media/theo/NAS1
     label: Disque Emby
-    quota_bytes: 1500000000000
+    quota_bytes: 800000000000

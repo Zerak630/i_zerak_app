@@ -31,6 +31,14 @@ if ! id -u "${SERVICE_USER}" >/dev/null 2>&1; then
   useradd --system --no-create-home --shell /usr/sbin/nologin "${SERVICE_USER}"
 fi
 
+# Le certificat TLS est partage avec la WebUI qBittorrent. Le groupe
+# izerak-cert donne acces a la cle privee aux deux comptes concernes, sans la
+# rendre lisible par tous.
+if getent group izerak-cert >/dev/null; then
+  usermod -aG izerak-cert "${SERVICE_USER}"
+  echo "    ${SERVICE_USER} ajoute au groupe izerak-cert"
+fi
+
 echo "==> Code et environnement virtuel"
 install -d -o root -g root -m 0755 "${PREFIX}"
 cp -r "${SOURCE_DIR}/izerak_agent" "${SOURCE_DIR}/pyproject.toml" "${PREFIX}/"

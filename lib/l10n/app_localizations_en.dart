@@ -464,4 +464,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String confirm_service_action(String name) {
     return 'This will interrupt $name. Continue?';
   }
+
+  @override
+  String get storage_permission_denied =>
+      'The agent cannot read this volume: check its permissions.';
 }

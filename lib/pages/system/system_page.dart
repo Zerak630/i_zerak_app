@@ -311,9 +311,14 @@ class _SystemPageState extends State<SystemPage> with WidgetsBindingObserver {
           leading: Icon(Icons.usb_off, color: scheme.onErrorContainer),
           title: Text(volume.label, style: TextStyle(color: scheme.onErrorContainer)),
           subtitle: Text(
-            volume.reason == 'not_mounted' || volume.reason == 'same_device_as_root'
-                ? l10n.storage_disconnected
-                : l10n.storage_missing(volume.path),
+            switch (volume.reason) {
+              // Le point de montage existe mais rien n'y est monte, ou il
+              // pointe vers la racine : dans les deux cas, le disque est absent.
+              'not_mounted' || 'same_device_as_root' => l10n.storage_disconnected,
+              // L'agent n'a pas le droit de traverser le repertoire parent.
+              'permission_denied' => l10n.storage_permission_denied,
+              _ => l10n.storage_missing(volume.path),
+            },
             style: TextStyle(color: scheme.onErrorContainer),
           ),
         ),

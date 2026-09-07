@@ -468,4 +468,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String confirm_service_action(String name) {
     return 'Cette action interrompra $name. Continuer ?';
   }
+
+  @override
+  String get storage_permission_denied =>
+      'L’agent ne peut pas lire ce volume : vérifiez ses permissions.';
 }

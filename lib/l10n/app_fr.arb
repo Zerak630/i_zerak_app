@@ -141,5 +141,6 @@
 	"storage_missing": "Le chemin {path} n’existe pas",
 	"storage_quota": "{used} utilisés sur {quota} autorisés",
 	"storage_capacity": "{free} libres sur {total} au total",
-	"confirm_service_action": "Cette action interrompra {name}. Continuer ?"
+	"confirm_service_action": "Cette action interrompra {name}. Continuer ?",
+	"storage_permission_denied": "L’agent ne peut pas lire ce volume : vérifiez ses permissions."
 }

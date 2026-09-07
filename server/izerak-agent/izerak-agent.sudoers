@@ -5,15 +5,18 @@
 # verbeux, mais cela rend l'autorisation lisible et auditable, et empeche
 # l'agent d'agir sur une unite qui ne figure pas ici meme en cas de faille dans
 # sa validation.
+#
+# Ces unites doivent correspondre exactement a celles listees dans
+# /etc/izerak-agent/config.yaml.
 
-izerak-agent ALL=(root) NOPASSWD: /bin/systemctl start emby-server.service
-izerak-agent ALL=(root) NOPASSWD: /bin/systemctl stop emby-server.service
-izerak-agent ALL=(root) NOPASSWD: /bin/systemctl restart emby-server.service
+izerak-agent ALL=(root) NOPASSWD: /bin/systemctl start emby.service
+izerak-agent ALL=(root) NOPASSWD: /bin/systemctl stop emby.service
+izerak-agent ALL=(root) NOPASSWD: /bin/systemctl restart emby.service
 
 izerak-agent ALL=(root) NOPASSWD: /bin/systemctl start qbittorrent-nox.service
 izerak-agent ALL=(root) NOPASSWD: /bin/systemctl stop qbittorrent-nox.service
 izerak-agent ALL=(root) NOPASSWD: /bin/systemctl restart qbittorrent-nox.service
 
-izerak-agent ALL=(root) NOPASSWD: /bin/systemctl start syncthing@pi.service
-izerak-agent ALL=(root) NOPASSWD: /bin/systemctl stop syncthing@pi.service
-izerak-agent ALL=(root) NOPASSWD: /bin/systemctl restart syncthing@pi.service
+izerak-agent ALL=(root) NOPASSWD: /bin/systemctl start syncthing@theo.service
+izerak-agent ALL=(root) NOPASSWD: /bin/systemctl stop syncthing@theo.service
+izerak-agent ALL=(root) NOPASSWD: /bin/systemctl restart syncthing@theo.service

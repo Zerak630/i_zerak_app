@@ -143,3 +143,54 @@ def test_lecture_de_proc_mounts(tmp_path: Path) -> None:
     assert info.readonly is True
 
     assert read_proc_mounts(Path("/mnt/absent"), mounts_file=mounts) is None
+
+
+def test_permission_refusee_ne_fait_pas_echouer_la_reponse(tmp_path: Path, monkeypatch) -> None:
+    """Un volume inaccessible se signale, il ne leve pas.
+
+    Les disques amovibles vivent sous /media/<utilisateur>, dont le parent n'est
+    traversable que par son proprietaire : un compte de service s'y heurte a une
+    PermissionError. Non rattrapee, elle renvoyait un 500 et emportait tous les
+    autres volumes surveilles avec elle.
+    """
+    point = tmp_path / "media"
+    point.mkdir()
+
+    def refuse(self):  # noqa: ANN001
+        raise PermissionError(13, "Permission denied")
+
+    monkeypatch.setattr(Path, "is_dir", refuse)
+
+    status = probe(str(point), "Disque Emby")
+
+    assert status.mounted is False
+    assert status.reason == "permission_denied"
+    assert status.free_bytes is None
+
+
+def test_sans_entree_de_montage_le_volume_n_est_pas_dit_en_lecture_seule(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """L'absence d'information de montage ne doit pas conclure a la lecture seule.
+
+    L'agent tourne avec des droits minimaux et sous ProtectSystem=strict : il ne
+    peut ecrire nulle part. Deduire l'etat du volume de sa propre incapacite a y
+    ecrire rapportait un disque en lecture seule a tort, ce qui bloque l'ajout de
+    telechargements cote application.
+    """
+    point = tmp_path / "media"
+    point.mkdir()
+
+    monkeypatch.setattr("izerak_agent.storage.os.path.ismount", lambda _: True)
+    _force_distinct_devices(monkeypatch, point)
+    monkeypatch.setattr(
+        "izerak_agent.storage.shutil.disk_usage",
+        lambda _: type("Usage", (), {"total": 10, "used": 1, "free": 9})(),
+    )
+    monkeypatch.setattr("izerak_agent.storage.read_proc_mounts", lambda *a, **k: None)
+
+    status = probe(str(point), "Disque Emby")
+
+    assert status.mounted is True
+    assert status.readonly is False
+    assert status.free_bytes == 9

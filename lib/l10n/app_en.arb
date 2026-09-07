@@ -181,5 +181,6 @@
 		"placeholders": {
 			"name": { "type": "String" }
 		}
-	}
+	},
+	"storage_permission_denied": "The agent cannot read this volume: check its permissions."
 }

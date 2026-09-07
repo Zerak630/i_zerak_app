@@ -949,6 +949,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This will interrupt {name}. Continue?'**
   String confirm_service_action(String name);
+
+  /// No description provided for @storage_permission_denied.
+  ///
+  /// In en, this message translates to:
+  /// **'The agent cannot read this volume: check its permissions.'**
+  String get storage_permission_denied;
 }
 
 class _AppLocalizationsDelegate
