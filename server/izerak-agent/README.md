@@ -5,7 +5,54 @@ la machine, l'etat du disque externe de la bibliotheque Emby, et le pilotage
 d'un ensemble ferme de services systemd. L'application mobile ne parle qu'a lui :
 elle n'ouvre jamais de session SSH et ne touche jamais a systemd directement.
 
+## Deploiement depuis le poste de developpement
+
+`deploy.ps1` envoie ce repertoire vers le Pi, sans les caches Python ni
+l'environnement virtuel, et en forcant les fins de ligne en LF — un script shell
+en CRLF echoue sur Linux avec « bad interpreter: /bin/bash^M ».
+
+### Configuration, une seule fois
+
+L'adresse du Pi n'est volontairement ecrite nulle part dans ce depot. Declarez-la
+dans votre `~/.ssh/config`, avec une cle dediee au deploiement :
+
+```powershell
+ssh-keygen -t ed25519 -f "$env:USERPROFILE\.ssh\izerak_pi" -C "izerak deploy"
+
+# Seule etape qui demande le mot de passe du compte sur le Pi.
+type "$env:USERPROFILE\.ssh\izerak_pi.pub" | ssh theo@<adresse-du-pi> "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+```
+
+Puis dans `~/.ssh/config` :
+
+```
+Host izerak-pi
+  HostName <adresse-du-pi>
+  User theo
+  IdentityFile ~/.ssh/izerak_pi
+```
+
+### Usage
+
+```powershell
+.\deploy.ps1                    # envoie vers /home/theo/izerak
+.\deploy.ps1 -Install           # envoie puis lance sudo ./install.sh
+.\deploy.ps1 -Test              # envoie puis execute pytest sur le Pi
+.\deploy.ps1 -Clean             # vide le repertoire distant avant extraction
+.\deploy.ps1 -PackageOnly       # construit l'archive sans rien envoyer
+```
+
+L'hote se surcharge par `-PiHost theo@192.168.1.10` ou par la variable
+d'environnement `IZERAK_PI`. Le repertoire de destination se surcharge par
+`-RemoteDir`.
+
+`-Clean` supprime le repertoire distant : utile quand un fichier a ete supprime
+localement, puisque l'extraction seule ne fait qu'ecraser.
+
 ## Installation
+
+Depuis le poste de developpement, `.\deploy.ps1 -Install` enchaine le transfert
+et l'installation. Sur le Pi directement :
 
 ```bash
 sudo ./install.sh

@@ -1,7 +1,42 @@
-[.dart]
-indent_size = 2
-indent_style = tab
+# https://editorconfig.org
+#
+# Les motifs sont des globs : « *.dart », pas « .dart », qui ne designait qu'un
+# fichier litteralement nomme « .dart » et ne s'appliquait donc a rien.
+root = true
 
-[.py]
+[*]
+charset = utf-8
+indent_style = space
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Style Dart par defaut : deux espaces. La largeur de 100 colonnes correspond au
+# code existant ; « dart format » utilise 80 par defaut et ignore ce fichier, il
+# ne s'agit ici que du repere affiche par l'editeur.
+[*.dart]
+indent_size = 2
+max_line_length = 100
+
+# PEP 8 : quatre espaces.
+[*.py]
 indent_size = 4
+max_line_length = 100
+
+[*.{yaml,yml,json,arb}]
+indent_size = 2
+
+[*.{gradle,xml,plist}]
+indent_size = 4
+
+# Markdown : deux espaces en fin de ligne forcent un retour a la ligne, il ne
+# faut donc pas les supprimer.
+[*.md]
+indent_size = 2
+trim_trailing_whitespace = false
+
+[*.{sh,bash}]
+indent_size = 2
+
+[Makefile]
 indent_style = tab
