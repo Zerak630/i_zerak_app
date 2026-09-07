@@ -79,7 +79,11 @@ function Assert-Reachable {
         Write-Host 'Configuration a faire une seule fois :' -ForegroundColor Yellow
         Write-Host ''
         Write-Host '  ssh-keygen -t ed25519 -f "$env:USERPROFILE\.ssh\izerak_pi" -C "izerak deploy"'
-        Write-Host '  type "$env:USERPROFILE\.ssh\izerak_pi.pub" | ssh theo@<adresse-du-pi> "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"'
+        Write-Host ''
+        Write-Host '  $k = (Get-Content "$env:USERPROFILE\.ssh\izerak_pi.pub" -Raw).Trim(); ssh theo@<adresse-du-pi> "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo ''$k'' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"'
+        Write-Host ''
+        Write-Host '  (la cle passe en argument : par un tube, ssh consomme l entree standard'
+        Write-Host '   pour l invite de mot de passe et le fichier distant reste vide)' -ForegroundColor DarkGray
         Write-Host ''
         Write-Host 'Puis ajoutez dans ~/.ssh/config :'
         Write-Host ''

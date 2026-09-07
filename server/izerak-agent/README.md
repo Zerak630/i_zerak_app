@@ -18,10 +18,18 @@ dans votre `~/.ssh/config`, avec une cle dediee au deploiement :
 
 ```powershell
 ssh-keygen -t ed25519 -f "$env:USERPROFILE\.ssh\izerak_pi" -C "izerak deploy"
-
-# Seule etape qui demande le mot de passe du compte sur le Pi.
-type "$env:USERPROFILE\.ssh\izerak_pi.pub" | ssh theo@<adresse-du-pi> "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
 ```
+
+Puis, seule etape qui demande le mot de passe du compte sur le Pi :
+
+```powershell
+$k = (Get-Content "$env:USERPROFILE\.ssh\izerak_pi.pub" -Raw).Trim(); ssh theo@<adresse-du-pi> "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '$k' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+```
+
+La cle est passee en argument, et non par un tube. Windows n'a pas
+`ssh-copy-id`, et la transposition naturelle — `type cle.pub | ssh ... "cat >>
+authorized_keys"` — echoue : `ssh` consomme l'entree standard pour son invite de
+mot de passe, le `cat` distant ne recoit rien, et le fichier est cree **vide**.
 
 Puis dans `~/.ssh/config` :
 
