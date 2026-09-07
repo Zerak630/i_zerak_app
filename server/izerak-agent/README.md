@@ -26,10 +26,11 @@ different. L'application n'a ainsi qu'une seule empreinte a epingler pour les
 deux services.
 
 ```bash
+# Remplacez le nom d'hote et l'adresse par ceux de votre serveur.
 openssl req -x509 -newkey rsa:2048 -nodes -days 3650 \
   -keyout /etc/izerak-agent/qbt.key -out /etc/izerak-agent/qbt.crt \
   -subj "/CN=nas.lan" \
-  -addext "subjectAltName=DNS:nas.lan,IP:192.168.1.110"
+  -addext "subjectAltName=DNS:nas.lan,IP:192.168.1.10"
 
 # Empreinte a comparer dans l'application, une seule fois :
 openssl x509 -in /etc/izerak-agent/qbt.crt -noout -fingerprint -sha256

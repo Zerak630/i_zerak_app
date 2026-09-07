@@ -57,10 +57,11 @@ qBittorrent et l'agent partagent **le même certificat auto-signé** sur deux po
 l'application n'ait qu'une seule empreinte à approuver.
 
 ```bash
+# Remplacez le nom d'hôte et l'adresse par ceux de votre serveur.
 openssl req -x509 -newkey rsa:2048 -nodes -days 3650 \
   -keyout qbt.key -out qbt.crt \
   -subj "/CN=nas.lan" \
-  -addext "subjectAltName=DNS:nas.lan,IP:192.168.1.110"
+  -addext "subjectAltName=DNS:nas.lan,IP:192.168.1.10"
 ```
 
 L'extension `subjectAltName` est **obligatoire** : les clients modernes ignorent le champ CN. Si vous

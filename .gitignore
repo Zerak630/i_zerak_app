@@ -21,6 +21,10 @@ migrate_working_dir/
 # is commented out by default.
 #.vscode/
 
+# Configuration de connexion propre a chaque poste : porte une adresse
+# de reseau local et un nom d'utilisateur.
+.vscode/sftp.json
+
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
