@@ -41,7 +41,14 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
     return subscriptions;
   }
 
-  void _refresh() => setState(() => _subscriptions = _load());
+  void _refresh() {
+    // Corps a accolades et non lambda flechee : celle-ci renvoyait la valeur de
+    // l'affectation, donc un Future, ce que setState refuse. L'assertion se
+    // declenchait a chaque ajout ou modification.
+    setState(() {
+      _subscriptions = _load();
+    });
+  }
 
   void _calculateTotals(List<Subscription> subscriptions) {
     double weeklyTotal = 0.0;
@@ -85,7 +92,12 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
     final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      builder: (BuildContext context) => const SubscriptionModal(),
+      builder: (BuildContext context) => Padding(
+        // Sans ce decalage, le clavier recouvre integralement la feuille :
+        // ni les champs saisis ni le bouton de validation ne restent visibles.
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: const SubscriptionModal(),
+      ),
     );
     if (saved == true) {
       _refresh();
