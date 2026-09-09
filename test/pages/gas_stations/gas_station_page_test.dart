@@ -8,6 +8,7 @@ import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/gas_station_dao.dart';
 import 'package:i_zerak_app/pages/gas_stations/gas_station_page.dart';
 import 'package:i_zerak_app/services/gas_service.dart';
+import 'package:i_zerak_app/services/maps_launcher.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_gas_stations.dart';
 import 'package:mockito/mockito.dart';
 
@@ -35,10 +36,36 @@ class _FakeFavorites implements IGasStations {
   Future<void> delete(int id) async => _stations.removeWhere((s) => s.id == id);
 
   @override
+  Future<void> rename(int id, String? name) async {
+    final trimmed = name?.trim() ?? '';
+    final index = _stations.indexWhere((s) => s.id == id);
+    if (index < 0) {
+      return;
+    }
+    final station = _stations[index];
+    _stations[index] =
+        (id: id, label: station.label, customName: trimmed.isEmpty ? null : trimmed);
+  }
+
+  @override
   Future<FuelType> readFuel() async => _fuel;
 
   @override
   Future<void> saveFuel(FuelType fuel) async => _fuel = fuel;
+}
+
+/// Retient l'itineraire demande plutot que d'ouvrir quoi que ce soit.
+class _FakeMaps implements MapsLauncher {
+  _FakeMaps({this.succeeds = true});
+
+  final bool succeeds;
+  final List<({double latitude, double longitude})> calls = [];
+
+  @override
+  Future<bool> navigateTo({required double latitude, required double longitude}) async {
+    calls.add((latitude: latitude, longitude: longitude));
+    return succeeds;
+  }
 }
 
 Widget wrap(Widget child) => MaterialApp(
@@ -59,11 +86,14 @@ void main() {
 
   /// `prices` porte les carburants effectivement vendus ; les autres colonnes
   /// partent nulles, comme dans la vraie reponse.
-  Map<String, dynamic> record(int id, String address, Map<FuelType, double?> prices) => {
+  Map<String, dynamic> record(int id, String address, Map<FuelType, double?> prices,
+          {Map<String, double>? geom = const {'lat': 47.277, 'lon': -0.075}}) =>
+      {
         'id': id,
         'adresse': address,
         'ville': 'Angers',
         'cp': '49100',
+        'geom': geom,
         for (final fuel in FuelType.values) fuel.priceField: prices[fuel],
       };
 
@@ -72,8 +102,19 @@ void main() {
 
   setUp(() => client = mocks.MockClient());
 
-  GasStationPage page(IGasStations favorites) =>
-      GasStationPage(service: GasService(client: client), favorites: favorites);
+  GasStationPage page(IGasStations favorites, {MapsLauncher? maps}) => GasStationPage(
+        service: GasService(client: client),
+        favorites: favorites,
+        maps: maps ?? _FakeMaps(),
+      );
+
+  /// Ouvre le menu de la premiere carte et choisit une action.
+  Future<void> chooseAction(WidgetTester tester, String action) async {
+    await tester.tap(find.byIcon(Icons.more_vert).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(action).last);
+    await tester.pumpAndSettle();
+  }
 
   testWidgets('sans favori, la page invite a en ajouter', (tester) async {
     stubStations(const []);
@@ -92,7 +133,7 @@ void main() {
     // meme micro-tache et l'etat intermediaire serait inobservable.
     when(client.get(any)).thenAnswer((_) => Completer<http.Response>().future);
     await tester
-        .pumpWidget(wrap(page(_FakeFavorites([(id: 1, label: 'Libelle en cache')]))));
+        .pumpWidget(wrap(page(_FakeFavorites([(id: 1, label: 'Libelle en cache', customName: null)]))));
     await tester.pump();
     await tester.pump();
 
@@ -103,7 +144,7 @@ void main() {
   testWidgets('les prix remplacent le cache une fois recus', (tester) async {
     stubStations([diesel(1, 'Quai Felix Faure', 2.25)]);
     await tester
-        .pumpWidget(wrap(page(_FakeFavorites([(id: 1, label: 'Libelle en cache')]))));
+        .pumpWidget(wrap(page(_FakeFavorites([(id: 1, label: 'Libelle en cache', customName: null)]))));
     await tester.pumpAndSettle();
 
     expect(find.text('Quai Felix Faure, Angers'), findsOneWidget);
@@ -120,9 +161,9 @@ void main() {
       diesel(3, 'Bon marche', 1.90),
     ]);
     await tester.pumpWidget(wrap(page(_FakeFavorites([
-      (id: 1, label: 'Chere'),
-      (id: 2, label: 'Sans gazole'),
-      (id: 3, label: 'Bon marche'),
+      (id: 1, label: 'Chere', customName: null),
+      (id: 2, label: 'Sans gazole', customName: null),
+      (id: 3, label: 'Bon marche', customName: null),
     ]))));
     await tester.pumpAndSettle();
 
@@ -141,7 +182,7 @@ void main() {
       (tester) async {
     when(client.get(any)).thenThrow(http.ClientException('hors ligne'));
     await tester
-        .pumpWidget(wrap(page(_FakeFavorites([(id: 1, label: 'Quai Felix Faure')]))));
+        .pumpWidget(wrap(page(_FakeFavorites([(id: 1, label: 'Quai Felix Faure', customName: null)]))));
     await tester.pumpAndSettle();
 
     expect(find.text('Données carburants injoignables'), findsOneWidget);
@@ -150,19 +191,17 @@ void main() {
 
   testWidgets('la suppression demande confirmation avant d agir', (tester) async {
     stubStations([diesel(1, 'Quai Felix Faure', 2.25)]);
-    final favorites = _FakeFavorites([(id: 1, label: 'Quai Felix Faure')]);
+    final favorites = _FakeFavorites([(id: 1, label: 'Quai Felix Faure', customName: null)]);
     await tester.pumpWidget(wrap(page(favorites)));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.delete_outline));
-    await tester.pumpAndSettle();
+    await chooseAction(tester, 'Supprimer');
     await tester.tap(find.text('Annuler'));
     await tester.pumpAndSettle();
 
     expect((await favorites.getAll()).length, 1);
 
-    await tester.tap(find.byIcon(Icons.delete_outline));
-    await tester.pumpAndSettle();
+    await chooseAction(tester, 'Supprimer');
     await tester.tap(find.text('Supprimer').last);
     await tester.pumpAndSettle();
 
@@ -191,6 +230,120 @@ void main() {
     expect(find.text('Boulevard du Bon Pasteur, Angers'), findsOneWidget);
   });
 
+  group('itineraire', () {
+    testWidgets('le bouton transmet les coordonnees de la station', (tester) async {
+      stubStations([
+        record(1, 'Quai Felix Faure', const {FuelType.gazole: 2.25},
+            geom: const {'lat': 47.47738, 'lon': -0.55225}),
+      ]);
+      final maps = _FakeMaps();
+      await tester.pumpWidget(wrap(page(
+          _FakeFavorites([(id: 1, label: 'Quai Felix Faure', customName: null)]),
+          maps: maps)));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.directions));
+      await tester.pumpAndSettle();
+
+      expect(maps.calls.single.latitude, 47.47738);
+      expect(maps.calls.single.longitude, -0.55225);
+    });
+
+    testWidgets('sans coordonnees, le bouton est inerte plutot que fautif',
+        (tester) async {
+      // `geom` absent existe dans le jeu de donnees. Sans ce garde-fou, la
+      // page dereferencait une latitude nulle et plantait sur un appui.
+      stubStations([record(1, 'Quai Felix Faure', const {FuelType.gazole: 2.25}, geom: null)]);
+      await tester.pumpWidget(wrap(
+          page(_FakeFavorites([(id: 1, label: 'Quai Felix Faure', customName: null)]))));
+      await tester.pumpAndSettle();
+
+      final button = tester.widget<IconButton>(find.ancestor(
+          of: find.byIcon(Icons.directions), matching: find.byType(IconButton)));
+      expect(button.onPressed, isNull);
+    });
+
+    testWidgets('un echec de lancement est signale, jamais silencieux',
+        (tester) async {
+      stubStations([diesel(1, 'Quai Felix Faure', 2.25)]);
+      await tester.pumpWidget(wrap(page(
+          _FakeFavorites([(id: 1, label: 'Quai Felix Faure', customName: null)]),
+          maps: _FakeMaps(succeeds: false))));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.directions));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Aucune application d’itinéraire trouvée'), findsOneWidget);
+    });
+  });
+
+  group('renommage', () {
+    testWidgets('le nom choisi remplace l adresse, qui reste en dessous',
+        (tester) async {
+      // Le jeu de donnees ne publie aucune enseigne : renommer est le seul
+      // moyen d'obtenir « Intermarche » plutot qu'une adresse en capitales.
+      stubStations([diesel(1, 'BD PORT GENTIL', 2.25)]);
+      final favorites = _FakeFavorites([(id: 1, label: 'BD PORT GENTIL', customName: null)]);
+      await tester.pumpWidget(wrap(page(favorites)));
+      await tester.pumpAndSettle();
+
+      await chooseAction(tester, 'Renommer');
+      await tester.enterText(find.byType(TextField), 'Intermarche Thouars');
+      await tester.tap(find.text('Enregistrer'));
+      await tester.pumpAndSettle();
+
+      expect((await favorites.getAll()).single.customName, 'Intermarche Thouars');
+      expect(find.text('Intermarche Thouars'), findsOneWidget);
+      // L'adresse doit rester visible : un nom sans lieu ne dit pas laquelle.
+      expect(find.text('BD PORT GENTIL, Angers'), findsOneWidget);
+    });
+
+    testWidgets('un champ vide rend la station a son adresse', (tester) async {
+      stubStations([diesel(1, 'BD PORT GENTIL', 2.25)]);
+      final favorites =
+          _FakeFavorites([(id: 1, label: 'BD PORT GENTIL', customName: 'Ancien nom')]);
+      await tester.pumpWidget(wrap(page(favorites)));
+      await tester.pumpAndSettle();
+      expect(find.text('Ancien nom'), findsOneWidget);
+
+      await chooseAction(tester, 'Renommer');
+      await tester.enterText(find.byType(TextField), '   ');
+      await tester.tap(find.text('Enregistrer'));
+      await tester.pumpAndSettle();
+
+      expect((await favorites.getAll()).single.customName, isNull);
+      expect(find.text('BD PORT GENTIL, Angers'), findsOneWidget);
+    });
+
+    testWidgets('annuler ne touche a rien', (tester) async {
+      stubStations([diesel(1, 'BD PORT GENTIL', 2.25)]);
+      final favorites =
+          _FakeFavorites([(id: 1, label: 'BD PORT GENTIL', customName: 'Ancien nom')]);
+      await tester.pumpWidget(wrap(page(favorites)));
+      await tester.pumpAndSettle();
+
+      await chooseAction(tester, 'Renommer');
+      await tester.enterText(find.byType(TextField), 'Autre chose');
+      await tester.tap(find.text('Annuler'));
+      await tester.pumpAndSettle();
+
+      expect((await favorites.getAll()).single.customName, 'Ancien nom');
+    });
+
+    testWidgets('la confirmation de suppression nomme ce qui est affiche',
+        (tester) async {
+      stubStations([diesel(1, 'BD PORT GENTIL', 2.25)]);
+      await tester.pumpWidget(wrap(page(
+          _FakeFavorites([(id: 1, label: 'BD PORT GENTIL', customName: 'Intermarche')]))));
+      await tester.pumpAndSettle();
+
+      await chooseAction(tester, 'Supprimer');
+
+      expect(find.textContaining('Intermarche'), findsWidgets);
+    });
+  });
+
   group('selecteur de carburant', () {
     /// Une station qui vend les trois, a des prix distincts : c'est ce qui rend
     /// le changement de carburant observable a l'ecran.
@@ -205,7 +358,7 @@ void main() {
     testWidgets('le choix enregistre est repris a l ouverture', (tester) async {
       stubStations(threeFuels());
       await tester.pumpWidget(wrap(page(
-          _FakeFavorites([(id: 1, label: 'Quai Felix Faure')], FuelType.e85))));
+          _FakeFavorites([(id: 1, label: 'Quai Felix Faure', customName: null)], FuelType.e85))));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('0.871'), findsOneWidget);
@@ -218,7 +371,7 @@ void main() {
       // aucun aller-retour reseau.
       stubStations(threeFuels());
       await tester
-          .pumpWidget(wrap(page(_FakeFavorites([(id: 1, label: 'Quai Felix Faure')]))));
+          .pumpWidget(wrap(page(_FakeFavorites([(id: 1, label: 'Quai Felix Faure', customName: null)]))));
       await tester.pumpAndSettle();
       expect(find.textContaining('2.250'), findsOneWidget);
 
@@ -234,7 +387,7 @@ void main() {
 
     testWidgets('le choix est enregistre des le changement', (tester) async {
       stubStations(threeFuels());
-      final favorites = _FakeFavorites([(id: 1, label: 'Quai Felix Faure')]);
+      final favorites = _FakeFavorites([(id: 1, label: 'Quai Felix Faure', customName: null)]);
       await tester.pumpWidget(wrap(page(favorites)));
       await tester.pumpAndSettle();
 
@@ -250,7 +403,7 @@ void main() {
         (tester) async {
       stubStations(threeFuels());
       await tester.pumpWidget(wrap(page(
-          _FakeFavorites([(id: 1, label: 'Quai Felix Faure')], FuelType.sp95))));
+          _FakeFavorites([(id: 1, label: 'Quai Felix Faure', customName: null)], FuelType.sp95))));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Prix inconnu'), findsOneWidget);
@@ -265,8 +418,8 @@ void main() {
         record(2, 'B', const {FuelType.gazole: 2.40, FuelType.sp98: 1.90}),
       ]);
       await tester.pumpWidget(wrap(page(_FakeFavorites([
-        (id: 1, label: 'A'),
-        (id: 2, label: 'B'),
+        (id: 1, label: 'A', customName: null),
+        (id: 2, label: 'B', customName: null),
       ]))));
       await tester.pumpAndSettle();
 

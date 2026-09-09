@@ -37,7 +37,7 @@ class GasService {
   /// ils arrivent dans la meme reponse, et changer de carburant ne declenche
   /// alors aucune requete.
   static final String _select =
-      ['id', 'adresse', 'ville', 'cp', for (final fuel in FuelType.values) fuel.priceField]
+      ['id', 'adresse', 'ville', 'cp', 'geom', for (final fuel in FuelType.values) fuel.priceField]
           .join(',');
 
   /// Plafond impose par l'API sur une page de resultats.

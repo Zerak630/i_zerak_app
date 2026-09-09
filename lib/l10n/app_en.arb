@@ -41,6 +41,11 @@
 	"gas_already_saved": "Already followed",
 	"gas_price_unknown": "Price unknown",
 	"gas_prices_shown": "Prices shown: {fuel}",
+	"gas_navigate": "Directions",
+	"gas_maps_unavailable": "No navigation app found",
+	"gas_rename": "Rename",
+	"gas_station_name": "Station name",
+	"gas_rename_hint": "Leave empty to restore the address",
 	"@gas_prices_shown": {
 		"placeholders": {
 			"fuel": { "type": "String" }

@@ -12,6 +12,13 @@ abstract class IGasStations {
 
   Future<void> delete(int id);
 
+  /// Donne a la station le nom choisi par l'utilisateur.
+  ///
+  /// `null` ou une chaine blanche efface ce nom et rend la station a son
+  /// adresse : le jeu de donnees ne publie aucune enseigne, l'adresse est tout
+  /// ce dont il dispose, et elle est parfois illisible.
+  Future<void> rename(int id, String? name);
+
   /// Le carburant que l'utilisateur suit.
   ///
   /// Il vit ici, et non dans `ServerConfig`, pour deux raisons : c'est une

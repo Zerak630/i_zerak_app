@@ -29,7 +29,7 @@ void main() {
 
   test('une station enregistree se relit apres reouverture', () async {
     await HiveGasStationRepository(await open())
-        .add((id: 49400004, label: 'ZI Ecoparc, Saumur'));
+        .add((id: 49400004, label: 'ZI Ecoparc, Saumur', customName: null));
     await Hive.box<String>('gas_stations').close();
 
     final read = await HiveGasStationRepository(await open()).getAll();
@@ -39,7 +39,7 @@ void main() {
   });
 
   test('le fichier est reellement ecrit, pas seulement le cache', () async {
-    await HiveGasStationRepository(await open()).add((id: 1, label: 'A'));
+    await HiveGasStationRepository(await open()).add((id: 1, label: 'A', customName: null));
 
     expect(await File('${directory.path}/gas_stations.hive').length(), greaterThan(0));
   });
@@ -48,8 +48,8 @@ void main() {
     // La cle est l'identifiant, pas un compteur : c'est ce qui garantit
     // l'unicite meme si l'interface laissait passer un doublon.
     final repository = HiveGasStationRepository(await open());
-    await repository.add((id: 7, label: 'Ancien libelle'));
-    await repository.add((id: 7, label: 'Nouveau libelle'));
+    await repository.add((id: 7, label: 'Ancien libelle', customName: null));
+    await repository.add((id: 7, label: 'Nouveau libelle', customName: null));
 
     final read = await repository.getAll();
     expect(read.length, 1);
@@ -58,8 +58,8 @@ void main() {
 
   test('la suppression porte sur l identifiant', () async {
     final repository = HiveGasStationRepository(await open());
-    await repository.add((id: 1, label: 'A'));
-    await repository.add((id: 2, label: 'B'));
+    await repository.add((id: 1, label: 'A', customName: null));
+    await repository.add((id: 2, label: 'B', customName: null));
     await repository.delete(1);
 
     expect((await repository.getAll()).single.id, 2);
@@ -104,7 +104,7 @@ void main() {
 
     test('un amorcage ne s applique pas a une boite deja peuplee', () async {
       final repository = HiveGasStationRepository(await open());
-      await repository.add((id: 1, label: 'A'));
+      await repository.add((id: 1, label: 'A', customName: null));
       await repository.seedLegacyStationsIfEmpty();
 
       expect((await repository.getAll()).single.id, 1);
@@ -126,7 +126,7 @@ void main() {
       // Sa cle n'est pas numerique : getAll doit l'ignorer, sinon une station
       // fantome apparait dans la liste.
       final repository = HiveGasStationRepository(await open());
-      await repository.add((id: 1, label: 'A'));
+      await repository.add((id: 1, label: 'A', customName: null));
       await repository.saveFuel(FuelType.e85);
 
       expect((await repository.getAll()).single.id, 1);

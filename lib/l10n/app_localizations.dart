@@ -326,6 +326,36 @@ abstract class AppLocalizations {
   /// **'Prices shown: {fuel}'**
   String gas_prices_shown(String fuel);
 
+  /// No description provided for @gas_navigate.
+  ///
+  /// In en, this message translates to:
+  /// **'Directions'**
+  String get gas_navigate;
+
+  /// No description provided for @gas_maps_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No navigation app found'**
+  String get gas_maps_unavailable;
+
+  /// No description provided for @gas_rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get gas_rename;
+
+  /// No description provided for @gas_station_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Station name'**
+  String get gas_station_name;
+
+  /// No description provided for @gas_rename_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty to restore the address'**
+  String get gas_rename_hint;
+
   /// No description provided for @fuel_gazole.
   ///
   /// In en, this message translates to:

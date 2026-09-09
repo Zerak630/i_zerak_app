@@ -36,4 +36,24 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+
+    <!-- Depuis Android 11, une application ne voit que les applications
+         qu'elle declare ici : sans cette section, canLaunchUrl repond false
+         pour google.navigation: et geo:, et le bouton « Y aller » resterait
+         inerte sans le moindre message. Le repli https reste couvert par
+         l'entree VIEW / https. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="google.navigation" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="geo" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
 </manifest>

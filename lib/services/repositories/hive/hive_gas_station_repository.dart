@@ -36,6 +36,16 @@ class HiveGasStationRepository implements IGasStations {
   static const String _seededKey = 'seeded';
   static const String _fuelKey = 'fuel';
 
+  /// Prefixe du nom donne par l'utilisateur, range sous `nom:<id>`.
+  ///
+  /// Une seconde cle plutot qu'une valeur composite : le nom choisi et
+  /// l'adresse d'origine restent deux chaines entieres, sans separateur a
+  /// echapper — et un nom contenant le separateur ne peut pas casser la
+  /// relecture. Le prefixe n'etant pas numerique, `getAll` l'ignore.
+  static const String _namePrefix = 'nom:';
+
+  String _nameKey(int id) => '$_namePrefix$id';
+
   /// A appeler une fois au demarrage, avant le premier affichage.
   Future<void> seedLegacyStationsIfEmpty() async {
     if (_box.containsKey(_seededKey)) {
@@ -59,7 +69,8 @@ class HiveGasStationRepository implements IGasStations {
   /// drapeau `seeded` avec les stations, dans la meme boite.
   Future<List<SavedGasStation>> getAll() async => [
         for (final key in _box.keys)
-          if (int.tryParse('$key') case final int id) (id: id, label: _box.get(key) ?? ''),
+          if (int.tryParse('$key') case final int id)
+            (id: id, label: _box.get(key) ?? '', customName: _box.get(_nameKey(id))),
       ];
 
   @override
@@ -73,7 +84,23 @@ class HiveGasStationRepository implements IGasStations {
 
   @override
   Future<void> delete(int id) async {
+    // Les deux cles partent ensemble : un nom orphelin resurgirait si la meme
+    // station etait ajoutee de nouveau, des mois plus tard.
     await _box.delete('$id');
+    await _box.delete(_nameKey(id));
+    await _box.flush();
+  }
+
+  @override
+  Future<void> rename(int id, String? name) async {
+    final trimmed = name?.trim() ?? '';
+    // Une chaine vide efface le nom au lieu d'en enregistrer un invisible :
+    // vider le champ est la facon naturelle de revenir a l'adresse d'origine.
+    if (trimmed.isEmpty) {
+      await _box.delete(_nameKey(id));
+    } else {
+      await _box.put(_nameKey(id), trimmed);
+    }
     await _box.flush();
   }
 

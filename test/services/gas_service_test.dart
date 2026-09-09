@@ -80,7 +80,7 @@ void main() {
       // Sans `select`, chaque enregistrement transporte horaires et services en
       // JSON echappe, soit une reponse vingt fois plus lourde.
       expect(uri.queryParameters['select'],
-          'id,adresse,ville,cp,gazole_prix,sp95_prix,sp98_prix,e10_prix,e85_prix,gplc_prix');
+          'id,adresse,ville,cp,geom,gazole_prix,sp95_prix,sp98_prix,e10_prix,e85_prix,gplc_prix');
     });
 
     test('une saisie vide ne declenche aucune requete', () async {

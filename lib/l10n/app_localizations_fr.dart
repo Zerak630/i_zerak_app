@@ -125,6 +125,21 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get gas_navigate => 'Y aller';
+
+  @override
+  String get gas_maps_unavailable => 'Aucune application d’itinéraire trouvée';
+
+  @override
+  String get gas_rename => 'Renommer';
+
+  @override
+  String get gas_station_name => 'Nom de la station';
+
+  @override
+  String get gas_rename_hint => 'Laisser vide pour revenir à l’adresse';
+
+  @override
   String get fuel_gazole => 'Gazole';
 
   @override

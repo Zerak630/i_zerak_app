@@ -3,17 +3,24 @@ import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/gas_station_dao.dart';
 import 'package:i_zerak_app/pages/gas_stations/widgets/add_gas_station_sheet.dart';
 import 'package:i_zerak_app/pages/gas_stations/widgets/fuel_label.dart';
+import 'package:i_zerak_app/pages/gas_stations/widgets/rename_station_dialog.dart';
 import 'package:i_zerak_app/services/gas_service.dart';
+import 'package:i_zerak_app/services/maps_launcher.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_gas_stations.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 
 class GasStationPage extends StatefulWidget {
-  GasStationPage({super.key, GasService? service, IGasStations? favorites})
-      : service = service ?? GasService(),
+  GasStationPage({
+    super.key,
+    GasService? service,
+    IGasStations? favorites,
+    this.maps = const MapsLauncher(),
+  })  : service = service ?? GasService(),
         favorites = favorites ?? getIt<IGasStations>();
 
   final GasService service;
   final IGasStations favorites;
+  final MapsLauncher maps;
 
   @override
   State<GasStationPage> createState() => _GasStationPageState();
@@ -33,7 +40,6 @@ class _GasStationPageState extends State<GasStationPage> {
   FuelType _fuel = FuelType.gazole;
 
   bool _loading = true;
-  bool _refreshing = false;
   String? _error;
 
   @override
@@ -70,7 +76,6 @@ class _GasStationPageState extends State<GasStationPage> {
       return;
     }
     setState(() {
-      _refreshing = true;
       _error = null;
     });
 
@@ -81,14 +86,12 @@ class _GasStationPageState extends State<GasStationPage> {
       }
       setState(() {
         _live = {for (final station in stations) station.id: station};
-        _refreshing = false;
       });
     } on GasServiceException {
       if (!mounted) {
         return;
       }
       setState(() {
-        _refreshing = false;
         _error = AppLocalizations.of(context)!.gas_unreachable;
       });
     }
@@ -104,7 +107,7 @@ class _GasStationPageState extends State<GasStationPage> {
     if (station == null) {
       return;
     }
-    await widget.favorites.add((id: station.id, label: station.location));
+    await widget.favorites.add((id: station.id, label: station.location, customName: null));
     if (!mounted) {
       return;
     }
@@ -114,12 +117,54 @@ class _GasStationPageState extends State<GasStationPage> {
     await _load();
   }
 
-  Future<void> _confirmDelete(SavedGasStation station) async {
+  /// Lance le guidage vers la station.
+  ///
+  /// L'echec est signale, jamais silencieux : sur un telephone sans
+  /// application de cartographie, un bouton qui ne fait rien passerait pour un
+  /// defaut de l'application.
+  Future<void> _navigateTo(GasStationDao station) async {
+    final l10n = AppLocalizations.of(context)!;
+    final launched = await widget.maps.navigateTo(
+      latitude: station.latitude!,
+      longitude: station.longitude!,
+    );
+    if (!mounted || launched) {
+      return;
+    }
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(l10n.gas_maps_unavailable)));
+  }
+
+  Future<void> _rename(SavedGasStation station, String currentName) async {
+    final name = await showRenameStationDialog(
+      context,
+      currentName: currentName,
+      initialValue: station.customName,
+    );
+    if (name == null) {
+      return;
+    }
+    await widget.favorites.rename(station.id, name);
+    if (!mounted) {
+      return;
+    }
+    setState(() => _saved = [
+          for (final s in _saved)
+            if (s.id == station.id)
+              (id: s.id, label: s.label, customName: name.trim().isEmpty ? null : name.trim())
+            else
+              s
+        ]);
+  }
+
+  Future<void> _confirmDelete(SavedGasStation station, String name) async {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        content: Text(l10n.delete_confirm(station.label)),
+        // Le nom affiche, pas le libelle stocke : la confirmation doit nommer
+        // ce que l'utilisateur voit dans la liste.
+        content: Text(l10n.delete_confirm(name)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
           TextButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.delete)),
@@ -250,18 +295,54 @@ class _GasStationPageState extends State<GasStationPage> {
         final saved = stations[index];
         final live = _live[saved.id];
         final price = live?.priceOf(_fuel);
+        final address = live?.location ?? saved.label;
+        final name = displayNameOf(saved, fresh: live?.location);
+        final renamed = name != address;
         return Card(
           child: ListTile(
-            title: Text(live?.location ?? saved.label),
-            // Le carburant est rappele sur chaque ligne : la liste se lit
-            // souvent en un coup d'oeil, sans remonter jusqu'au selecteur.
-            subtitle: Text(price == null
-                ? '${l10n.gas_price_unknown} — ${fuelLabel(l10n, _fuel)}'
-                : '${price.toStringAsFixed(3)} € — ${fuelLabel(l10n, _fuel)}'),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: l10n.delete,
-              onPressed: _refreshing ? null : () => _confirmDelete(saved),
+            title: Text(name),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Le carburant est rappele sur chaque ligne : la liste se lit
+                // souvent en un coup d'oeil, sans remonter jusqu'au selecteur.
+                Text(price == null
+                    ? '${l10n.gas_price_unknown} — ${fuelLabel(l10n, _fuel)}'
+                    : '${price.toStringAsFixed(3)} € — ${fuelLabel(l10n, _fuel)}'),
+                // Une station renommee garderait sinon un nom sans lieu, et
+                // « Intermarche » ne dit pas lequel.
+                if (renamed)
+                  Text(address,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              ],
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.directions),
+                  tooltip: l10n.gas_navigate,
+                  // Desactive tant que les coordonnees ne sont pas connues :
+                  // la reponse n'est pas encore arrivee, ou la station n'est
+                  // pas geolocalisee dans le jeu de donnees.
+                  onPressed: live != null && live.hasCoordinates
+                      ? () => _navigateTo(live)
+                      : null,
+                ),
+                PopupMenuButton<String>(
+                  itemBuilder: (context) => [
+                    PopupMenuItem(value: 'rename', child: Text(l10n.gas_rename)),
+                    PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
+                  ],
+                  onSelected: (action) => switch (action) {
+                    'rename' => _rename(saved, address),
+                    _ => _confirmDelete(saved, name),
+                  },
+                ),
+              ],
             ),
           ),
         );
