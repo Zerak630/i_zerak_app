@@ -230,6 +230,39 @@ void main() {
     expect(find.text('Boulevard du Bon Pasteur, Angers'), findsOneWidget);
   });
 
+  group('feuille d ajout', () {
+    testWidgets('les resultats tiennent dans le peu de place laissee par le clavier',
+        (tester) async {
+      // Le defaut verrouille ici : la hauteur des resultats etait une fraction
+      // de MediaQuery.size.height, c'est-a-dire de l'ecran entier, clavier
+      // compris. Clavier ouvert, il ne reste qu'une moitie d'ecran et la
+      // colonne debordait par le bas de 68 pixels.
+      tester.view.physicalSize = const Size(1080, 900);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      stubStations([
+        for (var i = 1; i <= 12; i++)
+          record(i, 'Rue numero $i', const {FuelType.gazole: 2.20}),
+      ]);
+      await tester.pumpWidget(wrap(page(_FakeFavorites())));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Angers');
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+
+      // Un debordement leve pendant la peinture : atteindre cette ligne sans
+      // exception est l'assertion. Le reste verifie que la feuille sert bien a
+      // quelque chose dans cet espace reduit.
+      expect(tester.takeException(), isNull);
+      expect(find.byType(ListTile), findsWidgets);
+    });
+  });
+
   group('itineraire', () {
     testWidgets('le bouton transmet les coordonnees de la station', (tester) async {
       stubStations([

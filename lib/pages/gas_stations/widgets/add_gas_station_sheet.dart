@@ -15,6 +15,10 @@ Future<GasStationDao?> showAddGasStationSheet(
     showModalBottomSheet<GasStationDao>(
       context: context,
       isScrollControlled: true,
+      // La feuille s'arrete sous la barre d'etat au lieu de passer dessous :
+      // avec le clavier ouvert, elle occupe presque tout l'ecran et le titre
+      // se retrouvait sinon derriere l'heure.
+      useSafeArea: true,
       builder: (context) => Padding(
         // Laisse la place au clavier, sans quoi le champ de recherche est
         // masque des la premiere frappe.
@@ -157,12 +161,13 @@ class _AddGasStationSheetState extends State<_AddGasStationSheet> {
                     .bodySmall
                     ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
             const SizedBox(height: 4),
-            // Hauteur bornee : la feuille ne doit pas grandir sans fin quand la
-            // recherche porte sur une grande ville.
-            ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.4),
-              child: _resultsView(context, l10n),
-            ),
+            // `Flexible`, et non une fraction de `MediaQuery.size.height` : cette
+            // hauteur-la est celle de l'ecran entier, clavier compris. Avec le
+            // clavier ouvert il ne reste qu'une moitie d'ecran, et reserver 40 %
+            // du total aux resultats faisait deborder la colonne par le bas —
+            // « BOTTOM OVERFLOWED BY 68 PIXELS ». Ici les resultats se
+            // contentent de la place qui reste vraiment, quelle qu'elle soit.
+            Flexible(child: _resultsView(context, l10n)),
             const SizedBox(height: 8),
             Align(
               alignment: Alignment.centerRight,
