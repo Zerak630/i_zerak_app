@@ -345,9 +345,12 @@ class _SettingsPageState extends State<SettingsPage> {
                 children: [
                   _piCard(context, l10n),
                   const SizedBox(height: 16),
-                  _qbittorrentCard(context, l10n),
-                  const SizedBox(height: 16),
+                  // L'agent passe avant qBittorrent : c'est lui qui renseigne
+                  // l'etat de la machine et du disque, donc le premier a
+                  // eprouver quand quelque chose ne repond pas.
                   _agentCard(context, l10n),
+                  const SizedBox(height: 16),
+                  _qbittorrentCard(context, l10n),
                   const SizedBox(height: 16),
                   _embyCard(context, l10n),
                   const SizedBox(height: 16),
