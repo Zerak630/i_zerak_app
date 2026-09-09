@@ -37,8 +37,7 @@ void main() {
         agentPort: 8081,
         username: 'admin',
         pollIntervalSeconds: 5,
-        defaultSavePath: '/media/theo/NAS1/done',
-        defaultCategory: 'films',
+        defaultSavePath: '/srv/nas1/Emby',
         pinnedCertSha256: '6ada632361e66fcb6014144bf0a3951124495b5d44f439ace69e5977f6d8e29f',
       );
 
@@ -67,12 +66,16 @@ void main() {
     expect(read.agentPort, 8081);
     expect(read.username, 'admin');
     expect(read.pollIntervalSeconds, 5);
-    expect(read.defaultSavePath, '/media/theo/NAS1/done');
-    expect(read.defaultCategory, 'films');
+    // Les champs 5, 7 et 8 entourent le champ 6, retire avec `defaultCategory`.
+    // C'est exactement la que se verrait un compteur `writeByte` mal ajuste :
+    // l'adaptateur est ecrit a la main, et l'erreur ne leve aucune exception,
+    // elle decale silencieusement la relecture.
+    expect(read.defaultSavePath, '/srv/nas1/Emby');
     // L'empreinte epinglee compte autant que le reste : sans elle, la
     // connexion HTTPS redemande une approbation a chaque lancement.
     expect(read.pinnedCertSha256,
         '6ada632361e66fcb6014144bf0a3951124495b5d44f439ace69e5977f6d8e29f');
+    expect(read.agentPort, 8081);
   });
 
   test('un enregistrement remplace le precedent', () async {

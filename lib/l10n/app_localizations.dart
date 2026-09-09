@@ -365,7 +365,7 @@ abstract class AppLocalizations {
   /// No description provided for @emby_section_hint.
   ///
   /// In en, this message translates to:
-  /// **'Folder where qBittorrent drops downloads for Emby to index.'**
+  /// **'Library root holding Films, Series and Autres, where qBittorrent drops downloads.'**
   String get emby_section_hint;
 
   /// No description provided for @tmdb_section.
@@ -377,7 +377,7 @@ abstract class AppLocalizations {
   /// No description provided for @tmdb_section_hint.
   ///
   /// In en, this message translates to:
-  /// **'Optional: fills in the folder name from a title or an IMDb link.'**
+  /// **'Optional: fills in the folder name and its tmdbid tag from a title.'**
   String get tmdb_section_hint;
 
   /// No description provided for @server_host.
@@ -521,14 +521,8 @@ abstract class AppLocalizations {
   /// No description provided for @default_save_path.
   ///
   /// In en, this message translates to:
-  /// **'Emby library path'**
+  /// **'Emby library root'**
   String get default_save_path;
-
-  /// No description provided for @default_category.
-  ///
-  /// In en, this message translates to:
-  /// **'Default category'**
-  String get default_category;
 
   /// No description provided for @tmdb_token.
   ///
@@ -722,11 +716,11 @@ abstract class AppLocalizations {
   /// **'Also delete downloaded files'**
   String get delete_files_too;
 
-  /// No description provided for @torrent_added.
+  /// No description provided for @torrent_added_in.
   ///
   /// In en, this message translates to:
-  /// **'Download added'**
-  String get torrent_added;
+  /// **'Added to {destination}'**
+  String torrent_added_in(String destination);
 
   /// No description provided for @download_speed.
   ///
@@ -770,11 +764,29 @@ abstract class AppLocalizations {
   /// **'Names the folder so Emby identifies the media.'**
   String get search_title_hint;
 
-  /// No description provided for @imdb_id.
+  /// No description provided for @destination_hint.
   ///
   /// In en, this message translates to:
-  /// **'IMDb link or id'**
-  String get imdb_id;
+  /// **'Sets the qBittorrent category and the library folder.'**
+  String get destination_hint;
+
+  /// No description provided for @destination_movies.
+  ///
+  /// In en, this message translates to:
+  /// **'Movies'**
+  String get destination_movies;
+
+  /// No description provided for @destination_series.
+  ///
+  /// In en, this message translates to:
+  /// **'Series'**
+  String get destination_series;
+
+  /// No description provided for @destination_other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get destination_other;
 
   /// No description provided for @emby_folder.
   ///
@@ -785,7 +797,7 @@ abstract class AppLocalizations {
   /// No description provided for @emby_folder_hint.
   ///
   /// In en, this message translates to:
-  /// **'Emby matches on the Title (Year) [imdbid-tt...] form.'**
+  /// **'Emby matches on the Title (Year) [tmdbid=123456] form.'**
   String get emby_folder_hint;
 
   /// No description provided for @tmdb_not_configured.

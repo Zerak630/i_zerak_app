@@ -149,14 +149,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get emby_section_hint =>
-      'Dossier où qBittorrent dépose les téléchargements pour qu’Emby les indexe.';
+      'Racine contenant Films, Series et Autres, où qBittorrent dépose les téléchargements.';
 
   @override
   String get tmdb_section => 'TMDB';
 
   @override
   String get tmdb_section_hint =>
-      'Facultatif : complète le nom du dossier à partir d’un titre ou d’un lien IMDb.';
+      'Facultatif : complète le nom du dossier et son tag tmdbid à partir d’un titre.';
 
   @override
   String get server_host => 'Adresse du Raspberry Pi';
@@ -237,10 +237,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get agent_token_hint => 'Généré par install.sh sur le Pi.';
 
   @override
-  String get default_save_path => 'Chemin de la bibliothèque Emby';
-
-  @override
-  String get default_category => 'Catégorie par défaut';
+  String get default_save_path => 'Racine de la bibliothèque Emby';
 
   @override
   String get tmdb_token => 'Jeton TMDB';
@@ -350,7 +347,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get delete_files_too => 'Supprimer aussi les fichiers téléchargés';
 
   @override
-  String get torrent_added => 'Téléchargement ajouté';
+  String torrent_added_in(String destination) {
+    return 'Ajouté dans $destination';
+  }
 
   @override
   String get download_speed => 'Vitesse de réception';
@@ -375,14 +374,24 @@ class AppLocalizationsFr extends AppLocalizations {
       'Nomme le dossier pour qu’Emby identifie le média.';
 
   @override
-  String get imdb_id => 'Lien ou identifiant IMDb';
+  String get destination_hint =>
+      'Détermine la catégorie qBittorrent et le dossier de la bibliothèque.';
+
+  @override
+  String get destination_movies => 'Films';
+
+  @override
+  String get destination_series => 'Séries';
+
+  @override
+  String get destination_other => 'Autres';
 
   @override
   String get emby_folder => 'Dossier de destination';
 
   @override
   String get emby_folder_hint =>
-      'Emby reconnaît la forme Titre (Année) [imdbid-tt…].';
+      'Emby reconnaît la forme Titre (Année) [tmdbid=123456].';
 
   @override
   String get tmdb_not_configured =>

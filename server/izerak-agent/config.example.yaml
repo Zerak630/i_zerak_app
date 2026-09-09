@@ -32,6 +32,6 @@ services:
 # independant de la capacite reelle du disque : c'est lui que l'application
 # affiche, et c'est son depassement qui bloque l'ajout de telechargements.
 storage:
-  - path: /media/theo/NAS1
+  - path: /srv/nas1
     label: Disque Emby
     quota_bytes: 800000000000

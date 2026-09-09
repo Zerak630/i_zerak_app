@@ -32,8 +32,9 @@ class TmdbNetworkException extends TmdbException {
 ///
 /// TMDB plutot que l'API IMDb : cette derniere n'a pas d'acces public, elle
 /// n'est distribuee qu'aux entreprises via AWS Data Exchange. TMDB fournit une
-/// cle gratuite pour un usage personnel et expose l'identifiant IMDb via
-/// `/external_ids`, ce qui suffit a nommer les dossiers pour Emby.
+/// cle gratuite pour un usage personnel, et son identifiant figure deja dans le
+/// resultat de recherche : nommer un dossier pour Emby ne coute donc qu'une
+/// seule requete.
 ///
 /// La licence impose d'afficher une attribution TMDB dans l'application.
 class TmdbService {
@@ -114,15 +115,5 @@ class TmdbService {
         .map(MediaMatch.fromSearchJson)
         .whereType<MediaMatch>()
         .toList(growable: false);
-  }
-
-  /// Complete la correspondance avec son identifiant IMDb.
-  Future<MediaMatch> withImdbId(MediaMatch match) async {
-    final body = await _get('/3/${match.kind.apiPath}/${match.tmdbId}/external_ids', const {});
-    final imdbId = body['imdb_id'] as String?;
-    if (imdbId == null || imdbId.isEmpty) {
-      return match;
-    }
-    return match.copyWith(imdbId: imdbId);
   }
 }

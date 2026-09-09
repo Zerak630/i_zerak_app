@@ -5,10 +5,18 @@ import 'package:flutter/services.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/media_match_dao.dart';
 import 'package:i_zerak_app/models/server_config_dao.dart';
+import 'package:i_zerak_app/models/torrent_destination.dart';
 import 'package:i_zerak_app/services/tmdb/tmdb_service.dart';
 
 /// Ce que la feuille renvoie a la page appelante.
-typedef MagnetRequest = ({String magnet, String? savePath, String? category});
+///
+/// `destination` sert uniquement au message de confirmation ; tout le rangement
+/// est deja resolu dans `options`.
+typedef MagnetRequest = ({
+  String magnet,
+  TorrentDestination destination,
+  AddTorrentOptions options,
+});
 
 /// Reconnait un lien magnet ou une URL de fichier torrent.
 final RegExp magnetPattern = RegExp(
@@ -46,13 +54,23 @@ class _AddMagnetSheetState extends State<_AddMagnetSheet> {
   final _magnetController = TextEditingController();
   final _searchController = TextEditingController();
   final _folderController = TextEditingController();
-  final _imdbController = TextEditingController();
 
   Timer? _debounce;
   List<MediaMatch> _results = const [];
   MediaMatch? _selected;
   bool _searching = false;
   String? _searchError;
+
+  /// Choix explicite de l'utilisateur, qui l'emporte sur la deduction TMDB.
+  ///
+  /// Il est **collant** : selectionner un autre titre ensuite ne le remet pas a
+  /// zero. Le bouton segmente reste visible en permanence, l'etat est donc
+  /// lisible a tout moment, et un basculement automatique apres un choix
+  /// delibere serait une surprise silencieuse.
+  TorrentDestination? _destinationOverride;
+
+  TorrentDestination get _destination =>
+      _destinationOverride ?? TorrentDestination.fromKind(_selected?.kind);
 
   @override
   void initState() {
@@ -66,7 +84,6 @@ class _AddMagnetSheetState extends State<_AddMagnetSheet> {
     _magnetController.dispose();
     _searchController.dispose();
     _folderController.dispose();
-    _imdbController.dispose();
     super.dispose();
   }
 
@@ -128,41 +145,14 @@ class _AddMagnetSheetState extends State<_AddMagnetSheet> {
     }
   }
 
-  Future<void> _select(MediaMatch match) async {
+  /// Synchrone : l'identifiant TMDB figure deja dans le resultat de recherche,
+  /// il n'y a plus d'aller-retour reseau pour completer le nom de dossier.
+  void _select(MediaMatch match) {
     setState(() {
       _selected = match;
       _results = const [];
       _searchController.text = match.title;
       _folderController.text = match.embyFolderName();
-    });
-
-    try {
-      final enriched = await widget.tmdb.withImdbId(match);
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _selected = enriched;
-        _imdbController.text = enriched.imdbId ?? '';
-        _folderController.text = enriched.embyFolderName();
-      });
-    } on TmdbException catch (_) {
-      // Le titre et l'annee suffisent a Emby dans la majorite des cas ;
-      // l'identifiant reste saisissable a la main.
-    }
-  }
-
-  /// Applique un identifiant IMDb saisi manuellement, en acceptant aussi bien
-  /// une URL complete qu'un identifiant nu.
-  void _applyManualImdb(String raw) {
-    final id = extractImdbId(raw);
-    final selected = _selected;
-    if (id == null || selected == null) {
-      return;
-    }
-    setState(() {
-      _selected = selected.copyWith(imdbId: id);
-      _folderController.text = _selected!.embyFolderName();
     });
   }
 
@@ -171,31 +161,19 @@ class _AddMagnetSheetState extends State<_AddMagnetSheet> {
       return;
     }
 
-    final root = widget.config.defaultSavePath?.trim();
-    final folder = _folderController.text.trim();
-
-    String? savePath;
-    if (root != null && root.isNotEmpty) {
-      savePath = folder.isEmpty ? root : '${root.replaceAll(RegExp(r'/+$'), '')}/$folder';
-    }
-
+    final destination = _destination;
     Navigator.pop(context, (
       magnet: _magnetController.text.trim(),
-      savePath: savePath,
-      category: _categoryForSelection(),
+      destination: destination,
+      options: resolveAddOptions(
+        destination: destination,
+        basePath: destinationPath(
+          libraryRoot: widget.config.defaultSavePath,
+          destination: destination,
+        ),
+        folderName: _folderController.text.trim(),
+      ),
     ));
-  }
-
-  String? _categoryForSelection() {
-    final configured = widget.config.defaultCategory?.trim();
-    if (configured != null && configured.isNotEmpty) {
-      return configured;
-    }
-    return switch (_selected?.kind) {
-      MediaKind.movie => 'movies',
-      MediaKind.tv => 'series',
-      null => null,
-    };
   }
 
   @override
@@ -270,19 +248,8 @@ class _AddMagnetSheetState extends State<_AddMagnetSheet> {
                           ?.copyWith(color: Theme.of(context).colorScheme.error)),
                 ),
               if (_results.isNotEmpty) _resultsStrip(context),
-              if (_selected != null) ...[
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _imdbController,
-                  autocorrect: false,
-                  onChanged: _applyManualImdb,
-                  decoration: InputDecoration(
-                    labelText: l10n.imdb_id,
-                    hintText: 'tt1234567',
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-              ],
+              const SizedBox(height: 16),
+              _destinationPicker(context, l10n),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _folderController,
@@ -313,6 +280,40 @@ class _AddMagnetSheetState extends State<_AddMagnetSheet> {
       ),
     );
   }
+
+  /// Bouton segmente a trois valeurs, toujours visible.
+  ///
+  /// Pas d'icones : trois segments portant a la fois une icone et un libelle
+  /// debordent sur un ecran de 320 dp, et le libelle seul suffit.
+  Widget _destinationPicker(BuildContext context, AppLocalizations l10n) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SegmentedButton<TorrentDestination>(
+            segments: [
+              ButtonSegment(
+                  value: TorrentDestination.films, label: Text(l10n.destination_movies)),
+              ButtonSegment(
+                  value: TorrentDestination.series, label: Text(l10n.destination_series)),
+              ButtonSegment(
+                  value: TorrentDestination.autres, label: Text(l10n.destination_other)),
+            ],
+            selected: {_destination},
+            showSelectedIcon: false,
+            onSelectionChanged: (values) =>
+                setState(() => _destinationOverride = values.first),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              l10n.destination_hint,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+          ),
+        ],
+      );
 
   Widget _resultsStrip(BuildContext context) => SizedBox(
         height: 190,

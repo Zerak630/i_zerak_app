@@ -3,12 +3,8 @@
 ///
 /// Dart pur, sans import Flutter, pour rester testable avec `package:test`.
 enum MediaKind {
-  movie('movie'),
-  tv('tv');
-
-  const MediaKind(this.apiPath);
-
-  final String apiPath;
+  movie,
+  tv;
 
   static MediaKind? fromApi(String? raw) => switch (raw) {
         'movie' => movie,
@@ -24,7 +20,6 @@ class MediaMatch {
     required this.title,
     this.year,
     this.posterPath,
-    this.imdbId,
   });
 
   final int tmdbId;
@@ -32,9 +27,6 @@ class MediaMatch {
   final String title;
   final int? year;
   final String? posterPath;
-
-  /// Identifiant IMDb au format `tt1234567`, resolu via `/external_ids`.
-  final String? imdbId;
 
   /// `/search/multi` melange films, series et personnes. Renvoie null pour tout
   /// ce qui n'est pas un titre.
@@ -68,41 +60,36 @@ class MediaMatch {
     return int.tryParse(date.substring(0, 4));
   }
 
-  MediaMatch copyWith({String? imdbId}) => MediaMatch(
-        tmdbId: tmdbId,
-        kind: kind,
-        title: title,
-        year: year,
-        posterPath: posterPath,
-        imdbId: imdbId ?? this.imdbId,
-      );
-
-  String? get imdbUrl => imdbId == null ? null : 'https://www.imdb.com/title/$imdbId/';
-
-  /// Nom de dossier reconnu par Emby et Jellyfin.
+  /// Nom de dossier reconnu par Emby.
   ///
-  /// La forme `Titre (Annee) [imdbid-tt1234567]` force la correspondance et
-  /// evite les erreurs d'identification sur les titres ambigus, les remakes et
-  /// les traductions. C'est le vrai interet d'associer un identifiant IMDb au
-  /// telechargement.
+  /// La forme `Titre (Annee) [tmdbid=123456]` force la correspondance et evite
+  /// les erreurs d'identification sur les titres ambigus, les remakes et les
+  /// traductions.
+  ///
+  /// **Le signe egal n'est pas une coquille.** C'est la forme documentee par
+  /// Emby (`Casino Royale (2006) [tmdbid=36557]`) ; Jellyfin, lui, attend un
+  /// tiret. Ne pas « corriger » l'un en l'autre sans savoir lequel des deux
+  /// serveurs lit la bibliotheque.
+  ///
+  /// `tmdbId` n'etant jamais nul, le tag est toujours present : contrairement a
+  /// l'identifiant IMDb qu'il remplace, il ne demande aucun appel reseau
+  /// supplementaire, il est deja dans le resultat de recherche.
   String embyFolderName() {
     final buffer = StringBuffer(sanitizeForFileSystem(title));
     if (year != null) {
       buffer.write(' ($year)');
     }
-    if (imdbId != null && imdbId!.isNotEmpty) {
-      buffer.write(' [imdbid-$imdbId]');
-    }
+    buffer.write(' [tmdbid=$tmdbId]');
     return buffer.toString();
   }
 
   @override
-  String toString() => 'MediaMatch($tmdbId, ${kind.name}, $title, $year, $imdbId)';
+  String toString() => 'MediaMatch($tmdbId, ${kind.name}, $title, $year)';
 }
 
 /// Longueur retenue pour le seul titre : la plupart des systemes de fichiers
 /// plafonnent un composant de chemin a 255 octets, et le suffixe annee plus
-/// identifiant IMDb doit encore tenir.
+/// identifiant TMDB doit encore tenir.
 const int _maxTitleLength = 150;
 
 /// Rend un titre utilisable comme nom de dossier.
@@ -130,7 +117,3 @@ String sanitizeForFileSystem(String raw) {
 
   return value.isEmpty ? 'Sans titre' : value;
 }
-
-/// Extrait un identifiant IMDb d'une URL complete, d'un identifiant nu, ou de
-/// tout texte en contenant un.
-String? extractImdbId(String raw) => RegExp(r'tt\d{7,8}').firstMatch(raw)?.group(0);

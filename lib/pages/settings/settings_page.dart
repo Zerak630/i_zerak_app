@@ -40,7 +40,6 @@ class _SettingsPageState extends State<SettingsPage> {
   final _agentTokenController = TextEditingController();
   final _tmdbTokenController = TextEditingController();
   final _savePathController = TextEditingController();
-  final _categoryController = TextEditingController();
 
   ServerConfig _config = ServerConfig();
   bool _loading = true;
@@ -70,7 +69,6 @@ class _SettingsPageState extends State<SettingsPage> {
     _agentTokenController.dispose();
     _tmdbTokenController.dispose();
     _savePathController.dispose();
-    _categoryController.dispose();
     super.dispose();
   }
 
@@ -94,7 +92,6 @@ class _SettingsPageState extends State<SettingsPage> {
       _agentTokenController.text = agentToken ?? '';
       _tmdbTokenController.text = tmdbToken ?? '';
       _savePathController.text = config.defaultSavePath ?? '';
-      _categoryController.text = config.defaultCategory ?? '';
       _loading = false;
     });
   }
@@ -108,7 +105,6 @@ class _SettingsPageState extends State<SettingsPage> {
         agentPort: int.tryParse(_agentPortController.text) ?? _config.agentPort,
         username: _usernameController.text.trim(),
         defaultSavePath: _savePathController.text.trim(),
-        defaultCategory: _categoryController.text.trim(),
       );
 
   String _messageFor(BuildContext context, QbException error) {
@@ -494,12 +490,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
           ),
-          TextFormField(
-            controller: _categoryController,
-            autocorrect: false,
-            decoration: InputDecoration(
-                labelText: l10n.default_category, border: const OutlineInputBorder()),
-          ),
           DropdownButtonFormField<int>(
             initialValue: _config.pollIntervalSeconds,
             decoration:
@@ -552,7 +542,7 @@ class _SettingsPageState extends State<SettingsPage> {
             autocorrect: false,
             decoration: InputDecoration(
               labelText: l10n.default_save_path,
-              hintText: '/media/theo/NAS1/done',
+              hintText: '/srv/nas1/Emby',
               border: const OutlineInputBorder(),
             ),
           ),

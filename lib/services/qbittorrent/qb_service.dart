@@ -149,7 +149,25 @@ class QbService {
     return (torrents: torrentList, transfer: transfer);
   }
 
-  Future<void> addMagnet(String magnet, {String? savePath, String? category}) async {
+  /// Ajoute un magnet, ou une URL de fichier torrent.
+  ///
+  /// `autoTmm` et `createSubfolder` sont **nullables a dessein** : cote
+  /// qBittorrent, `autoTMM` et `root_folder` sont des tri-etats, et un champ
+  /// absent laisse le reglage de session decider. Envoyer `false` par defaut
+  /// « pour faire propre » changerait le comportement du serveur.
+  ///
+  /// L'inverse est tout aussi vrai : quand on fournit un `savePath`, il faut
+  /// envoyer `autoTMM=false` explicitement. Un serveur regle en gestion
+  /// automatique ignore sinon `savepath` **en silence**, au profit du chemin de
+  /// la categorie. Voir `resolveAddOptions` dans `torrent_destination.dart`,
+  /// qui est le seul endroit ou cette decision se prend.
+  Future<void> addMagnet(
+    String magnet, {
+    String? savePath,
+    String? category,
+    bool? autoTmm,
+    bool? createSubfolder,
+  }) async {
     final client = await _resolve();
     final fields = <String, String>{'urls': magnet};
     if (savePath != null && savePath.isNotEmpty) {
@@ -157,6 +175,16 @@ class QbService {
     }
     if (category != null && category.isNotEmpty) {
       fields['category'] = category;
+    }
+    if (autoTmm != null) {
+      fields['autoTMM'] = autoTmm ? 'true' : 'false';
+    }
+    if (createSubfolder != null) {
+      // `root_folder` est le nom du champ jusqu'a qBittorrent 4.3.1 ; le Pi
+      // tourne en 4.2.5, verifie sur le binaire installe. Les versions plus
+      // recentes lisent `contentLayout` a la place et ignorent silencieusement
+      // les champs qu'elles ne connaissent pas.
+      fields['root_folder'] = createSubfolder ? 'true' : 'false';
     }
     await client.postMultipart('torrents/add', fields);
   }

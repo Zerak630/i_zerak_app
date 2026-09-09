@@ -25,13 +25,15 @@ class ServerConfig {
   @HiveField(4)
   int pollIntervalSeconds;
 
-  /// Racine de la bibliotheque Emby sur le serveur, ou seront deposes les
-  /// telechargements.
+  /// Racine de la bibliotheque Emby sur le serveur, celle qui contient `Films/`,
+  /// `Series/` et `Autres/`. Ce n'est plus un dossier de depot : la destination
+  /// choisie a l'ajout y ajoute son propre segment.
   @HiveField(5)
   String? defaultSavePath;
 
-  @HiveField(6)
-  String? defaultCategory;
+  // Le champ 6 portait `defaultCategory`, retire quand le choix Films / Series /
+  // Autres est passe dans la feuille d'ajout : une categorie unique ecrasait ce
+  // choix. Le numero 6 est **brule** et ne doit jamais etre reattribue.
 
   /// Empreinte SHA-256 du certificat accepte, au format hexadecimal minuscule.
   /// Nulle tant qu'aucun certificat n'a ete approuve.
@@ -48,7 +50,6 @@ class ServerConfig {
     this.username = '',
     this.pollIntervalSeconds = 3,
     this.defaultSavePath,
-    this.defaultCategory,
     this.pinnedCertSha256,
     this.agentPort = 8081,
   });
@@ -96,7 +97,6 @@ class ServerConfig {
     String? username,
     int? pollIntervalSeconds,
     String? defaultSavePath,
-    String? defaultCategory,
     String? pinnedCertSha256,
     int? agentPort,
     bool clearPinnedCert = false,
@@ -108,7 +108,6 @@ class ServerConfig {
         username: username ?? this.username,
         pollIntervalSeconds: pollIntervalSeconds ?? this.pollIntervalSeconds,
         defaultSavePath: defaultSavePath ?? this.defaultSavePath,
-        defaultCategory: defaultCategory ?? this.defaultCategory,
         pinnedCertSha256: clearPinnedCert ? null : (pinnedCertSha256 ?? this.pinnedCertSha256),
         agentPort: agentPort ?? this.agentPort,
       );

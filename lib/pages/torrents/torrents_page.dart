@@ -5,6 +5,7 @@ import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/agent_dao.dart';
 import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/models/torrent_dao.dart';
+import 'package:i_zerak_app/models/torrent_destination.dart';
 import 'package:i_zerak_app/models/transfer_info_dao.dart';
 import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/pages/torrents/widgets/add_magnet_sheet.dart';
@@ -289,14 +290,22 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
     try {
       await _service.addMagnet(
         request.magnet,
-        savePath: request.savePath,
-        category: request.category,
+        savePath: request.options.savePath,
+        category: request.options.category,
+        autoTmm: request.options.autoTmm,
+        createSubfolder: request.options.createSubfolder,
       );
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.torrent_added)));
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(l10n.torrent_added_in(switch (request.destination) {
+          TorrentDestination.films => l10n.destination_movies,
+          TorrentDestination.series => l10n.destination_series,
+          TorrentDestination.autres => l10n.destination_other,
+        })),
+      ));
       await _refresh();
     } on QbException catch (error) {
       if (!mounted) {

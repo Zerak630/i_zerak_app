@@ -18,6 +18,8 @@ import 'package:i_zerak_app/models/subscription_dao.dart';
 ///
 /// Identifiants de type deja pris : 0 `Subscription`, 1 `SubscriptionFrequency`,
 /// 2 `ServerConfig`. Un identifiant libere ne doit jamais etre reattribue.
+///
+/// Numeros de champ brules : `ServerConfig` 6, qui portait `defaultCategory`.
 
 class SubscriptionTypeAdapter extends TypeAdapter<Subscription> {
   @override
@@ -129,7 +131,9 @@ class ServerConfigTypeAdapter extends TypeAdapter<ServerConfig> {
       username: fields[3] as String? ?? '',
       pollIntervalSeconds: fields[4] as int? ?? 3,
       defaultSavePath: fields[5] as String?,
-      defaultCategory: fields[6] as String?,
+      // Le champ 6 portait `defaultCategory`. Les enregistrements anterieurs le
+      // contiennent encore : il est lu dans la map, puis ignore. Le numero est
+      // brule, ne jamais le reattribuer.
       pinnedCertSha256: fields[7] as String?,
       agentPort: fields[8] as int? ?? 8081,
     );
@@ -138,7 +142,9 @@ class ServerConfigTypeAdapter extends TypeAdapter<ServerConfig> {
   @override
   void write(BinaryWriter writer, ServerConfig obj) {
     writer
-      ..writeByte(9)
+      // Doit valoir exactement le nombre de paires ecrites ci-dessous. Une
+      // erreur ici ne leve aucune exception : elle corrompt a la relecture.
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.host)
       ..writeByte(1)
@@ -151,8 +157,6 @@ class ServerConfigTypeAdapter extends TypeAdapter<ServerConfig> {
       ..write(obj.pollIntervalSeconds)
       ..writeByte(5)
       ..write(obj.defaultSavePath)
-      ..writeByte(6)
-      ..write(obj.defaultCategory)
       ..writeByte(7)
       ..write(obj.pinnedCertSha256)
       ..writeByte(8)
