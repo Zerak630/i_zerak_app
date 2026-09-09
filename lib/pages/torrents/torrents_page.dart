@@ -79,12 +79,27 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
 
   Future<void> _bootstrap() async {
     _config = await _configRepository.read();
+    // Chaque attente est un point ou l'utilisateur peut changer d'onglet, ce qui
+    // detruit cette page. Sans ces gardes, la suite s'executait malgre tout et
+    // _startPolling armait un minuteur sur un State deja dispose : plus
+    // personne ne pouvait l'annuler, et il interrogeait le serveur toutes les
+    // trois secondes jusqu'a la fermeture de l'application.
+    if (!mounted) {
+      return;
+    }
     await _refresh();
+    if (!mounted) {
+      return;
+    }
     _startPolling();
   }
 
   void _startPolling() {
     _timer?.cancel();
+    _timer = null;
+    if (!mounted) {
+      return;
+    }
     final seconds = _config?.pollIntervalSeconds ?? 0;
     if (seconds <= 0) {
       return;

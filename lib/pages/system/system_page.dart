@@ -64,12 +64,25 @@ class _SystemPageState extends State<SystemPage> with WidgetsBindingObserver {
 
   Future<void> _bootstrap() async {
     _config = await _configRepository.read();
+    // Voir la note de TorrentsPage : sans ces gardes, un changement d'onglet
+    // pendant l'attente laissait derriere lui un minuteur orphelin, impossible
+    // a annuler puisque le State qui le detenait etait deja dispose.
+    if (!mounted) {
+      return;
+    }
     await _refresh();
+    if (!mounted) {
+      return;
+    }
     _startPolling();
   }
 
   void _startPolling() {
     _timer?.cancel();
+    _timer = null;
+    if (!mounted) {
+      return;
+    }
     // Les metriques materielles evoluent lentement : inutile de suivre la
     // cadence du suivi des torrents.
     final seconds = (_config?.pollIntervalSeconds ?? 0) <= 0 ? 0 : 10;
