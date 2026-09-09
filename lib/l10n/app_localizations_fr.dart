@@ -96,6 +96,56 @@ class AppLocalizationsFr extends AppLocalizations {
   String get gas_title => 'Stations essences';
 
   @override
+  String get gas_add_station => 'Ajouter une station';
+
+  @override
+  String get gas_search_field => 'Ville ou code postal';
+
+  @override
+  String get gas_search_hint => 'Exemple : Angers, ou 49100';
+
+  @override
+  String get gas_no_result => 'Aucune station trouvée';
+
+  @override
+  String get gas_no_station => 'Aucune station suivie';
+
+  @override
+  String get gas_no_station_hint => 'Ajoutez-en une avec le bouton +';
+
+  @override
+  String get gas_already_saved => 'Déjà suivie';
+
+  @override
+  String get gas_price_unknown => 'Prix inconnu';
+
+  @override
+  String gas_prices_shown(String fuel) {
+    return 'Prix affichés : $fuel';
+  }
+
+  @override
+  String get fuel_gazole => 'Gazole';
+
+  @override
+  String get fuel_sp95 => 'SP95';
+
+  @override
+  String get fuel_sp98 => 'SP98';
+
+  @override
+  String get fuel_e10 => 'E10';
+
+  @override
+  String get fuel_e85 => 'E85';
+
+  @override
+  String get fuel_gplc => 'GPLc';
+
+  @override
+  String get gas_unreachable => 'Données carburants injoignables';
+
+  @override
   String get no_subscription => 'Aucun abonnement';
 
   @override

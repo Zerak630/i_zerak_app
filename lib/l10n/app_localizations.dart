@@ -272,6 +272,102 @@ abstract class AppLocalizations {
   /// **'Gas stations'**
   String get gas_title;
 
+  /// No description provided for @gas_add_station.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a station'**
+  String get gas_add_station;
+
+  /// No description provided for @gas_search_field.
+  ///
+  /// In en, this message translates to:
+  /// **'City or postcode'**
+  String get gas_search_field;
+
+  /// No description provided for @gas_search_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: Angers, or 49100'**
+  String get gas_search_hint;
+
+  /// No description provided for @gas_no_result.
+  ///
+  /// In en, this message translates to:
+  /// **'No station found'**
+  String get gas_no_result;
+
+  /// No description provided for @gas_no_station.
+  ///
+  /// In en, this message translates to:
+  /// **'No station followed yet'**
+  String get gas_no_station;
+
+  /// No description provided for @gas_no_station_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add one with the + button'**
+  String get gas_no_station_hint;
+
+  /// No description provided for @gas_already_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Already followed'**
+  String get gas_already_saved;
+
+  /// No description provided for @gas_price_unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Price unknown'**
+  String get gas_price_unknown;
+
+  /// No description provided for @gas_prices_shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices shown: {fuel}'**
+  String gas_prices_shown(String fuel);
+
+  /// No description provided for @fuel_gazole.
+  ///
+  /// In en, this message translates to:
+  /// **'Diesel'**
+  String get fuel_gazole;
+
+  /// No description provided for @fuel_sp95.
+  ///
+  /// In en, this message translates to:
+  /// **'SP95'**
+  String get fuel_sp95;
+
+  /// No description provided for @fuel_sp98.
+  ///
+  /// In en, this message translates to:
+  /// **'SP98'**
+  String get fuel_sp98;
+
+  /// No description provided for @fuel_e10.
+  ///
+  /// In en, this message translates to:
+  /// **'E10'**
+  String get fuel_e10;
+
+  /// No description provided for @fuel_e85.
+  ///
+  /// In en, this message translates to:
+  /// **'E85'**
+  String get fuel_e85;
+
+  /// No description provided for @fuel_gplc.
+  ///
+  /// In en, this message translates to:
+  /// **'LPG'**
+  String get fuel_gplc;
+
+  /// No description provided for @gas_unreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel price service unreachable'**
+  String get gas_unreachable;
+
   /// No description provided for @no_subscription.
   ///
   /// In en, this message translates to:

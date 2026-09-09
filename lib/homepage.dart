@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:i_zerak_app/pages/gas_station_page.dart';
+import 'package:i_zerak_app/pages/gas_stations/gas_station_page.dart';
 import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/pages/torrents/torrents_page.dart';
 import 'package:i_zerak_app/pages/subscriptions/subscriptions.dart';

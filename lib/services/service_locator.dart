@@ -5,10 +5,12 @@ import 'package:i_zerak_app/services/agent/agent_service.dart';
 import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/models/subscription_dao.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
+import 'package:i_zerak_app/services/repositories/hive/hive_gas_station_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_server_config_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_subscription_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/type_adapters.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_credentials.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_gas_stations.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_server_config.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
 import 'package:i_zerak_app/services/repositories/secure/secure_credentials_store.dart';
@@ -38,6 +40,12 @@ Future<void> setupServiceLocator() async {
 
   getIt.registerSingleton<IServerConfig>(
       HiveServerConfigRepository(await Hive.openBox<ServerConfig>('server_config')));
+
+  // Boite de chaines primitives, sans TypeAdapter : les stations favorites ne
+  // sont qu'un identifiant et un libelle (cf. HiveGasStationRepository).
+  final gasStations = HiveGasStationRepository(await Hive.openBox<String>('gas_stations'));
+  await gasStations.seedLegacyStationsIfEmpty();
+  getIt.registerSingleton<IGasStations>(gasStations);
 
   getIt.registerLazySingleton<ICredentials>(() => const SecureCredentialsStore());
 

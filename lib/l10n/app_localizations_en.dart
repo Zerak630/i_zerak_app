@@ -96,6 +96,56 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gas_title => 'Gas stations';
 
   @override
+  String get gas_add_station => 'Add a station';
+
+  @override
+  String get gas_search_field => 'City or postcode';
+
+  @override
+  String get gas_search_hint => 'For example: Angers, or 49100';
+
+  @override
+  String get gas_no_result => 'No station found';
+
+  @override
+  String get gas_no_station => 'No station followed yet';
+
+  @override
+  String get gas_no_station_hint => 'Add one with the + button';
+
+  @override
+  String get gas_already_saved => 'Already followed';
+
+  @override
+  String get gas_price_unknown => 'Price unknown';
+
+  @override
+  String gas_prices_shown(String fuel) {
+    return 'Prices shown: $fuel';
+  }
+
+  @override
+  String get fuel_gazole => 'Diesel';
+
+  @override
+  String get fuel_sp95 => 'SP95';
+
+  @override
+  String get fuel_sp98 => 'SP98';
+
+  @override
+  String get fuel_e10 => 'E10';
+
+  @override
+  String get fuel_e85 => 'E85';
+
+  @override
+  String get fuel_gplc => 'LPG';
+
+  @override
+  String get gas_unreachable => 'Fuel price service unreachable';
+
+  @override
   String get no_subscription => 'No subscription yet';
 
   @override
