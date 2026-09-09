@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/server_config_dao.dart';
+import 'package:i_zerak_app/services/agent/agent_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_exceptions.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_credentials.dart';
@@ -9,8 +10,13 @@ import 'package:i_zerak_app/services/service_locator.dart';
 
 enum _TestState { idle, running, ok, failed }
 
-/// Reglages du serveur auto-heberge : connexion qBittorrent, agent de
-/// supervision du Raspberry Pi et destination Emby.
+/// Reglages du serveur auto-heberge.
+///
+/// L'ecran est decoupe par service et non par type de champ : une carte par
+/// interlocuteur, chacune avec son port, ses identifiants et son propre test de
+/// connexion. Seule la premiere carte est commune, parce que qBittorrent,
+/// l'agent et Emby vivent sur la meme machine et partagent donc l'adresse, le
+/// schema et le certificat epingle.
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -22,6 +28,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final IServerConfig _configRepository = getIt<IServerConfig>();
   final ICredentials _credentials = getIt<ICredentials>();
   final QbService _qbService = getIt<QbService>();
+  final AgentService _agentService = getIt<AgentService>();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -37,9 +44,15 @@ class _SettingsPageState extends State<SettingsPage> {
 
   ServerConfig _config = ServerConfig();
   bool _loading = true;
+  bool _saving = false;
   bool _obscurePassword = true;
-  _TestState _testState = _TestState.idle;
-  String? _testMessage;
+
+  // Chaque service porte son propre verdict : savoir que qBittorrent repond ne
+  // dit rien de l'agent, et confondre les deux masquait la moitie des pannes.
+  _TestState _qbState = _TestState.idle;
+  String? _qbMessage;
+  _TestState _agentState = _TestState.idle;
+  String? _agentMessage;
 
   @override
   void initState() {
@@ -87,8 +100,8 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   /// Construit la configuration a partir des champs courants, sans
-  /// l'enregistrer : le test de connexion doit pouvoir porter sur une saisie
-  /// non encore validee.
+  /// l'enregistrer : les tests de connexion doivent porter sur une saisie non
+  /// encore validee.
   ServerConfig _draft() => _config.copyWith(
         host: _hostController.text.trim(),
         port: int.tryParse(_portController.text) ?? _config.port,
@@ -114,13 +127,15 @@ class _SettingsPageState extends State<SettingsPage> {
     };
   }
 
-  Future<void> _testConnection() async {
+  // --- Tests de connexion ---------------------------------------------------
+
+  Future<void> _testQbittorrent() async {
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
     setState(() {
-      _testState = _TestState.running;
-      _testMessage = null;
+      _qbState = _TestState.running;
+      _qbMessage = null;
     });
 
     final draft = _draft();
@@ -131,38 +146,92 @@ class _SettingsPageState extends State<SettingsPage> {
       }
       setState(() {
         _config = draft;
-        _testState = _TestState.ok;
-        _testMessage = AppLocalizations.of(context)!.connection_ok(version);
+        _qbState = _TestState.ok;
+        _qbMessage = AppLocalizations.of(context)!.connection_ok(version);
       });
     } on QbCertificateException catch (error) {
-      if (!mounted) {
-        return;
-      }
-      final fingerprint = error.presentedFingerprint;
-      if (fingerprint != null && await _confirmCertificate(fingerprint)) {
-        if (!mounted) {
-          return;
-        }
-        setState(() => _config = draft.copyWith(pinnedCertSha256: fingerprint));
-        await _testConnection();
+      if (await _adoptCertificate(error, draft)) {
+        await _testQbittorrent();
         return;
       }
       if (!mounted) {
         return;
       }
       setState(() {
-        _testState = _TestState.failed;
-        _testMessage = _messageFor(context, error);
+        _qbState = _TestState.failed;
+        _qbMessage = _messageFor(context, error);
       });
     } on QbException catch (error) {
       if (!mounted) {
         return;
       }
       setState(() {
-        _testState = _TestState.failed;
-        _testMessage = _messageFor(context, error);
+        _qbState = _TestState.failed;
+        _qbMessage = _messageFor(context, error);
       });
     }
+  }
+
+  Future<void> _testAgent() async {
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
+    setState(() {
+      _agentState = _TestState.running;
+      _agentMessage = null;
+    });
+
+    final draft = _draft();
+    try {
+      final version = await _agentService.testConnection(draft, _agentTokenController.text);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _config = draft;
+        _agentState = _TestState.ok;
+        _agentMessage = AppLocalizations.of(context)!.agent_ok(version);
+      });
+    } on QbCertificateException catch (error) {
+      if (await _adoptCertificate(error, draft)) {
+        await _testAgent();
+        return;
+      }
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _agentState = _TestState.failed;
+        _agentMessage = _messageFor(context, error);
+      });
+    } on QbException catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _agentState = _TestState.failed;
+        _agentMessage = _messageFor(context, error);
+      });
+    }
+  }
+
+  /// Propose d'adopter le certificat presente et retourne vrai s'il l'a ete.
+  ///
+  /// Partage par les deux tests : les deux services sont derriere le meme
+  /// certificat, et l'empreinte approuvee depuis l'un vaut pour l'autre.
+  Future<bool> _adoptCertificate(QbCertificateException error, ServerConfig draft) async {
+    final fingerprint = error.presentedFingerprint;
+    if (fingerprint == null || !mounted) {
+      return false;
+    }
+    if (!await _confirmCertificate(fingerprint)) {
+      return false;
+    }
+    if (!mounted) {
+      return false;
+    }
+    setState(() => _config = draft.copyWith(pinnedCertSha256: fingerprint));
+    return true;
   }
 
   /// Demande l'adoption explicite d'un certificat inconnu.
@@ -208,29 +277,58 @@ class _SettingsPageState extends State<SettingsPage> {
     return pairs.join(':');
   }
 
+  // --- Enregistrement -------------------------------------------------------
+
   Future<void> _save() async {
-    if (!(_formKey.currentState?.validate() ?? false)) {
+    if (_saving || !(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
+    setState(() => _saving = true);
+
+    final config = _draft();
+    try {
+      await _configRepository.save(config);
+      await _writeOrDelete(SecretKey.qbPassword, _passwordController.text);
+      await _writeOrDelete(SecretKey.agentToken, _agentTokenController.text);
+      await _writeOrDelete(SecretKey.tmdbToken, _tmdbTokenController.text);
+
+      // Relecture depuis le depot, et non depuis la memoire : c'est le seul
+      // moyen de distinguer une ecriture reellement persistee d'une valeur
+      // simplement gardee en cache. Une configuration perdue au redemarrage
+      // suivant est le pire des silences.
+      final stored = await _configRepository.read();
+      if (stored == null || stored.host != config.host || stored.port != config.port) {
+        throw StateError('la configuration relue ne correspond pas a celle ecrite');
+      }
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(AppLocalizations.of(context)!.settings_save_failed(error.toString())),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ));
       return;
     }
 
-    final config = _draft();
-    await _configRepository.save(config);
-    await _writeOrDelete(SecretKey.qbPassword, _passwordController.text);
-    await _writeOrDelete(SecretKey.agentToken, _agentTokenController.text);
-    await _writeOrDelete(SecretKey.tmdbToken, _tmdbTokenController.text);
-
-    // Sans cela, le service continuerait de parler a l'ancien hote avec
-    // l'ancienne session.
+    // Sans cela, les services continueraient de parler a l'ancien hote avec
+    // l'ancienne session et l'ancien jeton.
     _qbService.invalidate();
+    _agentService.invalidate();
 
     if (!mounted) {
       return;
     }
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.settings_saved)));
     Navigator.pop(context, true);
   }
 
   Future<void> _writeOrDelete(SecretKey key, String value) =>
       value.isEmpty ? _credentials.delete(key) : _credentials.write(key, value);
+
+  // --- Interface ------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -243,142 +341,287 @@ class _SettingsPageState extends State<SettingsPage> {
           : Form(
               key: _formKey,
               child: ListView(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                 children: [
-                  _sectionTitle(context, l10n.server_section),
-                  TextFormField(
-                    controller: _hostController,
-                    decoration: InputDecoration(
-                      labelText: l10n.server_host,
-                      hintText: 'nas.lan',
-                      border: const OutlineInputBorder(),
-                    ),
-                    autocorrect: false,
-                    validator: (value) =>
-                        (value == null || value.trim().isEmpty) ? l10n.please_enter_a_host : null,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(child: _portField(_portController, l10n.server_port, l10n)),
-                      const SizedBox(width: 12),
-                      Expanded(child: _portField(_agentPortController, l10n.agent_port, l10n)),
-                    ],
-                  ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.use_https),
-                    subtitle: Text(_config.useHttps
-                        ? l10n.use_https_on_hint
-                        : l10n.use_https_off_hint),
-                    value: _config.useHttps,
-                    onChanged: (value) => setState(() {
-                      // Changer de schema invalide le certificat approuve.
-                      _config = _config.copyWith(useHttps: value, clearPinnedCert: !value);
-                    }),
-                  ),
-                  if (_config.useHttps && _draft().hostIsRawIpv4)
-                    _warning(context, l10n.warning_raw_ip_certificate),
-                  if (!_config.useHttps) _warning(context, l10n.warning_cleartext_blocked),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _usernameController,
-                    autocorrect: false,
-                    decoration: InputDecoration(
-                        labelText: l10n.username, border: const OutlineInputBorder()),
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    decoration: InputDecoration(
-                      labelText: l10n.password,
-                      border: const OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<int>(
-                    initialValue: _config.pollIntervalSeconds,
-                    decoration: InputDecoration(
-                        labelText: l10n.poll_interval, border: const OutlineInputBorder()),
-                    items: const [0, 2, 3, 5, 10]
-                        .map((seconds) => DropdownMenuItem<int>(
-                              value: seconds,
-                              child: Text(seconds == 0 ? l10n.poll_interval_manual : '$seconds s'),
-                            ))
-                        .toList(),
-                    onChanged: (value) => setState(
-                        () => _config = _config.copyWith(pollIntervalSeconds: value ?? 3)),
-                  ),
+                  _piCard(context, l10n),
                   const SizedBox(height: 16),
-                  _testButton(context, l10n),
-                  if (_testMessage != null) _testFeedback(context),
-                  const Divider(height: 32),
-                  _sectionTitle(context, l10n.agent_section),
-                  TextFormField(
-                    controller: _agentTokenController,
-                    obscureText: true,
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    decoration: InputDecoration(
-                      labelText: l10n.agent_token,
-                      helperText: l10n.agent_token_hint,
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                  const Divider(height: 32),
-                  _sectionTitle(context, l10n.advanced_section),
-                  TextFormField(
-                    controller: _savePathController,
-                    autocorrect: false,
-                    decoration: InputDecoration(
-                      labelText: l10n.default_save_path,
-                      hintText: '/mnt/media/films',
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _categoryController,
-                    autocorrect: false,
-                    decoration: InputDecoration(
-                        labelText: l10n.default_category, border: const OutlineInputBorder()),
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _tmdbTokenController,
-                    obscureText: true,
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    decoration: InputDecoration(
-                      labelText: l10n.tmdb_token,
-                      helperText: l10n.tmdb_token_hint,
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(l10n.tmdb_attribution,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                  _qbittorrentCard(context, l10n),
+                  const SizedBox(height: 16),
+                  _agentCard(context, l10n),
+                  const SizedBox(height: 16),
+                  _embyCard(context, l10n),
+                  const SizedBox(height: 16),
+                  _tmdbCard(context, l10n),
                   const SizedBox(height: 24),
-                  FilledButton(onPressed: _save, child: Text(l10n.save)),
-                  const SizedBox(height: 32),
+                  FilledButton.icon(
+                    onPressed: _saving ? null : _save,
+                    icon: _saving
+                        ? const SizedBox(
+                            width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.save_outlined),
+                    label: Text(l10n.save),
+                  ),
                 ],
               ),
             ),
     );
   }
 
-  Widget _sectionTitle(BuildContext context, String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 12.0),
-        child: Text(text, style: Theme.of(context).textTheme.titleMedium),
+  /// Ce qui est commun aux trois services : ils tournent sur la meme machine.
+  Widget _piCard(BuildContext context, AppLocalizations l10n) => _card(
+        context,
+        icon: Icons.developer_board,
+        title: l10n.pi_section,
+        hint: l10n.pi_section_hint,
+        children: [
+          TextFormField(
+            controller: _hostController,
+            decoration: InputDecoration(
+              labelText: l10n.server_host,
+              hintText: 'raspberrypi.local',
+              border: const OutlineInputBorder(),
+            ),
+            autocorrect: false,
+            keyboardType: TextInputType.url,
+            validator: (value) =>
+                (value == null || value.trim().isEmpty) ? l10n.please_enter_a_host : null,
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.use_https),
+            subtitle: Text(_config.useHttps ? l10n.use_https_on_hint : l10n.use_https_off_hint),
+            value: _config.useHttps,
+            onChanged: (value) => setState(() {
+              // Changer de schema invalide le certificat approuve.
+              _config = _config.copyWith(useHttps: value, clearPinnedCert: !value);
+              _qbState = _TestState.idle;
+              _agentState = _TestState.idle;
+            }),
+          ),
+          if (_config.useHttps && _draft().hostIsRawIpv4)
+            _warning(context, l10n.warning_raw_ip_certificate),
+          if (!_config.useHttps) _warning(context, l10n.warning_cleartext_blocked),
+          if (_config.useHttps) _certificateRow(context, l10n),
+        ],
       );
+
+  /// Etat de l'epinglage, avec la possibilite de repartir de zero.
+  ///
+  /// Indispensable le jour ou le certificat du Pi est regenere : sans ce
+  /// bouton, l'application refuserait la nouvelle empreinte sans jamais
+  /// proposer de l'adopter.
+  Widget _certificateRow(BuildContext context, AppLocalizations l10n) {
+    final pinned = _config.pinnedCertSha256;
+    final theme = Theme.of(context);
+    // Les huit premiers octets suffisent a reconnaitre une empreinte deja
+    // comparee ; les afficher en entier noierait le reste de la carte.
+    const shortLength = 8 * 3 - 1;
+
+    if (pinned == null) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 8.0),
+        child: Text(
+          l10n.certificate_none,
+          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.verified_user, size: 18, color: theme.colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.certificate_pinned, style: theme.textTheme.bodySmall),
+                Builder(builder: (context) {
+                  final grouped = _groupFingerprint(pinned);
+                  return Text(
+                    grouped.length <= shortLength
+                        ? grouped
+                        : '${grouped.substring(0, shortLength)}…',
+                    style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+                  );
+                }),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: () => setState(() {
+              _config = _config.copyWith(clearPinnedCert: true);
+              _qbState = _TestState.idle;
+              _agentState = _TestState.idle;
+            }),
+            child: Text(l10n.certificate_forget),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _qbittorrentCard(BuildContext context, AppLocalizations l10n) => _card(
+        context,
+        icon: Icons.download,
+        title: l10n.qbittorrent_section,
+        hint: l10n.qbittorrent_section_hint,
+        children: [
+          _portField(_portController, l10n.server_port, l10n),
+          TextFormField(
+            controller: _usernameController,
+            autocorrect: false,
+            decoration:
+                InputDecoration(labelText: l10n.username, border: const OutlineInputBorder()),
+          ),
+          TextFormField(
+            controller: _passwordController,
+            obscureText: _obscurePassword,
+            autocorrect: false,
+            enableSuggestions: false,
+            decoration: InputDecoration(
+              labelText: l10n.password,
+              border: const OutlineInputBorder(),
+              suffixIcon: IconButton(
+                icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+              ),
+            ),
+          ),
+          TextFormField(
+            controller: _categoryController,
+            autocorrect: false,
+            decoration: InputDecoration(
+                labelText: l10n.default_category, border: const OutlineInputBorder()),
+          ),
+          DropdownButtonFormField<int>(
+            initialValue: _config.pollIntervalSeconds,
+            decoration:
+                InputDecoration(labelText: l10n.poll_interval, border: const OutlineInputBorder()),
+            items: const [0, 2, 3, 5, 10]
+                .map((seconds) => DropdownMenuItem<int>(
+                      value: seconds,
+                      child: Text(seconds == 0 ? l10n.poll_interval_manual : '$seconds s'),
+                    ))
+                .toList(),
+            onChanged: (value) =>
+                setState(() => _config = _config.copyWith(pollIntervalSeconds: value ?? 3)),
+          ),
+          _testButton(context, l10n.test_connection, _qbState, _testQbittorrent),
+          if (_qbMessage != null) _testFeedback(context, _qbMessage!, _qbState),
+        ],
+      );
+
+  Widget _agentCard(BuildContext context, AppLocalizations l10n) => _card(
+        context,
+        icon: Icons.memory,
+        title: l10n.agent_section,
+        hint: l10n.agent_section_hint,
+        children: [
+          _portField(_agentPortController, l10n.agent_port, l10n),
+          TextFormField(
+            controller: _agentTokenController,
+            obscureText: true,
+            autocorrect: false,
+            enableSuggestions: false,
+            decoration: InputDecoration(
+              labelText: l10n.agent_token,
+              helperText: l10n.agent_token_hint,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          _testButton(context, l10n.test_agent, _agentState, _testAgent),
+          if (_agentMessage != null) _testFeedback(context, _agentMessage!, _agentState),
+        ],
+      );
+
+  Widget _embyCard(BuildContext context, AppLocalizations l10n) => _card(
+        context,
+        icon: Icons.movie_outlined,
+        title: l10n.emby_section,
+        hint: l10n.emby_section_hint,
+        children: [
+          TextFormField(
+            controller: _savePathController,
+            autocorrect: false,
+            decoration: InputDecoration(
+              labelText: l10n.default_save_path,
+              hintText: '/media/theo/NAS1/done',
+              border: const OutlineInputBorder(),
+            ),
+          ),
+        ],
+      );
+
+  Widget _tmdbCard(BuildContext context, AppLocalizations l10n) => _card(
+        context,
+        icon: Icons.local_movies_outlined,
+        title: l10n.tmdb_section,
+        hint: l10n.tmdb_section_hint,
+        children: [
+          TextFormField(
+            controller: _tmdbTokenController,
+            obscureText: true,
+            autocorrect: false,
+            enableSuggestions: false,
+            decoration: InputDecoration(
+              labelText: l10n.tmdb_token,
+              helperText: l10n.tmdb_token_hint,
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          Text(
+            l10n.tmdb_attribution,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
+        ],
+      );
+
+  /// Carte d'un service : en-tete puis champs, separes d'un espacement egal.
+  Widget _card(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String hint,
+    required List<Widget> children,
+  }) {
+    final theme = Theme.of(context);
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 20, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Expanded(child: Text(title, style: theme.textTheme.titleMedium)),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              hint,
+              style:
+                  theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 16),
+            for (var i = 0; i < children.length; i++) ...[
+              children[i],
+              if (i < children.length - 1) const SizedBox(height: 12),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _portField(TextEditingController controller, String label, AppLocalizations l10n) =>
       TextFormField(
@@ -393,45 +636,46 @@ class _SettingsPageState extends State<SettingsPage> {
         },
       );
 
-  Widget _warning(BuildContext context, String message) => Padding(
-        padding: const EdgeInsets.only(top: 8.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(Icons.warning_amber, size: 18, color: Theme.of(context).colorScheme.error),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(message,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: Theme.of(context).colorScheme.error)),
+  Widget _warning(BuildContext context, String message) => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.warning_amber, size: 18, color: Theme.of(context).colorScheme.error),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(message,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: Theme.of(context).colorScheme.error)),
+          ),
+        ],
+      );
+
+  Widget _testButton(
+    BuildContext context,
+    String label,
+    _TestState state,
+    Future<void> Function() onPressed,
+  ) =>
+      Align(
+        alignment: Alignment.centerLeft,
+        child: OutlinedButton.icon(
+          onPressed: state == _TestState.running ? null : onPressed,
+          icon: switch (state) {
+            _TestState.running => const SizedBox(
+                width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+            _TestState.ok => const Icon(Icons.check_circle, color: Colors.green),
+            _TestState.failed => Icon(Icons.error, color: Theme.of(context).colorScheme.error),
+            _TestState.idle => const Icon(Icons.network_check),
+          },
+          label: Text(label),
+        ),
+      );
+
+  Widget _testFeedback(BuildContext context, String message, _TestState state) => Text(
+        message,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: state == _TestState.ok ? Colors.green : Theme.of(context).colorScheme.error,
             ),
-          ],
-        ),
-      );
-
-  Widget _testButton(BuildContext context, AppLocalizations l10n) => OutlinedButton.icon(
-        onPressed: _testState == _TestState.running ? null : _testConnection,
-        icon: switch (_testState) {
-          _TestState.running =>
-            const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-          _TestState.ok => const Icon(Icons.check_circle, color: Colors.green),
-          _TestState.failed => Icon(Icons.error, color: Theme.of(context).colorScheme.error),
-          _TestState.idle => const Icon(Icons.network_check),
-        },
-        label: Text(l10n.test_connection),
-      );
-
-  Widget _testFeedback(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: 8.0),
-        child: Text(
-          _testMessage!,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: _testState == _TestState.ok
-                    ? Colors.green
-                    : Theme.of(context).colorScheme.error,
-              ),
-        ),
       );
 }

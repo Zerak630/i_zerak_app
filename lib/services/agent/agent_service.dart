@@ -101,6 +101,49 @@ class AgentService {
 
   Future<String> health() async => (await _get('health')).body;
 
+  /// Verifie une configuration d'agent qui n'est pas encore enregistree.
+  ///
+  /// Le pendant de `QbService.testConnection` : l'ecran de reglages doit
+  /// pouvoir eprouver le port et le jeton saisis avant que l'utilisateur ne
+  /// valide, et distinguer un agent injoignable d'un jeton refuse. Retourne la
+  /// version annoncee par l'agent.
+  Future<String> testConnection(ServerConfig config, String token) async {
+    if (token.trim().isEmpty) {
+      throw const QbNotConfiguredException('Jeton de l\'agent absent');
+    }
+
+    String? presented;
+    final client = _clientFactory?.call(config) ??
+        (config.useHttps
+            ? buildPinnedClient(
+                pinnedSha256: config.pinnedCertSha256,
+                onUntrustedCertificate: (fingerprint) => presented = fingerprint,
+              )
+            : buildPlainClient());
+
+    try {
+      final response = await _guard(() => client.get(
+            config.agentApi('health'),
+            headers: _headers(token.trim()),
+          ));
+      final decoded = jsonDecode(response.body);
+      return (decoded is Map && decoded['version'] is String)
+          ? decoded['version'] as String
+          : '?';
+    } on QbCertificateException catch (error) {
+      throw QbCertificateException(error.message, presentedFingerprint: presented);
+    } on QbNetworkException catch (error) {
+      // Selon la plateforme, un certificat refuse remonte en simple panne
+      // reseau. L'empreinte captee au passage tranche sans ambiguite.
+      if (presented != null) {
+        throw QbCertificateException(error.message, presentedFingerprint: presented);
+      }
+      rethrow;
+    } finally {
+      client.close();
+    }
+  }
+
   Future<SystemSnapshot> snapshot() async {
     final stats = await system();
     final volumes = await storage();

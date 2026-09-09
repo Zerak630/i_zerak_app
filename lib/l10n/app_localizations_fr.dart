@@ -127,16 +127,71 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settings_title => 'Réglages';
 
   @override
-  String get server_section => 'Serveur qBittorrent';
+  String get pi_section => 'Raspberry Pi';
 
   @override
-  String get server_host => 'Hôte';
+  String get pi_section_hint =>
+      'Adresse et certificat communs à tous les services hébergés sur le Pi.';
 
   @override
-  String get server_port => 'Port';
+  String get qbittorrent_section => 'qBittorrent';
+
+  @override
+  String get qbittorrent_section_hint =>
+      'Client de téléchargement, joint sur son interface web.';
+
+  @override
+  String get agent_section_hint =>
+      'Agent Python installé sur le Pi : état du matériel, du disque et des services.';
+
+  @override
+  String get emby_section => 'Emby';
+
+  @override
+  String get emby_section_hint =>
+      'Dossier où qBittorrent dépose les téléchargements pour qu’Emby les indexe.';
+
+  @override
+  String get tmdb_section => 'TMDB';
+
+  @override
+  String get tmdb_section_hint =>
+      'Facultatif : complète le nom du dossier à partir d’un titre ou d’un lien IMDb.';
+
+  @override
+  String get server_host => 'Adresse du Raspberry Pi';
+
+  @override
+  String get server_port => 'Port de l’interface web';
 
   @override
   String get agent_port => 'Port de l’agent';
+
+  @override
+  String get certificate_pinned => 'Certificat approuvé';
+
+  @override
+  String get certificate_none =>
+      'Aucun certificat approuvé. Il sera présenté au premier test de connexion.';
+
+  @override
+  String get certificate_forget => 'Oublier';
+
+  @override
+  String get test_agent => 'Tester l’agent';
+
+  @override
+  String agent_ok(String version) {
+    return 'Agent joignable — version $version';
+  }
+
+  @override
+  String get settings_saved => 'Réglages enregistrés';
+
+  @override
+  String settings_save_failed(String error) {
+    return 'Enregistrement impossible : $error';
+  }
 
   @override
   String get use_https => 'Utiliser HTTPS';
@@ -173,16 +228,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get test_connection => 'Tester la connexion';
 
   @override
-  String get agent_section => 'Agent Raspberry Pi';
+  String get agent_section => 'API iZerak';
 
   @override
   String get agent_token => 'Jeton de l’agent';
 
   @override
   String get agent_token_hint => 'Généré par install.sh sur le Pi.';
-
-  @override
-  String get advanced_section => 'Avancé';
 
   @override
   String get default_save_path => 'Chemin de la bibliothèque Emby';

@@ -14,9 +14,22 @@ class HiveServerConfigRepository implements IServerConfig {
   @override
   Future<ServerConfig?> read() async => _box.get(_key);
 
+  /// Ecrit puis force le vidage du tampon sur le disque.
+  ///
+  /// Une boite Hive sert d'abord ses valeurs depuis un cache en memoire : tant
+  /// que le fichier n'est pas ecrit, l'application se comporte normalement et
+  /// ne decouvre la perte qu'au redemarrage suivant. Le `flush` supprime cette
+  /// fenetre, et surtout il fait remonter une erreur d'ecriture ici plutot que
+  /// de la laisser passer inapercue.
   @override
-  Future<void> save(ServerConfig config) => _box.put(_key, config);
+  Future<void> save(ServerConfig config) async {
+    await _box.put(_key, config);
+    await _box.flush();
+  }
 
   @override
-  Future<void> clear() => _box.delete(_key);
+  Future<void> clear() async {
+    await _box.delete(_key);
+    await _box.flush();
+  }
 }

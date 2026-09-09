@@ -24,10 +24,17 @@ class HiveSubscriptionRepository implements ISubscriptions {
     // attribution, `put(null, ...)` est rejete par Hive et l'ajout echoue.
     subscription.id ??= _newId();
     await _box.put(subscription.id, subscription);
+    // Meme raison que pour la configuration : une boite Hive sert ses valeurs
+    // depuis un cache en memoire, et une ecriture qui n'atteint pas le disque
+    // resterait invisible jusqu'au prochain demarrage.
+    await _box.flush();
   }
 
   @override
-  Future<void> delete(String id) async => _box.delete(id);
+  Future<void> delete(String id) async {
+    await _box.delete(id);
+    await _box.flush();
+  }
 
   String _newId() =>
       '${DateTime.now().microsecondsSinceEpoch.toRadixString(36)}'
