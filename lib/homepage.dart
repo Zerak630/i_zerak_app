@@ -60,6 +60,11 @@ class HomePageState extends State<HomePage> {
                             ),
                           ])),
                 ),
+                // Seul l'onglet actif est construit. C'est deliberé : les pages
+                // Torrents et Systeme interrogent le serveur auto-heberge, et
+                // un onglet quitte doit cesser de le faire. Le remplacer un
+                // jour par un IndexedStack les garderait toutes vivantes — et
+                // toutes bavardes — derriere celle qu'on regarde.
                 Expanded(flex: 1, child: _getActivePage(_selectedIndex)),
               ],
             );

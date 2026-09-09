@@ -44,6 +44,20 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
   /// l'agent n'est pas installe.
   StorageVolume? _blockingVolume;
 
+  /// Date de la derniere interrogation de l'agent sur l'etat du disque.
+  DateTime? _storageCheckedAt;
+
+  /// Duree de validite de l'etat du disque.
+  ///
+  /// Un disque externe ne se debranche pas toutes les trois secondes, alors que
+  /// le suivi des torrents bat a cette cadence. Sans ce cache, l'agent recevait
+  /// environ mille deux cents requetes par heure pour une reponse qui ne change
+  /// presque jamais — sur une machine qui s'est deja effondree sous la charge.
+  /// Les moments ou la reponse compte vraiment (premiere releve, geste
+  /// explicite de l'utilisateur, ajout d'un telechargement) contournent le
+  /// cache.
+  static const Duration _storageTtl = Duration(minutes: 1);
+
   Timer? _timer;
 
   /// Empeche l'empilement des requetes quand le serveur repond plus lentement
@@ -68,11 +82,16 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // Inutile d'interroger le serveur quand l'application n'est pas visible.
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      _timer?.cancel();
-      _timer = null;
+    // `hidden` precede `paused` sur Android : le traiter coupe le minuteur un
+    // cran plus tot, et surtout ne laisse pas le cas au hasard si l'ordre des
+    // etats change.
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      _stopPolling();
     } else if (state == AppLifecycleState.resumed && _view == _View.ready) {
-      _refresh();
+      _refresh(force: true);
       _startPolling();
     }
   }
@@ -87,7 +106,7 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
     if (!mounted) {
       return;
     }
-    await _refresh();
+    await _refresh(force: true);
     if (!mounted) {
       return;
     }
@@ -117,14 +136,19 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
     _timer = null;
   }
 
-  Future<void> _refresh() async {
-    if (_inFlight) {
+  /// [force] contourne le cache de l'etat du disque. Reserve aux moments ou la
+  /// reponse compte : premiere releve, retour au premier plan, geste explicite
+  /// de l'utilisateur. Le minuteur, lui, se contente du cache.
+  Future<void> _refresh({bool force = false}) async {
+    // L'onglet inactif est detruit par HomePage, mais une requete peut encore
+    // etre en vol : rien ne doit repartir depuis un State dispose.
+    if (_inFlight || !mounted) {
       return;
     }
     _inFlight = true;
     try {
       final snapshot = await _service.snapshot();
-      final blocking = await _checkStorage();
+      final blocking = await _checkStorage(force: force);
       if (!mounted) {
         return;
       }
@@ -171,7 +195,17 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
   /// L'agent est facultatif : s'il n'est pas installe ou pas joignable, on ne
   /// bloque rien. Le garde-fou ne se declenche que sur une reponse explicite,
   /// jamais sur une absence de reponse.
-  Future<StorageVolume?> _checkStorage() async {
+  ///
+  /// La reponse vaut une minute (`_storageTtl`). L'echec est date lui aussi :
+  /// sans cela, un agent absent serait reinterroge a chaque battement du
+  /// minuteur, ce qui est precisement la charge que le cache doit eviter.
+  Future<StorageVolume?> _checkStorage({bool force = false}) async {
+    final checkedAt = _storageCheckedAt;
+    if (!force && checkedAt != null && DateTime.now().difference(checkedAt) < _storageTtl) {
+      return _blockingVolume;
+    }
+
+    _storageCheckedAt = DateTime.now();
     try {
       final volumes = await _agent.storage();
       for (final volume in volumes) {
@@ -231,8 +265,14 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
     }
 
     // Ajouter un telechargement alors que le disque externe est absent le
-    // ferait atterrir sur la carte SD du Pi, jusqu'a la saturer.
-    final blocking = _blockingVolume;
+    // ferait atterrir sur la carte SD du Pi, jusqu'a la saturer. C'est le seul
+    // endroit ou l'etat du disque doit etre frais : on paie donc ici la requete
+    // que le cache economise le reste du temps.
+    final blocking = await _checkStorage(force: true);
+    if (!mounted) {
+      return;
+    }
+    setState(() => _blockingVolume = blocking);
     if (blocking != null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(AppLocalizations.of(context)!.storage_blocked_add),
@@ -299,7 +339,7 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
             _error == null ? '' : _messageFor(context, _error!),
             AppLocalizations.of(context)!.retry,
             () async {
-              await _refresh();
+              await _refresh(force: true);
               _startPolling();
             },
           ),
@@ -325,7 +365,7 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
           TransferBanner(transfer: _transfer),
           Expanded(
             child: RefreshIndicator(
-              onRefresh: _refresh,
+              onRefresh: () => _refresh(force: true),
               child: _torrents.isEmpty
                   // Enveloppe dans une liste defilable pour que le tirer-pour-
                   // rafraichir reste actif quand il n'y a aucun torrent.
