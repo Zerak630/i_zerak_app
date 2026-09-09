@@ -83,3 +83,21 @@ String formatRatio(double ratio) => ratio < 0 ? _infinite : ratio.toStringAsFixe
 /// s'applique : un Raspberry Pi peut tourner plus de cent jours, et cette duree
 /// doit rester lisible telle quelle.
 String formatUptime(int seconds) => seconds < 0 ? _unknown : _formatDuration(seconds);
+
+/// Duree de fonctionnement projetee a l'instant `now`.
+///
+/// L'agent rapporte une valeur datee. C'est la seule grandeur dont on connait
+/// l'evolution sans redemander : elle avance d'une seconde par seconde. La
+/// projection part de l'horloge murale, et non d'un comptage de battements,
+/// afin de rester juste apres une mise en arriere-plan — un compteur incremente
+/// par minuteur aurait pris du retard pendant que l'application dormait.
+///
+/// Une valeur negative reste inconnue, et une horloge qui recule (changement
+/// d'heure) ne fait jamais reculer la duree.
+String formatUptimeSince(int baseSeconds, DateTime fetchedAt, DateTime now) {
+  if (baseSeconds < 0) {
+    return formatUptime(baseSeconds);
+  }
+  final elapsed = now.difference(fetchedAt).inSeconds;
+  return formatUptime(baseSeconds + (elapsed < 0 ? 0 : elapsed));
+}

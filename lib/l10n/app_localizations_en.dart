@@ -312,6 +312,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retry => 'Retry';
 
   @override
+  String get refresh => 'Refresh';
+
+  @override
+  String last_updated(String time) {
+    return 'Updated at $time';
+  }
+
+  @override
   String get add_magnet => 'Add a download';
 
   @override

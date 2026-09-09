@@ -3,11 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/agent_dao.dart';
-import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/services/agent/agent_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_exceptions.dart';
-import 'package:i_zerak_app/services/repositories/interfaces/i_server_config.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 import 'package:i_zerak_app/utils/formatters.dart';
 
@@ -15,6 +13,12 @@ enum _View { loading, notConfigured, ready, error }
 
 /// Supervision du Raspberry Pi : materiel, disque de la bibliotheque et
 /// services.
+///
+/// Le rafraichissement est **manuel uniquement** : bouton, ou tirer vers le
+/// bas. Un instantane coute trois requetes HTTPS successives a un Pi 3B+, et
+/// les repeter en fond faisait surgir « Agent injoignable » a la moindre
+/// hesitation du reseau, pour des metriques qui evoluent lentement. Entre deux
+/// releves, seule la duree de fonctionnement avance, calculee localement.
 class SystemPage extends StatefulWidget {
   const SystemPage({super.key});
 
@@ -22,86 +26,39 @@ class SystemPage extends StatefulWidget {
   State<SystemPage> createState() => _SystemPageState();
 }
 
-class _SystemPageState extends State<SystemPage> with WidgetsBindingObserver {
+class _SystemPageState extends State<SystemPage> {
   final AgentService _agent = getIt<AgentService>();
-  final IServerConfig _configRepository = getIt<IServerConfig>();
 
   _View _view = _View.loading;
   SystemStats _stats = const SystemStats();
   List<StorageVolume> _volumes = const [];
   List<ServiceStatus> _services = const [];
   QbException? _error;
-  ServerConfig? _config;
 
-  Timer? _timer;
-  bool _inFlight = false;
+  /// Instant de la derniere releve reussie. Sert d'origine au compteur de duree
+  /// de fonctionnement, et date les valeurs affichees.
+  DateTime? _fetchedAt;
+
+  bool _refreshing = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _bootstrap();
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _timer = null;
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      _timer?.cancel();
-      _timer = null;
-    } else if (state == AppLifecycleState.resumed && _view == _View.ready) {
-      _refresh();
-      _startPolling();
-    }
-  }
-
-  Future<void> _bootstrap() async {
-    _config = await _configRepository.read();
-    // Voir la note de TorrentsPage : sans ces gardes, un changement d'onglet
-    // pendant l'attente laissait derriere lui un minuteur orphelin, impossible
-    // a annuler puisque le State qui le detenait etait deja dispose.
-    if (!mounted) {
-      return;
-    }
-    await _refresh();
-    if (!mounted) {
-      return;
-    }
-    _startPolling();
-  }
-
-  void _startPolling() {
-    _timer?.cancel();
-    _timer = null;
-    if (!mounted) {
-      return;
-    }
-    // Les metriques materielles evoluent lentement : inutile de suivre la
-    // cadence du suivi des torrents.
-    final seconds = (_config?.pollIntervalSeconds ?? 0) <= 0 ? 0 : 10;
-    if (seconds == 0) {
-      return;
-    }
-    _timer = Timer.periodic(Duration(seconds: seconds), (_) => _refresh());
-  }
-
-  void _stopPolling() {
-    _timer?.cancel();
-    _timer = null;
+    // Apres le premier rendu, et non pendant : _refresh appelle setState des sa
+    // premiere ligne, ce qui est interdit tant que la page n'a pas ete
+    // construite une fois. Le garde couvre le changement d'onglet immediat.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _refresh();
+      }
+    });
   }
 
   Future<void> _refresh() async {
-    if (_inFlight) {
+    if (_refreshing || !mounted) {
       return;
     }
-    _inFlight = true;
+    setState(() => _refreshing = true);
     try {
       final snapshot = await _agent.snapshot();
       if (!mounted) {
@@ -111,6 +68,7 @@ class _SystemPageState extends State<SystemPage> with WidgetsBindingObserver {
         _stats = snapshot.stats;
         _volumes = snapshot.volumes;
         _services = snapshot.services;
+        _fetchedAt = DateTime.now();
         _error = null;
         _view = _View.ready;
       });
@@ -118,41 +76,52 @@ class _SystemPageState extends State<SystemPage> with WidgetsBindingObserver {
       if (!mounted) {
         return;
       }
-      _stopPolling();
       setState(() => _view = _View.notConfigured);
     } on QbException catch (error) {
-      if (!mounted) {
-        return;
-      }
-      if (error is QbAuthException || error is QbCertificateException) {
-        _stopPolling();
-      }
-      setState(() {
-        _error = error;
-        _view = _View.error;
-      });
+      _reportFailure(error);
     } catch (error) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _error = QbNetworkException(error.toString());
-        _view = _View.error;
-      });
+      // Filet de securite : aucune exception ne doit remonter d'un geste de
+      // rafraichissement.
+      _reportFailure(QbNetworkException(error.toString()));
     } finally {
-      _inFlight = false;
+      if (mounted) {
+        setState(() => _refreshing = false);
+      }
+    }
+  }
+
+  /// Un echec ne remplace l'ecran que si rien n'a encore ete affiche.
+  ///
+  /// Une fois des donnees a l'ecran, les effacer pour un incident passager
+  /// serait une perte seche : le Pi ne repond pas toujours du premier coup, et
+  /// des chiffres d'il y a deux minutes valent mieux qu'une page d'erreur. Le
+  /// message passe alors par un bandeau, et la ligne « mis a jour a » dit
+  /// d'elle-meme que la releve date.
+  void _reportFailure(QbException error) {
+    if (!mounted) {
+      return;
+    }
+    final hasData = _view == _View.ready;
+    setState(() {
+      _error = error;
+      if (!hasData) {
+        _view = _View.error;
+      }
+    });
+    if (hasData) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(_messageFor(context, error))));
     }
   }
 
   Future<void> _openSettings() async {
-    _stopPolling();
     await Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage()));
     if (!mounted) {
       return;
     }
     _agent.invalidate();
     setState(() => _view = _View.loading);
-    await _bootstrap();
+    await _refresh();
   }
 
   Future<void> _runCommand(ServiceStatus service, ServiceCommand command) async {
@@ -233,28 +202,62 @@ class _SystemPageState extends State<SystemPage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return switch (_view) {
-      _View.loading => const Center(child: CircularProgressIndicator()),
-      _View.notConfigured => _placeholder(context, Icons.developer_board,
-          l10n.agent_not_configured_message, l10n.configure, _openSettings),
-      _View.error => _placeholder(context, Icons.cloud_off,
-          _error == null ? '' : _messageFor(context, _error!), l10n.retry, () async {
-          await _refresh();
-          _startPolling();
-        }),
-      _View.ready => RefreshIndicator(
-          onRefresh: _refresh,
-          child: ListView(
-            padding: const EdgeInsets.all(8.0),
-            children: [
-              if (_stats.throttled.hasWarning) _throttleWarning(context, l10n),
-              _hardwareCard(context, l10n),
-              ..._volumes.map((volume) => _storageCard(context, l10n, volume)),
-              _servicesCard(context, l10n),
-            ],
+    return Scaffold(
+      body: switch (_view) {
+        _View.loading => const Center(child: CircularProgressIndicator()),
+        _View.notConfigured => _placeholder(context, Icons.developer_board,
+            l10n.agent_not_configured_message, l10n.configure, _openSettings),
+        _View.error => _placeholder(context, Icons.cloud_off,
+            _error == null ? '' : _messageFor(context, _error!), l10n.retry, _refresh),
+        _View.ready => RefreshIndicator(
+            onRefresh: _refresh,
+            child: ListView(
+              padding: const EdgeInsets.all(8.0),
+              children: [
+                if (_stats.throttled.hasWarning) _throttleWarning(context, l10n),
+                _hardwareCard(context, l10n),
+                ..._volumes.map((volume) => _storageCard(context, l10n, volume)),
+                _servicesCard(context, l10n),
+                _lastUpdated(context, l10n),
+              ],
+            ),
           ),
-        ),
-    };
+      },
+      // Le rafraichissement est un geste, jamais un minuteur.
+      floatingActionButton: _view == _View.ready
+          ? FloatingActionButton(
+              onPressed: _refreshing ? null : _refresh,
+              tooltip: l10n.refresh,
+              child: _refreshing
+                  ? const SizedBox(
+                      width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.refresh),
+            )
+          : null,
+    );
+  }
+
+  /// Date les valeurs affichees : sans minuteur, rien d'autre ne dit leur age.
+  Widget _lastUpdated(BuildContext context, AppLocalizations l10n) {
+    final fetchedAt = _fetchedAt;
+    if (fetchedAt == null) {
+      return const SizedBox.shrink();
+    }
+    final time = MaterialLocalizations.of(context).formatTimeOfDay(
+      TimeOfDay.fromDateTime(fetchedAt),
+      alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+    );
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 88),
+      child: Text(
+        l10n.last_updated(time),
+        textAlign: TextAlign.center,
+        style: Theme.of(context)
+            .textTheme
+            .bodySmall
+            ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+      ),
+    );
   }
 
   Widget _throttleWarning(BuildContext context, AppLocalizations l10n) {
@@ -298,7 +301,18 @@ class _SystemPageState extends State<SystemPage> with WidgetsBindingObserver {
             Text(_stats.model ?? _stats.hostname,
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 12),
-            _row(context, Icons.schedule, l10n.uptime, formatUptime(_stats.uptimeSeconds)),
+            _row(
+              context,
+              Icons.schedule,
+              l10n.uptime,
+              formatUptime(_stats.uptimeSeconds),
+              // La duree de fonctionnement est la seule grandeur dont on
+              // connait l'evolution sans redemander : elle avance d'une seconde
+              // par seconde. La faire vivre localement evite une requete.
+              valueWidget: _fetchedAt == null
+                  ? null
+                  : _UptimeTicker(baseSeconds: _stats.uptimeSeconds, fetchedAt: _fetchedAt!),
+            ),
             _row(context, Icons.speed, l10n.load_average,
                 '${_stats.load1.toStringAsFixed(2)} · ${_stats.load5.toStringAsFixed(2)} · ${_stats.load15.toStringAsFixed(2)}'),
             if (temp != null)
@@ -462,7 +476,14 @@ class _SystemPageState extends State<SystemPage> with WidgetsBindingObserver {
     return '$label · ${formatBytes(service.memoryBytes!)}';
   }
 
-  Widget _row(BuildContext context, IconData icon, String label, String value, {Color? color}) =>
+  Widget _row(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value, {
+    Color? color,
+    Widget? valueWidget,
+  }) =>
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         child: Row(
@@ -470,11 +491,14 @@ class _SystemPageState extends State<SystemPage> with WidgetsBindingObserver {
             Icon(icon, size: 18, color: color ?? Theme.of(context).colorScheme.onSurfaceVariant),
             const SizedBox(width: 12),
             Expanded(child: Text(label, style: Theme.of(context).textTheme.bodyMedium)),
-            Text(value,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.w600, color: color)),
+            DefaultTextStyle.merge(
+              style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(fontWeight: FontWeight.w600, color: color) ??
+                  const TextStyle(),
+              child: valueWidget ?? Text(value),
+            ),
           ],
         ),
       );
@@ -501,4 +525,64 @@ class _SystemPageState extends State<SystemPage> with WidgetsBindingObserver {
           ),
         ),
       );
+}
+
+/// Duree de fonctionnement qui avance seule entre deux releves.
+///
+/// L'affichage repart de la valeur rapportee par l'agent et y ajoute le temps
+/// ecoule depuis, mesure a l'horloge murale et non par comptage de battements :
+/// une application mise en arriere-plan puis reprise retrouve ainsi la bonne
+/// valeur, alors qu'un compteur incremente aurait pris du retard.
+///
+/// Le minuteur bat chaque seconde mais ne reconstruit que lorsque le texte
+/// change reellement — au-dela d'une heure, le format n'affiche plus les
+/// secondes, et il n'y aurait rien a redessiner.
+class _UptimeTicker extends StatefulWidget {
+  const _UptimeTicker({required this.baseSeconds, required this.fetchedAt});
+
+  final int baseSeconds;
+  final DateTime fetchedAt;
+
+  @override
+  State<_UptimeTicker> createState() => _UptimeTickerState();
+}
+
+class _UptimeTickerState extends State<_UptimeTicker> {
+  Timer? _timer;
+  late String _label = _compute();
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+  }
+
+  @override
+  void didUpdateWidget(_UptimeTicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Une nouvelle releve replace l'origine du compteur.
+    if (oldWidget.baseSeconds != widget.baseSeconds || oldWidget.fetchedAt != widget.fetchedAt) {
+      _label = _compute();
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _timer = null;
+    super.dispose();
+  }
+
+  String _compute() =>
+      formatUptimeSince(widget.baseSeconds, widget.fetchedAt, DateTime.now());
+
+  void _tick() {
+    final next = _compute();
+    if (next != _label && mounted) {
+      setState(() => _label = next);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Text(_label);
 }

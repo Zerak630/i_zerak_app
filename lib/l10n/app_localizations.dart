@@ -656,6 +656,18 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get retry;
 
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @last_updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated at {time}'**
+  String last_updated(String time);
+
   /// No description provided for @add_magnet.
   ///
   /// In en, this message translates to:

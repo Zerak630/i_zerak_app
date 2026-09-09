@@ -314,6 +314,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get retry => 'Réessayer';
 
   @override
+  String get refresh => 'Rafraîchir';
+
+  @override
+  String last_updated(String time) {
+    return 'Mis à jour à $time';
+  }
+
+  @override
   String get add_magnet => 'Ajouter un téléchargement';
 
   @override

@@ -121,6 +121,13 @@
 	"not_configured_message": "Set the server address and credentials to control qBittorrent from here.",
 	"configure": "Configure",
 	"retry": "Retry",
+	"refresh": "Refresh",
+	"last_updated": "Updated at {time}",
+	"@last_updated": {
+		"placeholders": {
+			"time": { "type": "String" }
+		}
+	},
 	"add_magnet": "Add a download",
 	"magnet_link": "Magnet link",
 	"please_enter_a_magnet": "Please enter a magnet link",

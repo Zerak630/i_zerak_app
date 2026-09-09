@@ -93,6 +93,8 @@
 	"not_configured_message": "Renseignez l’adresse du serveur et vos identifiants pour piloter qBittorrent depuis l’application.",
 	"configure": "Configurer",
 	"retry": "Réessayer",
+	"refresh": "Rafraîchir",
+	"last_updated": "Mis à jour à {time}",
 	"add_magnet": "Ajouter un téléchargement",
 	"magnet_link": "Lien magnet",
 	"please_enter_a_magnet": "Veuillez entrer un lien magnet",

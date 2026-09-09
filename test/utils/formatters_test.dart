@@ -100,4 +100,38 @@ void main() {
       expect(formatRatio(1.2345), '1.23');
     });
   });
+
+  group('formatUptimeSince', () {
+    final fetchedAt = DateTime(2026, 9, 9, 10, 0, 0);
+
+    test('la duree avance avec l horloge, sans nouvel appel', () {
+      // La page Systeme ne se rafraichit qu'a la demande : entre deux releves,
+      // c'est ce calcul seul qui fait vivre la duree de fonctionnement.
+      expect(formatUptimeSince(30, fetchedAt, fetchedAt), '30s');
+      expect(formatUptimeSince(30, fetchedAt, fetchedAt.add(const Duration(seconds: 45))),
+          '1min 15s');
+      expect(formatUptimeSince(3600, fetchedAt, fetchedAt.add(const Duration(minutes: 30))),
+          '1h 30min');
+    });
+
+    test('une longue absence est rattrapee d un coup', () {
+      // Le point du calcul a l'horloge murale : un compteur incremente par
+      // minuteur aurait pris tout ce retard pendant que l'application dormait.
+      expect(
+        formatUptimeSince(86400, fetchedAt, fetchedAt.add(const Duration(hours: 5))),
+        '1j 5h',
+      );
+    });
+
+    test('une horloge qui recule ne fait pas reculer la duree', () {
+      expect(
+        formatUptimeSince(120, fetchedAt, fetchedAt.subtract(const Duration(hours: 1))),
+        '2min',
+      );
+    });
+
+    test('une duree inconnue le reste', () {
+      expect(formatUptimeSince(-1, fetchedAt, fetchedAt.add(const Duration(hours: 3))), '—');
+    });
+  });
 }
