@@ -99,7 +99,11 @@ def services(_: Authenticated, settings: AgentConfig = Depends(config)) -> dict:
 
 
 def _describe(entry: ServiceEntry) -> dict:
-    return {**status(entry.name, entry.unit).to_dict(), "web": entry.web()}
+    return {
+        **status(entry.name, entry.unit).to_dict(),
+        "web": entry.web(),
+        "actions": list(entry.actions),
+    }
 
 
 @app.post("/api/v1/services/{name}/{action}")
@@ -114,6 +118,8 @@ def service_action(
     entry = settings.entry_for(name)
     if entry is None:
         raise HTTPException(status_code=404, detail="Service inconnu")
+    if action.value not in entry.actions:
+        raise HTTPException(status_code=403, detail="Action non permise pour ce service")
 
     _enforce_rate_limit()
 

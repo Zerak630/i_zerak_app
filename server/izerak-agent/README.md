@@ -110,6 +110,11 @@ Deux points meritent attention :
   « Ouvrir » dans l'application. L'agent ne publie que le port, le schema
   (`web_scheme`, `http` par defaut) et le chemin (`web_path`, `/` par defaut) ;
   l'hote reste celui des reglages de l'application.
+- **`actions`**, facultatif, restreint les actions permises sur un service
+  (`start`, `stop`, `restart` par defaut). Une action retiree est refusee en
+  403 par l'agent et masquee dans l'application ; retirez aussi sa ligne du
+  sudoers. WireGuard n'a pas `stop` : l'arreter depuis un telephone qui passe
+  par le tunnel couperait l'acces sans moyen de le relancer.
 - **`quota_bytes`** est un plafond que vous vous imposez, distinct de la
   capacite reelle du disque. C'est lui que l'application affiche, et c'est son
   depassement qui bloque l'ajout de nouveaux telechargements.

@@ -33,6 +33,12 @@ services:
   - name: cora
     unit: commandes-coraboeuf.service
     web_port: 5000
+  # actions restreint ce que l'application peut faire (start, stop, restart
+  # par defaut). Sans « stop » : arreter le tunnel depuis un telephone qui
+  # passe par lui couperait l'acces sans retour possible.
+  - name: wireguard
+    unit: wg-quick@wg0.service
+    actions: [start, restart]
 
 # Volumes surveilles. quota_bytes est un plafond que vous vous imposez,
 # independant de la capacite reelle du disque : c'est lui que l'application

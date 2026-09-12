@@ -231,7 +231,10 @@ class ServiceStatus {
     this.since,
     this.memoryBytes,
     this.web,
+    this.actions = allActions,
   });
+
+  static const Set<String> allActions = {'start', 'stop', 'restart'};
 
   final String name;
   final String unit;
@@ -242,6 +245,17 @@ class ServiceStatus {
   final int? memoryBytes;
   final ServiceWeb? web;
 
+  /// Actions que l'agent accepte pour ce service, parmi [allActions]. Un agent
+  /// anterieur a ce champ ne l'envoie pas : tout est alors permis, comme avant.
+  final Set<String> actions;
+
+  static Set<String> _actionsFromJson(Object? json) {
+    if (json is! List) {
+      return allActions;
+    }
+    return json.whereType<String>().where(allActions.contains).toSet();
+  }
+
   ServiceStatus copyWith({ServiceState? state}) => ServiceStatus(
         name: name,
         unit: unit,
@@ -251,6 +265,7 @@ class ServiceStatus {
         since: since,
         memoryBytes: memoryBytes,
         web: web,
+        actions: actions,
       );
 
   factory ServiceStatus.fromJson(Map<String, dynamic> json) => ServiceStatus(
@@ -262,6 +277,7 @@ class ServiceStatus {
         since: json['since'] as String?,
         memoryBytes: (json['memory_bytes'] as num?)?.toInt(),
         web: ServiceWeb.fromJson(json['web']),
+        actions: _actionsFromJson(json['actions']),
       );
 
   static List<ServiceStatus> listFromBody(String body) {

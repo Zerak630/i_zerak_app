@@ -117,6 +117,16 @@ void main() {
           'http://pi:5000/');
     });
 
+    test('les actions permises viennent de l\'agent', () {
+      final services = ServiceStatus.listFromBody(
+          '{"services":[{"name":"wireguard","actions":["start","restart","reboot"]},'
+          '{"name":"emby"}]}');
+
+      expect(services.first.actions, {'start', 'restart'});
+      // Un agent plus ancien n'envoie pas le champ : rien n'est retire.
+      expect(services.last.actions, ServiceStatus.allActions);
+    });
+
     test('un etat inconnu retombe sur une valeur neutre', () {
       final services = ServiceStatus.listFromBody(
           '{"services":[{"name":"x","active_state":"reloading"}]}');

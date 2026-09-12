@@ -124,6 +124,7 @@ def test_interface_web_publiee_avec_l_etat(settings: AgentConfig, monkeypatch) -
     services = {item["name"]: item for item in response.json()["services"]}
     assert services["emby"]["web"] is None
     assert services["cora"]["web"] == {"scheme": "http", "port": 5000, "path": "/"}
+    assert services["cora"]["actions"] == ["start", "stop", "restart"]
 
 
 def test_configuration_web_lue_et_validee(tmp_path: Path) -> None:
@@ -149,6 +150,43 @@ def test_configuration_web_lue_et_validee(tmp_path: Path) -> None:
         "    web_port: 99999\n",
         encoding="utf-8",
     )
+    with pytest.raises(ConfigError):
+        load(config_file)
+
+
+def test_action_retiree_est_refusee_sans_executer(monkeypatch) -> None:
+    """Un service protege contre l'arret ne l'est pas que dans l'interface."""
+    appels: list = []
+    monkeypatch.setattr("izerak_agent.main.apply", lambda *args: appels.append(args))
+    protege = AgentConfig(
+        token=TOKEN,
+        services=[
+            ServiceEntry(name="wireguard", unit="wg-quick@wg0.service", actions=("start", "restart"))
+        ],
+    )
+    app.dependency_overrides[config] = lambda: protege
+    try:
+        response = TestClient(app).post(
+            "/api/v1/services/wireguard/stop", headers={"Authorization": f"Bearer {TOKEN}"}
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 403
+    assert appels == []
+
+
+def test_actions_lues_et_validees(tmp_path: Path) -> None:
+    config_file = tmp_path / "config.yaml"
+    base = f'token: "{TOKEN}"\nservices:\n  - name: wireguard\n    unit: wg-quick@wg0.service\n'
+
+    config_file.write_text(base, encoding="utf-8")
+    assert load(config_file).entry_for("wireguard").actions == ("start", "stop", "restart")
+
+    config_file.write_text(base + "    actions: [restart, start, start]\n", encoding="utf-8")
+    assert load(config_file).entry_for("wireguard").actions == ("start", "restart")
+
+    config_file.write_text(base + "    actions: [reboot]\n", encoding="utf-8")
     with pytest.raises(ConfigError):
         load(config_file)
 

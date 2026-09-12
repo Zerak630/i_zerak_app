@@ -24,3 +24,8 @@ izerak-agent ALL=(root) NOPASSWD: /bin/systemctl restart syncthing@theo.service
 izerak-agent ALL=(root) NOPASSWD: /bin/systemctl start commandes-coraboeuf.service
 izerak-agent ALL=(root) NOPASSWD: /bin/systemctl stop commandes-coraboeuf.service
 izerak-agent ALL=(root) NOPASSWD: /bin/systemctl restart commandes-coraboeuf.service
+
+# WireGuard : pas de « stop », volontairement. Arreter le tunnel depuis le
+# telephone qui l'emprunte couperait l'acces, sans moyen de le relancer.
+izerak-agent ALL=(root) NOPASSWD: /bin/systemctl start wg-quick@wg0.service
+izerak-agent ALL=(root) NOPASSWD: /bin/systemctl restart wg-quick@wg0.service

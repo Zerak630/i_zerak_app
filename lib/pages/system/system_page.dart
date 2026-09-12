@@ -467,30 +467,35 @@ class _SystemPageState extends State<SystemPage> {
                         tooltip: l10n.service_open,
                         onPressed: () => _openWeb(service),
                       ),
-                    PopupMenuButton<ServiceCommand>(
-                      onSelected: (command) => _runCommand(service, command),
-                      itemBuilder: (context) => [
-                        if (!service.state.isRunning)
-                          PopupMenuItem(
-                              value: ServiceCommand.start, child: Text(l10n.service_start)),
-                        if (service.state.isRunning) ...[
-                          PopupMenuItem(
-                              value: ServiceCommand.restart,
-                              child: Text(l10n.service_restart)),
-                          PopupMenuItem(
-                            value: ServiceCommand.stop,
-                            child: Text(l10n.service_stop,
-                                style: TextStyle(color: Theme.of(context).colorScheme.error)),
-                          ),
+                    if (_commandsFor(service).isNotEmpty)
+                      PopupMenuButton<ServiceCommand>(
+                        onSelected: (command) => _runCommand(service, command),
+                        itemBuilder: (context) => [
+                          for (final command in _commandsFor(service))
+                            PopupMenuItem(
+                              value: command,
+                              child: switch (command) {
+                                ServiceCommand.start => Text(l10n.service_start),
+                                ServiceCommand.restart => Text(l10n.service_restart),
+                                ServiceCommand.stop => Text(l10n.service_stop,
+                                    style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                              },
+                            ),
                         ],
-                      ],
-                    ),
+                      ),
                   ],
                 ),
               ),
           ],
         ),
       );
+
+  /// Commandes proposees : celles qui ont un sens dans l'etat courant, parmi
+  /// celles que l'agent permet pour ce service.
+  List<ServiceCommand> _commandsFor(ServiceStatus service) => [
+        if (!service.state.isRunning) ServiceCommand.start,
+        if (service.state.isRunning) ...[ServiceCommand.restart, ServiceCommand.stop],
+      ].where((command) => service.actions.contains(command.name)).toList(growable: false);
 
   String _serviceSubtitle(BuildContext context, AppLocalizations l10n, ServiceStatus service) {
     final label = switch (service.state) {

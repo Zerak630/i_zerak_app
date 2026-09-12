@@ -15,6 +15,9 @@ DEFAULT_CONFIG_PATH = Path("/etc/izerak-agent/config.yaml")
 # en production.
 MIN_TOKEN_LENGTH = 32
 
+# Memes valeurs que systemd.ServiceAction, dans le meme ordre.
+ALL_ACTIONS: tuple[str, ...] = ("start", "stop", "restart")
+
 
 @dataclass(frozen=True)
 class ServiceEntry:
@@ -26,6 +29,11 @@ class ServiceEntry:
     web_port: int | None = None
     web_scheme: str = "http"
     web_path: str = "/"
+    # Actions permises sur ce service. Retirer « stop » protege un service dont
+    # l'arret couperait l'acces a l'agent lui-meme — un tunnel VPN par lequel
+    # passe le telephone, typiquement : une fois arrete, plus rien ne permet de
+    # le relancer a distance. Les regles sudo doivent suivre la meme liste.
+    actions: tuple[str, ...] = ALL_ACTIONS
 
     def web(self) -> dict | None:
         if self.web_port is None:
@@ -85,12 +93,28 @@ def _service_entry(item: dict) -> ServiceEntry:
     path = str(item.get("web_path") or "/")
     if not path.startswith("/"):
         path = "/" + path
+
+    raw_actions = item.get("actions")
+    if raw_actions is None:
+        actions = ALL_ACTIONS
+    else:
+        if not isinstance(raw_actions, list) or any(
+            action not in ALL_ACTIONS for action in raw_actions
+        ):
+            raise ConfigError(
+                f"actions invalides pour le service {name} : {raw_actions!r} "
+                f"(valeurs permises : {', '.join(ALL_ACTIONS)})"
+            )
+        # Ordre canonique et sans doublon, quel que soit l'ordre ecrit.
+        actions = tuple(action for action in ALL_ACTIONS if action in raw_actions)
+
     return ServiceEntry(
         name=name,
         unit=str(item["unit"]),
         web_port=port,
         web_scheme=scheme,
         web_path=path,
+        actions=actions,
     )
 
 
