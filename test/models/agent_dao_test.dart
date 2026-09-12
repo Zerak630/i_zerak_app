@@ -99,6 +99,24 @@ void main() {
       expect(services.single.memoryBytes, 123456);
     });
 
+    test("l'interface web se forme avec l'hote des reglages", () {
+      final services = ServiceStatus.listFromBody(
+          '{"services":[{"name":"cora","active_state":"active",'
+          '"web":{"scheme":"http","port":5000,"path":"/"}},'
+          '{"name":"emby","active_state":"active","web":null}]}');
+
+      expect(services.first.web?.uriFor('192.168.1.110').toString(), 'http://192.168.1.110:5000/');
+      expect(services.first.web?.uriFor('fd7a::1').toString(), 'http://[fd7a::1]:5000/');
+      expect(services.last.web, isNull);
+    });
+
+    test('une interface web mal formee est ignoree', () {
+      expect(ServiceWeb.fromJson({'port': 0}), isNull);
+      expect(ServiceWeb.fromJson({'port': '5000'}), isNull);
+      expect(ServiceWeb.fromJson({'port': 5000, 'scheme': 'javascript', 'path': 'x'})?.uriFor('pi').toString(),
+          'http://pi:5000/');
+    });
+
     test('un etat inconnu retombe sur une valeur neutre', () {
       final services = ServiceStatus.listFromBody(
           '{"services":[{"name":"x","active_state":"reloading"}]}');

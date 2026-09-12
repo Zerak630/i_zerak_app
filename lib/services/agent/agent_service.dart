@@ -151,6 +151,15 @@ class AgentService {
     return (stats: stats, volumes: volumes, services: serviceList);
   }
 
+  /// Adresse de l'interface web d'un service, ou null s'il n'en declare pas.
+  Future<Uri?> webUri(ServiceStatus service) async {
+    final web = service.web;
+    if (web == null) {
+      return null;
+    }
+    return web.uriFor((await _resolve()).config.host);
+  }
+
   Future<ServiceStatus> command(String name, ServiceCommand command) async {
     final resolved = await _resolve();
     final response = await _guard(() => resolved.client.post(

@@ -27,6 +27,12 @@ services:
     unit: qbittorrent-nox.service
   - name: syncthing
     unit: syncthing@theo.service
+  # web_port ajoute un bouton « Ouvrir » dans l'application. L'hote est celui
+  # des reglages de l'application ; web_scheme (http par defaut) et web_path
+  # (/ par defaut) completent l'adresse.
+  - name: cora
+    unit: commandes-coraboeuf.service
+    web_port: 5000
 
 # Volumes surveilles. quota_bytes est un plafond que vous vous imposez,
 # independant de la capacite reelle du disque : c'est lui que l'application

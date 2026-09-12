@@ -552,6 +552,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get service_restart => 'Restart';
 
   @override
+  String get service_open => 'Open';
+
+  @override
+  String service_open_failed(String name) {
+    return 'Could not open $name';
+  }
+
+  @override
   String get confirm => 'Confirm';
 
   @override

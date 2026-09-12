@@ -168,6 +168,8 @@
 	"service_start": "Démarrer",
 	"service_stop": "Arrêter",
 	"service_restart": "Redémarrer",
+	"service_open": "Ouvrir",
+	"service_open_failed": "Impossible d’ouvrir {name}",
 	"confirm": "Confirmer",
 	"service_active": "En fonctionnement",
 	"service_inactive": "Arrêté",

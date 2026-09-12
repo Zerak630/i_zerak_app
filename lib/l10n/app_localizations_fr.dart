@@ -556,6 +556,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get service_restart => 'Redémarrer';
 
   @override
+  String get service_open => 'Ouvrir';
+
+  @override
+  String service_open_failed(String name) {
+    return 'Impossible d’ouvrir $name';
+  }
+
+  @override
   String get confirm => 'Confirmer';
 
   @override

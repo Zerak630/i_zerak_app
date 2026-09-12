@@ -20,3 +20,7 @@ izerak-agent ALL=(root) NOPASSWD: /bin/systemctl restart qbittorrent-nox.service
 izerak-agent ALL=(root) NOPASSWD: /bin/systemctl start syncthing@theo.service
 izerak-agent ALL=(root) NOPASSWD: /bin/systemctl stop syncthing@theo.service
 izerak-agent ALL=(root) NOPASSWD: /bin/systemctl restart syncthing@theo.service
+
+izerak-agent ALL=(root) NOPASSWD: /bin/systemctl start commandes-coraboeuf.service
+izerak-agent ALL=(root) NOPASSWD: /bin/systemctl stop commandes-coraboeuf.service
+izerak-agent ALL=(root) NOPASSWD: /bin/systemctl restart commandes-coraboeuf.service

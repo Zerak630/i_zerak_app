@@ -211,6 +211,13 @@
 	"service_start": "Start",
 	"service_stop": "Stop",
 	"service_restart": "Restart",
+	"service_open": "Open",
+	"service_open_failed": "Could not open {name}",
+	"@service_open_failed": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
 	"confirm": "Confirm",
 	"service_active": "Running",
 	"service_inactive": "Stopped",

@@ -55,5 +55,11 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
         </intent>
+        <!-- Bouton « Ouvrir » des services du Pi : leurs interfaces web sont
+             souvent en http simple sur le reseau local (Cora, port 5000). -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
     </queries>
 </manifest>

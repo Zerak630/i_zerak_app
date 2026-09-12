@@ -18,7 +18,7 @@ from typing import Annotated, Optional
 from fastapi import Depends, FastAPI, Header, HTTPException
 
 from izerak_agent import metrics, storage
-from izerak_agent.config import AgentConfig, load
+from izerak_agent.config import AgentConfig, ServiceEntry, load
 from izerak_agent.systemd import ServiceAction, apply, status
 
 VERSION = "1.0.0"
@@ -95,9 +95,11 @@ def storage_status(_: Authenticated, settings: AgentConfig = Depends(config)) ->
 
 @app.get("/api/v1/services")
 def services(_: Authenticated, settings: AgentConfig = Depends(config)) -> dict:
-    return {
-        "services": [status(entry.name, entry.unit).to_dict() for entry in settings.services]
-    }
+    return {"services": [_describe(entry) for entry in settings.services]}
+
+
+def _describe(entry: ServiceEntry) -> dict:
+    return {**status(entry.name, entry.unit).to_dict(), "web": entry.web()}
 
 
 @app.post("/api/v1/services/{name}/{action}")
@@ -109,18 +111,18 @@ def service_action(
 ) -> dict:
     # Le nom recu ne sert que de cle de recherche : il n'atteint jamais
     # systemctl s'il ne figure pas dans la liste blanche.
-    unit = settings.unit_for(name)
-    if unit is None:
+    entry = settings.entry_for(name)
+    if entry is None:
         raise HTTPException(status_code=404, detail="Service inconnu")
 
     _enforce_rate_limit()
 
     try:
-        apply(unit, action)
+        apply(entry.unit, action)
     except RuntimeError as error:
         raise HTTPException(status_code=502, detail=str(error)) from error
 
-    return status(name, unit).to_dict()
+    return _describe(entry)
 
 
 def _enforce_rate_limit() -> None:

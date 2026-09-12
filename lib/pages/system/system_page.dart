@@ -8,6 +8,7 @@ import 'package:i_zerak_app/services/agent/agent_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_exceptions.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 import 'package:i_zerak_app/utils/formatters.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum _View { loading, notConfigured, ready, error }
 
@@ -181,6 +182,24 @@ class _SystemPageState extends State<SystemPage> {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(_messageFor(context, error))));
       await _refresh();
+    }
+  }
+
+  /// Ouvre l'interface web dans le navigateur, et non dans une vue integree :
+  /// on y retrouve ses onglets, et une appli comme Cora s'y utilise ensuite
+  /// sans repasser par iZerak.
+  Future<void> _openWeb(ServiceStatus service) async {
+    final l10n = AppLocalizations.of(context)!;
+    var opened = false;
+    try {
+      final uri = await _agent.webUri(service);
+      opened = uri != null && await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } on Exception {
+      opened = false;
+    }
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(l10n.service_open_failed(service.name))));
     }
   }
 
@@ -439,21 +458,33 @@ class _SystemPageState extends State<SystemPage> {
                 ),
                 title: Text(service.name),
                 subtitle: Text(_serviceSubtitle(context, l10n, service)),
-                trailing: PopupMenuButton<ServiceCommand>(
-                  onSelected: (command) => _runCommand(service, command),
-                  itemBuilder: (context) => [
-                    if (!service.state.isRunning)
-                      PopupMenuItem(
-                          value: ServiceCommand.start, child: Text(l10n.service_start)),
-                    if (service.state.isRunning) ...[
-                      PopupMenuItem(
-                          value: ServiceCommand.restart, child: Text(l10n.service_restart)),
-                      PopupMenuItem(
-                        value: ServiceCommand.stop,
-                        child: Text(l10n.service_stop,
-                            style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (service.web != null)
+                      IconButton(
+                        icon: const Icon(Icons.open_in_new),
+                        tooltip: l10n.service_open,
+                        onPressed: () => _openWeb(service),
                       ),
-                    ],
+                    PopupMenuButton<ServiceCommand>(
+                      onSelected: (command) => _runCommand(service, command),
+                      itemBuilder: (context) => [
+                        if (!service.state.isRunning)
+                          PopupMenuItem(
+                              value: ServiceCommand.start, child: Text(l10n.service_start)),
+                        if (service.state.isRunning) ...[
+                          PopupMenuItem(
+                              value: ServiceCommand.restart,
+                              child: Text(l10n.service_restart)),
+                          PopupMenuItem(
+                            value: ServiceCommand.stop,
+                            child: Text(l10n.service_stop,
+                                style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                          ),
+                        ],
+                      ],
+                    ),
                   ],
                 ),
               ),

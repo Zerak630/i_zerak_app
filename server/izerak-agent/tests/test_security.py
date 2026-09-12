@@ -99,6 +99,60 @@ def test_unit_for_ne_renvoie_que_les_unites_declarees(settings: AgentConfig) -> 
     assert settings.unit_for("../../etc/passwd") is None
 
 
+def test_interface_web_publiee_avec_l_etat(settings: AgentConfig, monkeypatch) -> None:
+    from izerak_agent.systemd import ServiceStatus
+
+    monkeypatch.setattr(
+        "izerak_agent.main.status",
+        lambda name, unit: ServiceStatus(name, unit, "active", "running", True, None, None),
+    )
+    avec_web = AgentConfig(
+        token=TOKEN,
+        services=[
+            ServiceEntry(name="emby", unit="emby-server.service"),
+            ServiceEntry(name="cora", unit="commandes-coraboeuf.service", web_port=5000),
+        ],
+    )
+    app.dependency_overrides[config] = lambda: avec_web
+    try:
+        response = TestClient(app).get(
+            "/api/v1/services", headers={"Authorization": f"Bearer {TOKEN}"}
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    services = {item["name"]: item for item in response.json()["services"]}
+    assert services["emby"]["web"] is None
+    assert services["cora"]["web"] == {"scheme": "http", "port": 5000, "path": "/"}
+
+
+def test_configuration_web_lue_et_validee(tmp_path: Path) -> None:
+    config_file = tmp_path / "config.yaml"
+    config_file.write_text(
+        f'token: "{TOKEN}"\n'
+        "services:\n"
+        "  - name: cora\n"
+        "    unit: commandes-coraboeuf.service\n"
+        "    web_port: 5000\n"
+        "    web_path: recap\n",
+        encoding="utf-8",
+    )
+    entry = load(config_file).entry_for("cora")
+    assert entry is not None
+    assert entry.web() == {"scheme": "http", "port": 5000, "path": "/recap"}
+
+    config_file.write_text(
+        f'token: "{TOKEN}"\n'
+        "services:\n"
+        "  - name: cora\n"
+        "    unit: commandes-coraboeuf.service\n"
+        "    web_port: 99999\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ConfigError):
+        load(config_file)
+
+
 def test_jeton_trop_court_est_refuse(tmp_path: Path) -> None:
     config_file = tmp_path / "config.yaml"
     config_file.write_text('token: "court"\n', encoding="utf-8")

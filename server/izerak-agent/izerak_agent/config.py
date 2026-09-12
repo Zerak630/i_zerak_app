@@ -20,6 +20,17 @@ MIN_TOKEN_LENGTH = 32
 class ServiceEntry:
     name: str
     unit: str
+    # Interface web du service, facultative. L'agent ne publie que le port, le
+    # schema et le chemin : l'hote reste celui par lequel l'application joint
+    # deja le Pi, qu'il s'agisse de son adresse locale ou d'un nom Tailscale.
+    web_port: int | None = None
+    web_scheme: str = "http"
+    web_path: str = "/"
+
+    def web(self) -> dict | None:
+        if self.web_port is None:
+            return None
+        return {"scheme": self.web_scheme, "port": self.web_port, "path": self.web_path}
 
 
 @dataclass(frozen=True)
@@ -39,6 +50,12 @@ class AgentConfig:
     services: list[ServiceEntry] = field(default_factory=list)
     storage: list[VolumeEntry] = field(default_factory=list)
 
+    def entry_for(self, name: str) -> ServiceEntry | None:
+        for entry in self.services:
+            if entry.name == name:
+                return entry
+        return None
+
     def unit_for(self, name: str) -> str | None:
         """Traduit un nom expose en unite systemd, ou None s'il est inconnu.
 
@@ -53,6 +70,28 @@ class AgentConfig:
 
 class ConfigError(RuntimeError):
     pass
+
+
+def _service_entry(item: dict) -> ServiceEntry:
+    name = str(item["name"])
+    port = item.get("web_port")
+    if port is not None:
+        # bool herite de int : « web_port: yes » passerait sinon pour le port 1.
+        if isinstance(port, bool) or not isinstance(port, int) or not 1 <= port <= 65535:
+            raise ConfigError(f"web_port invalide pour le service {name} : {port!r}")
+    scheme = str(item.get("web_scheme") or "http")
+    if scheme not in ("http", "https"):
+        raise ConfigError(f"web_scheme invalide pour le service {name} : {scheme!r}")
+    path = str(item.get("web_path") or "/")
+    if not path.startswith("/"):
+        path = "/" + path
+    return ServiceEntry(
+        name=name,
+        unit=str(item["unit"]),
+        web_port=port,
+        web_scheme=scheme,
+        web_path=path,
+    )
 
 
 def load(path: Path | None = None) -> AgentConfig:
@@ -72,7 +111,7 @@ def load(path: Path | None = None) -> AgentConfig:
         )
 
     services = [
-        ServiceEntry(name=str(item["name"]), unit=str(item["unit"]))
+        _service_entry(item)
         for item in raw.get("services", [])
         if isinstance(item, dict) and item.get("name") and item.get("unit")
     ]

@@ -1106,6 +1106,18 @@ abstract class AppLocalizations {
   /// **'Restart'**
   String get service_restart;
 
+  /// No description provided for @service_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get service_open;
+
+  /// No description provided for @service_open_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open {name}'**
+  String service_open_failed(String name);
+
   /// No description provided for @confirm.
   ///
   /// In en, this message translates to:

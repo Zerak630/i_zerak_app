@@ -182,6 +182,45 @@ enum ServiceState {
   bool get isTransitioning => this == activating || this == deactivating;
 }
 
+/// Interface web d'un service, telle que declaree dans la configuration de
+/// l'agent.
+///
+/// L'agent ne connait pas l'hote : il ignore par quelle adresse le telephone
+/// le joint — reseau local ou Tailscale. L'adresse complete n'est donc formee
+/// qu'ici, avec l'hote des reglages.
+class ServiceWeb {
+  const ServiceWeb({required this.port, this.scheme = 'http', this.path = '/'});
+
+  final int port;
+  final String scheme;
+  final String path;
+
+  static ServiceWeb? fromJson(Object? json) {
+    if (json is! Map<String, dynamic>) {
+      return null;
+    }
+    final raw = json['port'];
+    final port = raw is int ? raw : null;
+    if (port == null || port < 1 || port > 65535) {
+      return null;
+    }
+    final scheme = json['scheme'];
+    final path = json['path'];
+    return ServiceWeb(
+      port: port,
+      // Tout autre schema ouvrirait autre chose qu'un navigateur.
+      scheme: scheme == 'https' ? 'https' : 'http',
+      path: path is String && path.startsWith('/') ? path : '/',
+    );
+  }
+
+  Uri uriFor(String host) => Uri.parse('$scheme://${_authority(host.trim())}:$port$path');
+
+  /// Une adresse IPv6 litterale doit etre entre crochets devant le port.
+  static String _authority(String host) =>
+      host.contains(':') && !host.startsWith('[') ? '[$host]' : host;
+}
+
 class ServiceStatus {
   const ServiceStatus({
     required this.name,
@@ -191,6 +230,7 @@ class ServiceStatus {
     this.enabled = false,
     this.since,
     this.memoryBytes,
+    this.web,
   });
 
   final String name;
@@ -200,6 +240,7 @@ class ServiceStatus {
   final bool enabled;
   final String? since;
   final int? memoryBytes;
+  final ServiceWeb? web;
 
   ServiceStatus copyWith({ServiceState? state}) => ServiceStatus(
         name: name,
@@ -209,6 +250,7 @@ class ServiceStatus {
         enabled: enabled,
         since: since,
         memoryBytes: memoryBytes,
+        web: web,
       );
 
   factory ServiceStatus.fromJson(Map<String, dynamic> json) => ServiceStatus(
@@ -219,6 +261,7 @@ class ServiceStatus {
         enabled: json['enabled'] == true,
         since: json['since'] as String?,
         memoryBytes: (json['memory_bytes'] as num?)?.toInt(),
+        web: ServiceWeb.fromJson(json['web']),
       );
 
   static List<ServiceStatus> listFromBody(String body) {
