@@ -13,19 +13,26 @@ WorkingDirectory=/opt/izerak-agent
 Restart=on-failure
 RestartSec=5
 
-# Durcissement. NoNewPrivileges est volontairement absent : il empecherait
-# l'elevation par sudo dont l'agent a besoin pour piloter systemctl. Les autres
-# restrictions compensent en limitant ce qui reste accessible au processus.
+# Durcissement. NoNewPrivileges doit rester a « no » : il empeche sudo de
+# prendre l'uid root, et toute action sur un service echoue alors en 502
+# (« sudo: le uid effectif n'est pas 0 »).
+#
+# Il ne suffit pas de l'omettre. Pour un compte non root, systemd l'active
+# implicitement des qu'une option reposant sur seccomp ou sur le noyau est
+# presente : RestrictAddressFamilies, RestrictNamespaces, LockPersonality,
+# MemoryDenyWriteExecute, ProtectKernelTunables, ProtectKernelModules,
+# SystemCallFilter, PrivateDevices, RestrictSUIDSGID... Aucune ne doit figurer
+# ici. Verification apres installation :
+#
+#   grep NoNewPrivs /proc/$(systemctl show izerak-agent -p MainPID --value)/status
+#
+# qui doit afficher 0. Les restrictions de systeme de fichiers ci-dessous n'ont
+# pas cet effet.
+NoNewPrivileges=no
 ProtectSystem=strict
 ProtectHome=yes
 PrivateTmp=yes
-ProtectKernelTunables=yes
-ProtectKernelModules=yes
 ProtectControlGroups=yes
-RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
-RestrictNamespaces=yes
-LockPersonality=yes
-MemoryDenyWriteExecute=yes
 ReadOnlyPaths=/etc/izerak-agent
 
 [Install]

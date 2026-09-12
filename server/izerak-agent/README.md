@@ -106,6 +106,10 @@ Deux points meritent attention :
   n'est jamais transmis a `systemctl` : la requete ressort en 404 sans qu'aucun
   processus ne soit lance. Ajouter un service impose d'ajouter aussi les trois
   lignes correspondantes dans `izerak-agent.sudoers`.
+- **`web_port`**, facultatif sur un service, fait apparaitre un bouton
+  « Ouvrir » dans l'application. L'agent ne publie que le port, le schema
+  (`web_scheme`, `http` par defaut) et le chemin (`web_path`, `/` par defaut) ;
+  l'hote reste celui des reglages de l'application.
 - **`quota_bytes`** est un plafond que vous vous imposez, distinct de la
   capacite reelle du disque. C'est lui que l'application affiche, et c'est son
   depassement qui bloque l'ajout de nouveaux telechargements.
@@ -119,7 +123,7 @@ Toutes les routes exigent l'en-tete `Authorization: Bearer <jeton>`.
 | GET | `/api/v1/health` | version de l'agent, horodatage |
 | GET | `/api/v1/system` | uptime, charge, temperature, memoire, bridage |
 | GET | `/api/v1/storage` | etat des volumes surveilles |
-| GET | `/api/v1/services` | etat des services autorises |
+| GET | `/api/v1/services` | etat des services autorises, et leur interface web (`web`, ou `null`) |
 | POST | `/api/v1/services/{nom}/{start\|stop\|restart}` | etat apres action |
 
 ```bash
@@ -155,11 +159,15 @@ inscriptible.
 - L'action est validee par un enum : seuls `start`, `stop` et `restart` existent.
 - **Aucun endpoint d'extinction ou de redemarrage de la machine.** Son absence
   limite ce qu'une compromission de l'appareil mobile permettrait de faire.
-- Elevation limitee a neuf commandes exactes dans `/etc/sudoers.d/izerak-agent`.
+- Elevation limitee a trois commandes exactes par service dans `/etc/sudoers.d/izerak-agent`.
 - Limitation a dix actions par minute, pour qu'un bug de boucle cote application
   ne mette pas les services en cycle demarrage/arret.
-- Unite systemd durcie. `NoNewPrivileges` est volontairement absent : il
-  empecherait l'elevation par sudo dont l'agent a besoin.
+- Unite systemd durcie sur le systeme de fichiers uniquement (`ProtectSystem`,
+  `ProtectHome`, `PrivateTmp`). `NoNewPrivileges` doit rester desactive, sans
+  quoi sudo ne peut plus prendre l'uid root ; or systemd l'active en silence
+  des qu'on ajoute `RestrictAddressFamilies`, `LockPersonality`,
+  `MemoryDenyWriteExecute`, `ProtectKernel*` et consorts. Voir le commentaire
+  de `izerak-agent.service`.
 
 N'exposez jamais ce port depuis Internet.
 
@@ -185,4 +193,5 @@ journalctl -u izerak-agent -f
 | L'agent ne demarre pas | jeton de moins de 32 caracteres dans `config.yaml` |
 | 401 depuis l'application | jeton recopie partiellement |
 | 502 sur une action | regle sudoers absente pour ce couple action/unite |
+| 502 « le uid effectif n'est pas 0 » | `NoNewPrivs: 1` sur le processus : une option de l'unite l'active implicitement |
 | Certificat refuse | empreinte epinglee obsolete apres regeneration du certificat ; a reapprouver dans les reglages |
