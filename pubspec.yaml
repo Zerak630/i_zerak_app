@@ -123,3 +123,10 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/images/iZerak_logo.png"
+  # Icone adaptative (Android 8+) : sans elle, le lanceur reduit le PNG dans
+  # une pastille blanche. Le fond reprend la teinte du disque du logo, et
+  # l'encart garde la pastille TOD dans le masque rond.
+  adaptive_icon_background: "#312F4E"
+  adaptive_icon_foreground: "assets/images/iZerak_logo.png"
+  adaptive_icon_foreground_inset: 19
+  min_sdk_android: 21
