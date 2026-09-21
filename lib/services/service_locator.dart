@@ -4,11 +4,15 @@ import 'package:http/http.dart' as http;
 import 'package:i_zerak_app/services/agent/agent_service.dart';
 import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/models/subscription_dao.dart';
+import 'package:i_zerak_app/services/commute_price_service.dart';
+import 'package:i_zerak_app/services/gas_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
+import 'package:i_zerak_app/services/repositories/hive/hive_commute_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_gas_station_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_server_config_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_subscription_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/type_adapters.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_credentials.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_gas_stations.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_server_config.dart';
@@ -46,6 +50,17 @@ Future<void> setupServiceLocator() async {
   final gasStations = HiveGasStationRepository(await Hive.openBox<String>('gas_stations'));
   await gasStations.seedLegacyStationsIfEmpty();
   getIt.registerSingleton<IGasStations>(gasStations);
+
+  // Meme principe que les stations : des chaines JSON, sans TypeAdapter
+  // (cf. HiveCommuteRepository).
+  getIt.registerSingleton<ICommute>(
+      HiveCommuteRepository(await Hive.openBox<String>('commute')));
+
+  getIt.registerLazySingleton<CommutePriceService>(() => CommutePriceService(
+        gas: GasService(client: getIt<http.Client>()),
+        favorites: getIt<IGasStations>(),
+        store: getIt<ICommute>(),
+      ));
 
   getIt.registerLazySingleton<ICredentials>(() => const SecureCredentialsStore());
 

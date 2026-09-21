@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/server_config_dao.dart';
+import 'package:i_zerak_app/pages/commute/commute_settings_page.dart';
 import 'package:i_zerak_app/services/agent/agent_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_exceptions.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
@@ -339,6 +340,21 @@ class _SettingsPageState extends State<SettingsPage> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                 children: [
+                  // Seule entree sans rapport avec le Pi : elle ouvre sa propre
+                  // page, enregistree a part, et reste donc hors du formulaire.
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.pedal_bike),
+                      title: Text(l10n.commute_settings_title),
+                      subtitle: Text(l10n.commute_settings_entry_hint),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => CommuteSettingsPage()),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   _piCard(context, l10n),
                   const SizedBox(height: 16),
                   // L'agent passe avant qBittorrent : c'est lui qui renseigne

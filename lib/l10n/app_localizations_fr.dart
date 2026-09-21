@@ -614,4 +614,420 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get storage_permission_denied =>
       'L’agent ne peut pas lire ce volume : vérifiez ses permissions.';
+
+  @override
+  String get bb_commute => 'Vélo';
+
+  @override
+  String get commute_pot => 'Cagnotte vélo';
+
+  @override
+  String commute_bike_trips(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count trajets à vélo depuis le $date',
+      one: '1 trajet à vélo depuis le $date',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get commute_no_bike_trip => 'Aucun trajet à vélo pour l’instant';
+
+  @override
+  String commute_saved_and_spent(String total, String spent) {
+    return '$total économisés · $spent dépensés';
+  }
+
+  @override
+  String get commute_last_14_days => 'Les 14 derniers jours';
+
+  @override
+  String commute_today(String date) {
+    return 'Aujourd’hui · $date';
+  }
+
+  @override
+  String get commute_today_short => 'aujourd’hui';
+
+  @override
+  String get commute_nothing_today => 'rien d’enregistré';
+
+  @override
+  String get commute_by_bike => 'À vélo';
+
+  @override
+  String commute_by_bike_gain(String amount) {
+    return '+ $amount en cagnotte';
+  }
+
+  @override
+  String get commute_by_car => 'En voiture';
+
+  @override
+  String get commute_recorded_bike => 'Vélo, aujourd’hui';
+
+  @override
+  String commute_recorded_car(String reason) {
+    return 'Voiture, aujourd’hui · $reason';
+  }
+
+  @override
+  String commute_recorded_detail(String amount, String date) {
+    return '$amount · $date';
+  }
+
+  @override
+  String get commute_undo => 'Annuler';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String commute_snack_bike(String amount) {
+    return 'Vélo enregistré — $amount en cagnotte';
+  }
+
+  @override
+  String commute_snack_car(String reason) {
+    return 'Voiture enregistrée · $reason';
+  }
+
+  @override
+  String get commute_essential => 'Coûts indispensables';
+
+  @override
+  String get commute_missed => 'Économies loupées';
+
+  @override
+  String commute_days(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours',
+      one: '1 jour',
+      zero: 'aucun jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String commute_price_live(String fuel, String price) {
+    return '$fuel au plus bas · $price/L';
+  }
+
+  @override
+  String commute_price_last_known(String price) {
+    return 'Dernier prix connu · $price/L';
+  }
+
+  @override
+  String commute_price_last_known_detail(String date) {
+    return 'Stations injoignables — relevé le $date';
+  }
+
+  @override
+  String commute_price_fallback(String price) {
+    return 'Prix par défaut · $price/L';
+  }
+
+  @override
+  String get commute_price_fallback_detail =>
+      'Aucun prix relevé pour l’instant';
+
+  @override
+  String get commute_recent => 'Ces derniers jours';
+
+  @override
+  String get commute_see_all => 'Tout voir';
+
+  @override
+  String get commute_setup_title => 'Réglez votre trajet';
+
+  @override
+  String get commute_setup_hint =>
+      'Indiquez la distance aller-retour : chaque trajet à vélo alimentera la cagnotte.';
+
+  @override
+  String get commute_setup_action => 'Régler';
+
+  @override
+  String get commute_settings_title => 'Trajet domicile-travail';
+
+  @override
+  String get commute_settings_entry_hint =>
+      'Distance, consommation et raisons de prendre la voiture';
+
+  @override
+  String get commute_section_trip => 'Le trajet';
+
+  @override
+  String get commute_distance => 'Distance aller-retour';
+
+  @override
+  String get commute_distance_help => 'Porte à porte, aller et retour compris.';
+
+  @override
+  String get commute_consumption => 'Consommation moyenne';
+
+  @override
+  String get commute_consumption_help =>
+      'Celle de la voiture que le vélo remplace.';
+
+  @override
+  String get commute_fuel => 'Carburant';
+
+  @override
+  String get commute_invalid_number => 'Nombre invalide';
+
+  @override
+  String get commute_section_price => 'Prix retenu';
+
+  @override
+  String get commute_price_rule =>
+      'Le plus bas parmi vos stations suivies, relevé le jour du trajet puis conservé tel quel.';
+
+  @override
+  String get commute_price_unreachable_rule => 'Stations injoignables';
+
+  @override
+  String get commute_price_unreachable_value => 'dernier prix relevé';
+
+  @override
+  String get commute_price_never_rule => 'Aucun prix jamais relevé';
+
+  @override
+  String get commute_section_reasons => 'Raisons de prendre la voiture';
+
+  @override
+  String get commute_bucket_essential => 'Coût indispensable';
+
+  @override
+  String get commute_bucket_missed => 'Économie loupée';
+
+  @override
+  String get commute_add_reason => 'Ajouter une raison';
+
+  @override
+  String get commute_reason_name => 'Raison';
+
+  @override
+  String get commute_rename_reason => 'Renommer la raison';
+
+  @override
+  String get commute_rename_reason_hint =>
+      'Laisser vide pour revenir au nom d’origine';
+
+  @override
+  String commute_reason_uses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Utilisée par $count jours',
+      one: 'Utilisée par 1 jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get commute_reason_actions => 'Actions sur la raison';
+
+  @override
+  String get commute_reason_in_use => 'Supprimer (déjà utilisée)';
+
+  @override
+  String get commute_trip_value_today => 'Un trajet vaut aujourd’hui';
+
+  @override
+  String commute_trip_formula(
+      String distance, String consumption, String price) {
+    return '$distance km × $consumption L/100 km × $price/L';
+  }
+
+  @override
+  String get reason_sport => 'Sport le soir';
+
+  @override
+  String get reason_shopping => 'Courses';
+
+  @override
+  String get reason_lazy => 'Flemme';
+
+  @override
+  String get commute_why_car => 'Pourquoi la voiture ?';
+
+  @override
+  String commute_why_car_detail(String date, String amount) {
+    return '$date — ce trajet vaut $amount';
+  }
+
+  @override
+  String get commute_bucket_essential_hint => 'La voiture était nécessaire';
+
+  @override
+  String get commute_bucket_missed_hint => 'Le vélo était possible';
+
+  @override
+  String get commute_chip_essential => 'Indispensable';
+
+  @override
+  String get commute_chip_missed => 'Loupée';
+
+  @override
+  String get commute_history_title => 'Historique';
+
+  @override
+  String get commute_legend_bike => 'Vélo';
+
+  @override
+  String get commute_legend_essential => 'Indispensable';
+
+  @override
+  String get commute_legend_missed => 'Loupé';
+
+  @override
+  String get commute_history_hint =>
+      'Touchez un jour pour le corriger ou le supprimer.';
+
+  @override
+  String get commute_clear_day => 'Effacer ce jour';
+
+  @override
+  String get commute_validated_goals => 'Objectifs atteints';
+
+  @override
+  String commute_validated_on(String amount, String date) {
+    return '$amount · le $date';
+  }
+
+  @override
+  String get goal_label_purchase => 'Objectif';
+
+  @override
+  String get goal_label_milestone => 'Palier';
+
+  @override
+  String get goal_reached => 'Atteint';
+
+  @override
+  String goal_progress_purchase(String current, String target) {
+    return '$current sur $target';
+  }
+
+  @override
+  String goal_progress_milestone(String current, String target) {
+    return '$current économisés sur $target';
+  }
+
+  @override
+  String goal_remaining(String amount, int trips) {
+    String _temp0 = intl.Intl.pluralLogic(
+      trips,
+      locale: localeName,
+      other: 'Encore $amount — environ $trips trajets à vélo',
+      one: 'Encore $amount — environ 1 trajet à vélo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String goal_remaining_amount(String amount) {
+    return 'Encore $amount';
+  }
+
+  @override
+  String get goal_milestone_hint =>
+      'Mesuré sur le total économisé : rien à dépenser';
+
+  @override
+  String goal_spend_validate(String amount) {
+    return 'Dépenser $amount et valider';
+  }
+
+  @override
+  String get goal_validate_milestone => 'Valider le palier';
+
+  @override
+  String get goal_new => 'Nouvel objectif';
+
+  @override
+  String get goal_kind_purchase => 'Achat';
+
+  @override
+  String get goal_kind_purchase_hint => 'se paie avec la cagnotte';
+
+  @override
+  String get goal_kind_milestone => 'Palier';
+
+  @override
+  String get goal_kind_milestone_hint => 'se franchit, sans dépenser';
+
+  @override
+  String get goal_name => 'Nom';
+
+  @override
+  String get goal_amount => 'Montant';
+
+  @override
+  String get goal_icon => 'Icône';
+
+  @override
+  String goal_missing(String amount) {
+    return 'Il manque $amount';
+  }
+
+  @override
+  String goal_missing_trips(int trips, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      trips,
+      locale: localeName,
+      other:
+          'Environ $trips trajets à vélo, au prix du trajet d’aujourd’hui ($amount).',
+      one:
+          'Environ 1 trajet à vélo, au prix du trajet d’aujourd’hui ($amount).',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get goal_already_reached =>
+      'Déjà atteint avec ce que vous avez économisé';
+
+  @override
+  String get goal_create => 'Créer l’objectif';
+
+  @override
+  String goal_validate_title(String name) {
+    return 'Valider « $name » ?';
+  }
+
+  @override
+  String goal_validate_purchase_detail(String amount) {
+    return '$amount sortent de la cagnotte. L’objectif rejoint la liste des objectifs atteints.';
+  }
+
+  @override
+  String get goal_validate_milestone_detail =>
+      'Rien n’est dépensé : le palier rejoint la liste des objectifs atteints.';
+
+  @override
+  String get goal_row_pot => 'Cagnotte';
+
+  @override
+  String get goal_row_saved => 'Économisé au total';
+
+  @override
+  String get goal_unchanged => 'inchangé';
+
+  @override
+  String goal_spend(String amount) {
+    return 'Dépenser $amount';
+  }
+
+  @override
+  String get goal_delete => 'Supprimer l’objectif';
+
+  @override
+  String get goal_invalid_amount => 'Montant invalide';
 }

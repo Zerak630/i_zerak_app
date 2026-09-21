@@ -610,4 +610,414 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get storage_permission_denied =>
       'The agent cannot read this volume: check its permissions.';
+
+  @override
+  String get bb_commute => 'Bike';
+
+  @override
+  String get commute_pot => 'Bike savings';
+
+  @override
+  String commute_bike_trips(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bike trips since $date',
+      one: '1 bike trip since $date',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get commute_no_bike_trip => 'No bike trip yet';
+
+  @override
+  String commute_saved_and_spent(String total, String spent) {
+    return '$total saved · $spent spent';
+  }
+
+  @override
+  String get commute_last_14_days => 'Last 14 days';
+
+  @override
+  String commute_today(String date) {
+    return 'Today · $date';
+  }
+
+  @override
+  String get commute_today_short => 'today';
+
+  @override
+  String get commute_nothing_today => 'nothing recorded';
+
+  @override
+  String get commute_by_bike => 'By bike';
+
+  @override
+  String commute_by_bike_gain(String amount) {
+    return '+ $amount saved';
+  }
+
+  @override
+  String get commute_by_car => 'By car';
+
+  @override
+  String get commute_recorded_bike => 'Bike, today';
+
+  @override
+  String commute_recorded_car(String reason) {
+    return 'Car, today · $reason';
+  }
+
+  @override
+  String commute_recorded_detail(String amount, String date) {
+    return '$amount · $date';
+  }
+
+  @override
+  String get commute_undo => 'Undo';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String commute_snack_bike(String amount) {
+    return 'Bike recorded — $amount saved';
+  }
+
+  @override
+  String commute_snack_car(String reason) {
+    return 'Car recorded · $reason';
+  }
+
+  @override
+  String get commute_essential => 'Essential costs';
+
+  @override
+  String get commute_missed => 'Missed savings';
+
+  @override
+  String commute_days(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+      zero: 'no day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String commute_price_live(String fuel, String price) {
+    return 'Cheapest $fuel · $price/L';
+  }
+
+  @override
+  String commute_price_last_known(String price) {
+    return 'Last known price · $price/L';
+  }
+
+  @override
+  String commute_price_last_known_detail(String date) {
+    return 'Stations unreachable — seen on $date';
+  }
+
+  @override
+  String commute_price_fallback(String price) {
+    return 'Default price · $price/L';
+  }
+
+  @override
+  String get commute_price_fallback_detail => 'No price seen yet';
+
+  @override
+  String get commute_recent => 'Recent days';
+
+  @override
+  String get commute_see_all => 'See all';
+
+  @override
+  String get commute_setup_title => 'Set up your commute';
+
+  @override
+  String get commute_setup_hint =>
+      'Enter the round-trip distance: every bike trip will then feed the savings.';
+
+  @override
+  String get commute_setup_action => 'Set up';
+
+  @override
+  String get commute_settings_title => 'Commute';
+
+  @override
+  String get commute_settings_entry_hint =>
+      'Distance, fuel use and reasons for taking the car';
+
+  @override
+  String get commute_section_trip => 'The trip';
+
+  @override
+  String get commute_distance => 'Round-trip distance';
+
+  @override
+  String get commute_distance_help => 'Door to door, there and back.';
+
+  @override
+  String get commute_consumption => 'Average fuel use';
+
+  @override
+  String get commute_consumption_help => 'That of the car the bike replaces.';
+
+  @override
+  String get commute_fuel => 'Fuel';
+
+  @override
+  String get commute_invalid_number => 'Invalid number';
+
+  @override
+  String get commute_section_price => 'Price used';
+
+  @override
+  String get commute_price_rule =>
+      'The cheapest among your followed stations, read on the day of the trip and then kept as is.';
+
+  @override
+  String get commute_price_unreachable_rule => 'Stations unreachable';
+
+  @override
+  String get commute_price_unreachable_value => 'last price seen';
+
+  @override
+  String get commute_price_never_rule => 'No price ever seen';
+
+  @override
+  String get commute_section_reasons => 'Reasons for taking the car';
+
+  @override
+  String get commute_bucket_essential => 'Essential cost';
+
+  @override
+  String get commute_bucket_missed => 'Missed saving';
+
+  @override
+  String get commute_add_reason => 'Add a reason';
+
+  @override
+  String get commute_reason_name => 'Reason';
+
+  @override
+  String get commute_rename_reason => 'Rename reason';
+
+  @override
+  String get commute_rename_reason_hint =>
+      'Leave empty to restore the original name';
+
+  @override
+  String commute_reason_uses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Used on $count days',
+      one: 'Used on 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get commute_reason_actions => 'Reason actions';
+
+  @override
+  String get commute_reason_in_use => 'Delete (already used)';
+
+  @override
+  String get commute_trip_value_today => 'One trip is worth today';
+
+  @override
+  String commute_trip_formula(
+      String distance, String consumption, String price) {
+    return '$distance km × $consumption L/100 km × $price/L';
+  }
+
+  @override
+  String get reason_sport => 'Evening sport';
+
+  @override
+  String get reason_shopping => 'Shopping';
+
+  @override
+  String get reason_lazy => 'Couldn\'t be bothered';
+
+  @override
+  String get commute_why_car => 'Why the car?';
+
+  @override
+  String commute_why_car_detail(String date, String amount) {
+    return '$date — this trip is worth $amount';
+  }
+
+  @override
+  String get commute_bucket_essential_hint => 'The car was needed';
+
+  @override
+  String get commute_bucket_missed_hint => 'The bike was possible';
+
+  @override
+  String get commute_chip_essential => 'Essential';
+
+  @override
+  String get commute_chip_missed => 'Missed';
+
+  @override
+  String get commute_history_title => 'History';
+
+  @override
+  String get commute_legend_bike => 'Bike';
+
+  @override
+  String get commute_legend_essential => 'Essential';
+
+  @override
+  String get commute_legend_missed => 'Missed';
+
+  @override
+  String get commute_history_hint => 'Tap a day to correct or clear it.';
+
+  @override
+  String get commute_clear_day => 'Clear this day';
+
+  @override
+  String get commute_validated_goals => 'Goals reached';
+
+  @override
+  String commute_validated_on(String amount, String date) {
+    return '$amount · on $date';
+  }
+
+  @override
+  String get goal_label_purchase => 'Goal';
+
+  @override
+  String get goal_label_milestone => 'Milestone';
+
+  @override
+  String get goal_reached => 'Reached';
+
+  @override
+  String goal_progress_purchase(String current, String target) {
+    return '$current of $target';
+  }
+
+  @override
+  String goal_progress_milestone(String current, String target) {
+    return '$current saved of $target';
+  }
+
+  @override
+  String goal_remaining(String amount, int trips) {
+    String _temp0 = intl.Intl.pluralLogic(
+      trips,
+      locale: localeName,
+      other: '$amount to go — about $trips bike trips',
+      one: '$amount to go — about 1 bike trip',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String goal_remaining_amount(String amount) {
+    return '$amount to go';
+  }
+
+  @override
+  String get goal_milestone_hint =>
+      'Measured on total savings: nothing to spend';
+
+  @override
+  String goal_spend_validate(String amount) {
+    return 'Spend $amount and validate';
+  }
+
+  @override
+  String get goal_validate_milestone => 'Validate the milestone';
+
+  @override
+  String get goal_new => 'New goal';
+
+  @override
+  String get goal_kind_purchase => 'Purchase';
+
+  @override
+  String get goal_kind_purchase_hint => 'paid with the savings';
+
+  @override
+  String get goal_kind_milestone => 'Milestone';
+
+  @override
+  String get goal_kind_milestone_hint => 'reached, nothing spent';
+
+  @override
+  String get goal_name => 'Name';
+
+  @override
+  String get goal_amount => 'Amount';
+
+  @override
+  String get goal_icon => 'Icon';
+
+  @override
+  String goal_missing(String amount) {
+    return '$amount to go';
+  }
+
+  @override
+  String goal_missing_trips(int trips, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      trips,
+      locale: localeName,
+      other: 'About $trips bike trips, at today\'s trip value ($amount).',
+      one: 'About 1 bike trip, at today\'s trip value ($amount).',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get goal_already_reached => 'Already reached with what you have saved';
+
+  @override
+  String get goal_create => 'Create goal';
+
+  @override
+  String goal_validate_title(String name) {
+    return 'Validate “$name”?';
+  }
+
+  @override
+  String goal_validate_purchase_detail(String amount) {
+    return '$amount leave the savings. The goal moves to the goals reached.';
+  }
+
+  @override
+  String get goal_validate_milestone_detail =>
+      'Nothing is spent: the milestone moves to the goals reached.';
+
+  @override
+  String get goal_row_pot => 'Savings';
+
+  @override
+  String get goal_row_saved => 'Saved in total';
+
+  @override
+  String get goal_unchanged => 'unchanged';
+
+  @override
+  String goal_spend(String amount) {
+    return 'Spend $amount';
+  }
+
+  @override
+  String get goal_delete => 'Delete goal';
+
+  @override
+  String get goal_invalid_amount => 'Invalid amount';
 }

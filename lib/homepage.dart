@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:i_zerak_app/pages/commute/commute_page.dart';
 import 'package:i_zerak_app/pages/gas_stations/gas_station_page.dart';
 import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/pages/torrents/torrents_page.dart';
@@ -102,6 +103,14 @@ class HomePageState extends State<HomePage> {
                   text: AppLocalizations.of(context)!.bb_gas_stations,
                   iconActiveColor: Theme.of(context).colorScheme.primary,
                 ),
+                // Cinquieme onglet : GNav ne nomme que l'onglet actif, les
+                // autres restent des icones, et la barre tient encore sur un
+                // ecran de 360 dp.
+                GButton(
+                  icon: Icons.pedal_bike,
+                  text: AppLocalizations.of(context)!.bb_commute,
+                  iconActiveColor: Theme.of(context).colorScheme.primary,
+                ),
               ]),
         ),
       ),
@@ -119,6 +128,8 @@ Widget _getActivePage(int index) {
       return const SystemPage();
     case 3:
       return GasStationPage();
+    case 4:
+      return CommutePage();
     default:
       throw Exception('Invalid index');
   }

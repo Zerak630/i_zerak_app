@@ -1201,6 +1201,643 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The agent cannot read this volume: check its permissions.'**
   String get storage_permission_denied;
+
+  /// No description provided for @bb_commute.
+  ///
+  /// In en, this message translates to:
+  /// **'Bike'**
+  String get bb_commute;
+
+  /// No description provided for @commute_pot.
+  ///
+  /// In en, this message translates to:
+  /// **'Bike savings'**
+  String get commute_pot;
+
+  /// No description provided for @commute_bike_trips.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 bike trip since {date}} other{{count} bike trips since {date}}}'**
+  String commute_bike_trips(int count, String date);
+
+  /// No description provided for @commute_no_bike_trip.
+  ///
+  /// In en, this message translates to:
+  /// **'No bike trip yet'**
+  String get commute_no_bike_trip;
+
+  /// No description provided for @commute_saved_and_spent.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} saved · {spent} spent'**
+  String commute_saved_and_spent(String total, String spent);
+
+  /// No description provided for @commute_last_14_days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 14 days'**
+  String get commute_last_14_days;
+
+  /// No description provided for @commute_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today · {date}'**
+  String commute_today(String date);
+
+  /// No description provided for @commute_today_short.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get commute_today_short;
+
+  /// No description provided for @commute_nothing_today.
+  ///
+  /// In en, this message translates to:
+  /// **'nothing recorded'**
+  String get commute_nothing_today;
+
+  /// No description provided for @commute_by_bike.
+  ///
+  /// In en, this message translates to:
+  /// **'By bike'**
+  String get commute_by_bike;
+
+  /// No description provided for @commute_by_bike_gain.
+  ///
+  /// In en, this message translates to:
+  /// **'+ {amount} saved'**
+  String commute_by_bike_gain(String amount);
+
+  /// No description provided for @commute_by_car.
+  ///
+  /// In en, this message translates to:
+  /// **'By car'**
+  String get commute_by_car;
+
+  /// No description provided for @commute_recorded_bike.
+  ///
+  /// In en, this message translates to:
+  /// **'Bike, today'**
+  String get commute_recorded_bike;
+
+  /// No description provided for @commute_recorded_car.
+  ///
+  /// In en, this message translates to:
+  /// **'Car, today · {reason}'**
+  String commute_recorded_car(String reason);
+
+  /// No description provided for @commute_recorded_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} · {date}'**
+  String commute_recorded_detail(String amount, String date);
+
+  /// No description provided for @commute_undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get commute_undo;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @commute_snack_bike.
+  ///
+  /// In en, this message translates to:
+  /// **'Bike recorded — {amount} saved'**
+  String commute_snack_bike(String amount);
+
+  /// No description provided for @commute_snack_car.
+  ///
+  /// In en, this message translates to:
+  /// **'Car recorded · {reason}'**
+  String commute_snack_car(String reason);
+
+  /// No description provided for @commute_essential.
+  ///
+  /// In en, this message translates to:
+  /// **'Essential costs'**
+  String get commute_essential;
+
+  /// No description provided for @commute_missed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed savings'**
+  String get commute_missed;
+
+  /// No description provided for @commute_days.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no day} =1{1 day} other{{count} days}}'**
+  String commute_days(int count);
+
+  /// No description provided for @commute_price_live.
+  ///
+  /// In en, this message translates to:
+  /// **'Cheapest {fuel} · {price}/L'**
+  String commute_price_live(String fuel, String price);
+
+  /// No description provided for @commute_price_last_known.
+  ///
+  /// In en, this message translates to:
+  /// **'Last known price · {price}/L'**
+  String commute_price_last_known(String price);
+
+  /// No description provided for @commute_price_last_known_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'Stations unreachable — seen on {date}'**
+  String commute_price_last_known_detail(String date);
+
+  /// No description provided for @commute_price_fallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Default price · {price}/L'**
+  String commute_price_fallback(String price);
+
+  /// No description provided for @commute_price_fallback_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'No price seen yet'**
+  String get commute_price_fallback_detail;
+
+  /// No description provided for @commute_recent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent days'**
+  String get commute_recent;
+
+  /// No description provided for @commute_see_all.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get commute_see_all;
+
+  /// No description provided for @commute_setup_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your commute'**
+  String get commute_setup_title;
+
+  /// No description provided for @commute_setup_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the round-trip distance: every bike trip will then feed the savings.'**
+  String get commute_setup_hint;
+
+  /// No description provided for @commute_setup_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up'**
+  String get commute_setup_action;
+
+  /// No description provided for @commute_settings_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Commute'**
+  String get commute_settings_title;
+
+  /// No description provided for @commute_settings_entry_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance, fuel use and reasons for taking the car'**
+  String get commute_settings_entry_hint;
+
+  /// No description provided for @commute_section_trip.
+  ///
+  /// In en, this message translates to:
+  /// **'The trip'**
+  String get commute_section_trip;
+
+  /// No description provided for @commute_distance.
+  ///
+  /// In en, this message translates to:
+  /// **'Round-trip distance'**
+  String get commute_distance;
+
+  /// No description provided for @commute_distance_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Door to door, there and back.'**
+  String get commute_distance_help;
+
+  /// No description provided for @commute_consumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Average fuel use'**
+  String get commute_consumption;
+
+  /// No description provided for @commute_consumption_help.
+  ///
+  /// In en, this message translates to:
+  /// **'That of the car the bike replaces.'**
+  String get commute_consumption_help;
+
+  /// No description provided for @commute_fuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel'**
+  String get commute_fuel;
+
+  /// No description provided for @commute_invalid_number.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid number'**
+  String get commute_invalid_number;
+
+  /// No description provided for @commute_section_price.
+  ///
+  /// In en, this message translates to:
+  /// **'Price used'**
+  String get commute_section_price;
+
+  /// No description provided for @commute_price_rule.
+  ///
+  /// In en, this message translates to:
+  /// **'The cheapest among your followed stations, read on the day of the trip and then kept as is.'**
+  String get commute_price_rule;
+
+  /// No description provided for @commute_price_unreachable_rule.
+  ///
+  /// In en, this message translates to:
+  /// **'Stations unreachable'**
+  String get commute_price_unreachable_rule;
+
+  /// No description provided for @commute_price_unreachable_value.
+  ///
+  /// In en, this message translates to:
+  /// **'last price seen'**
+  String get commute_price_unreachable_value;
+
+  /// No description provided for @commute_price_never_rule.
+  ///
+  /// In en, this message translates to:
+  /// **'No price ever seen'**
+  String get commute_price_never_rule;
+
+  /// No description provided for @commute_section_reasons.
+  ///
+  /// In en, this message translates to:
+  /// **'Reasons for taking the car'**
+  String get commute_section_reasons;
+
+  /// No description provided for @commute_bucket_essential.
+  ///
+  /// In en, this message translates to:
+  /// **'Essential cost'**
+  String get commute_bucket_essential;
+
+  /// No description provided for @commute_bucket_missed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed saving'**
+  String get commute_bucket_missed;
+
+  /// No description provided for @commute_add_reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a reason'**
+  String get commute_add_reason;
+
+  /// No description provided for @commute_reason_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get commute_reason_name;
+
+  /// No description provided for @commute_rename_reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename reason'**
+  String get commute_rename_reason;
+
+  /// No description provided for @commute_rename_reason_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty to restore the original name'**
+  String get commute_rename_reason_hint;
+
+  /// No description provided for @commute_reason_uses.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Used on 1 day} other{Used on {count} days}}'**
+  String commute_reason_uses(int count);
+
+  /// No description provided for @commute_reason_actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason actions'**
+  String get commute_reason_actions;
+
+  /// No description provided for @commute_reason_in_use.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete (already used)'**
+  String get commute_reason_in_use;
+
+  /// No description provided for @commute_trip_value_today.
+  ///
+  /// In en, this message translates to:
+  /// **'One trip is worth today'**
+  String get commute_trip_value_today;
+
+  /// No description provided for @commute_trip_formula.
+  ///
+  /// In en, this message translates to:
+  /// **'{distance} km × {consumption} L/100 km × {price}/L'**
+  String commute_trip_formula(
+      String distance, String consumption, String price);
+
+  /// No description provided for @reason_sport.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening sport'**
+  String get reason_sport;
+
+  /// No description provided for @reason_shopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get reason_shopping;
+
+  /// No description provided for @reason_lazy.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t be bothered'**
+  String get reason_lazy;
+
+  /// No description provided for @commute_why_car.
+  ///
+  /// In en, this message translates to:
+  /// **'Why the car?'**
+  String get commute_why_car;
+
+  /// No description provided for @commute_why_car_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} — this trip is worth {amount}'**
+  String commute_why_car_detail(String date, String amount);
+
+  /// No description provided for @commute_bucket_essential_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'The car was needed'**
+  String get commute_bucket_essential_hint;
+
+  /// No description provided for @commute_bucket_missed_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'The bike was possible'**
+  String get commute_bucket_missed_hint;
+
+  /// No description provided for @commute_chip_essential.
+  ///
+  /// In en, this message translates to:
+  /// **'Essential'**
+  String get commute_chip_essential;
+
+  /// No description provided for @commute_chip_missed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed'**
+  String get commute_chip_missed;
+
+  /// No description provided for @commute_history_title.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get commute_history_title;
+
+  /// No description provided for @commute_legend_bike.
+  ///
+  /// In en, this message translates to:
+  /// **'Bike'**
+  String get commute_legend_bike;
+
+  /// No description provided for @commute_legend_essential.
+  ///
+  /// In en, this message translates to:
+  /// **'Essential'**
+  String get commute_legend_essential;
+
+  /// No description provided for @commute_legend_missed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed'**
+  String get commute_legend_missed;
+
+  /// No description provided for @commute_history_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a day to correct or clear it.'**
+  String get commute_history_hint;
+
+  /// No description provided for @commute_clear_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear this day'**
+  String get commute_clear_day;
+
+  /// No description provided for @commute_validated_goals.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals reached'**
+  String get commute_validated_goals;
+
+  /// No description provided for @commute_validated_on.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} · on {date}'**
+  String commute_validated_on(String amount, String date);
+
+  /// No description provided for @goal_label_purchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal'**
+  String get goal_label_purchase;
+
+  /// No description provided for @goal_label_milestone.
+  ///
+  /// In en, this message translates to:
+  /// **'Milestone'**
+  String get goal_label_milestone;
+
+  /// No description provided for @goal_reached.
+  ///
+  /// In en, this message translates to:
+  /// **'Reached'**
+  String get goal_reached;
+
+  /// No description provided for @goal_progress_purchase.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {target}'**
+  String goal_progress_purchase(String current, String target);
+
+  /// No description provided for @goal_progress_milestone.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} saved of {target}'**
+  String goal_progress_milestone(String current, String target);
+
+  /// No description provided for @goal_remaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{trips, plural, =1{{amount} to go — about 1 bike trip} other{{amount} to go — about {trips} bike trips}}'**
+  String goal_remaining(String amount, int trips);
+
+  /// No description provided for @goal_remaining_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} to go'**
+  String goal_remaining_amount(String amount);
+
+  /// No description provided for @goal_milestone_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Measured on total savings: nothing to spend'**
+  String get goal_milestone_hint;
+
+  /// No description provided for @goal_spend_validate.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend {amount} and validate'**
+  String goal_spend_validate(String amount);
+
+  /// No description provided for @goal_validate_milestone.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate the milestone'**
+  String get goal_validate_milestone;
+
+  /// No description provided for @goal_new.
+  ///
+  /// In en, this message translates to:
+  /// **'New goal'**
+  String get goal_new;
+
+  /// No description provided for @goal_kind_purchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase'**
+  String get goal_kind_purchase;
+
+  /// No description provided for @goal_kind_purchase_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'paid with the savings'**
+  String get goal_kind_purchase_hint;
+
+  /// No description provided for @goal_kind_milestone.
+  ///
+  /// In en, this message translates to:
+  /// **'Milestone'**
+  String get goal_kind_milestone;
+
+  /// No description provided for @goal_kind_milestone_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'reached, nothing spent'**
+  String get goal_kind_milestone_hint;
+
+  /// No description provided for @goal_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get goal_name;
+
+  /// No description provided for @goal_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get goal_amount;
+
+  /// No description provided for @goal_icon.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get goal_icon;
+
+  /// No description provided for @goal_missing.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} to go'**
+  String goal_missing(String amount);
+
+  /// No description provided for @goal_missing_trips.
+  ///
+  /// In en, this message translates to:
+  /// **'{trips, plural, =1{About 1 bike trip, at today\'s trip value ({amount}).} other{About {trips} bike trips, at today\'s trip value ({amount}).}}'**
+  String goal_missing_trips(int trips, String amount);
+
+  /// No description provided for @goal_already_reached.
+  ///
+  /// In en, this message translates to:
+  /// **'Already reached with what you have saved'**
+  String get goal_already_reached;
+
+  /// No description provided for @goal_create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create goal'**
+  String get goal_create;
+
+  /// No description provided for @goal_validate_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate “{name}”?'**
+  String goal_validate_title(String name);
+
+  /// No description provided for @goal_validate_purchase_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} leave the savings. The goal moves to the goals reached.'**
+  String goal_validate_purchase_detail(String amount);
+
+  /// No description provided for @goal_validate_milestone_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is spent: the milestone moves to the goals reached.'**
+  String get goal_validate_milestone_detail;
+
+  /// No description provided for @goal_row_pot.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get goal_row_pot;
+
+  /// No description provided for @goal_row_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved in total'**
+  String get goal_row_saved;
+
+  /// No description provided for @goal_unchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'unchanged'**
+  String get goal_unchanged;
+
+  /// No description provided for @goal_spend.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend {amount}'**
+  String goal_spend(String amount);
+
+  /// No description provided for @goal_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete goal'**
+  String get goal_delete;
+
+  /// No description provided for @goal_invalid_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid amount'**
+  String get goal_invalid_amount;
 }
 
 class _AppLocalizationsDelegate

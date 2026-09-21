@@ -253,5 +253,258 @@
 			"name": { "type": "String" }
 		}
 	},
-	"storage_permission_denied": "The agent cannot read this volume: check its permissions."
+	"storage_permission_denied": "The agent cannot read this volume: check its permissions.",
+	"bb_commute": "Bike",
+	"commute_pot": "Bike savings",
+	"commute_bike_trips": "{count, plural, =1{1 bike trip since {date}} other{{count} bike trips since {date}}}",
+	"@commute_bike_trips": {
+		"placeholders": {
+			"count": { "type": "int" },
+			"date": { "type": "String" }
+		}
+	},
+	"commute_no_bike_trip": "No bike trip yet",
+	"commute_saved_and_spent": "{total} saved · {spent} spent",
+	"@commute_saved_and_spent": {
+		"placeholders": {
+			"total": { "type": "String" },
+			"spent": { "type": "String" }
+		}
+	},
+	"commute_last_14_days": "Last 14 days",
+	"commute_today": "Today · {date}",
+	"@commute_today": {
+		"placeholders": {
+			"date": { "type": "String" }
+		}
+	},
+	"commute_today_short": "today",
+	"commute_nothing_today": "nothing recorded",
+	"commute_by_bike": "By bike",
+	"commute_by_bike_gain": "+ {amount} saved",
+	"@commute_by_bike_gain": {
+		"placeholders": {
+			"amount": { "type": "String" }
+		}
+	},
+	"commute_by_car": "By car",
+	"commute_recorded_bike": "Bike, today",
+	"commute_recorded_car": "Car, today · {reason}",
+	"@commute_recorded_car": {
+		"placeholders": {
+			"reason": { "type": "String" }
+		}
+	},
+	"commute_recorded_detail": "{amount} · {date}",
+	"@commute_recorded_detail": {
+		"placeholders": {
+			"amount": { "type": "String" },
+			"date": { "type": "String" }
+		}
+	},
+	"commute_undo": "Undo",
+	"ok": "OK",
+	"commute_snack_bike": "Bike recorded — {amount} saved",
+	"@commute_snack_bike": {
+		"placeholders": {
+			"amount": { "type": "String" }
+		}
+	},
+	"commute_snack_car": "Car recorded · {reason}",
+	"@commute_snack_car": {
+		"placeholders": {
+			"reason": { "type": "String" }
+		}
+	},
+	"commute_essential": "Essential costs",
+	"commute_missed": "Missed savings",
+	"commute_days": "{count, plural, =0{no day} =1{1 day} other{{count} days}}",
+	"@commute_days": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"commute_price_live": "Cheapest {fuel} · {price}/L",
+	"@commute_price_live": {
+		"placeholders": {
+			"fuel": { "type": "String" },
+			"price": { "type": "String" }
+		}
+	},
+	"commute_price_last_known": "Last known price · {price}/L",
+	"@commute_price_last_known": {
+		"placeholders": {
+			"price": { "type": "String" }
+		}
+	},
+	"commute_price_last_known_detail": "Stations unreachable — seen on {date}",
+	"@commute_price_last_known_detail": {
+		"placeholders": {
+			"date": { "type": "String" }
+		}
+	},
+	"commute_price_fallback": "Default price · {price}/L",
+	"@commute_price_fallback": {
+		"placeholders": {
+			"price": { "type": "String" }
+		}
+	},
+	"commute_price_fallback_detail": "No price seen yet",
+	"commute_recent": "Recent days",
+	"commute_see_all": "See all",
+	"commute_setup_title": "Set up your commute",
+	"commute_setup_hint": "Enter the round-trip distance: every bike trip will then feed the savings.",
+	"commute_setup_action": "Set up",
+	"commute_settings_title": "Commute",
+	"commute_settings_entry_hint": "Distance, fuel use and reasons for taking the car",
+	"commute_section_trip": "The trip",
+	"commute_distance": "Round-trip distance",
+	"commute_distance_help": "Door to door, there and back.",
+	"commute_consumption": "Average fuel use",
+	"commute_consumption_help": "That of the car the bike replaces.",
+	"commute_fuel": "Fuel",
+	"commute_invalid_number": "Invalid number",
+	"commute_section_price": "Price used",
+	"commute_price_rule": "The cheapest among your followed stations, read on the day of the trip and then kept as is.",
+	"commute_price_unreachable_rule": "Stations unreachable",
+	"commute_price_unreachable_value": "last price seen",
+	"commute_price_never_rule": "No price ever seen",
+	"commute_section_reasons": "Reasons for taking the car",
+	"commute_bucket_essential": "Essential cost",
+	"commute_bucket_missed": "Missed saving",
+	"commute_add_reason": "Add a reason",
+	"commute_reason_name": "Reason",
+	"commute_rename_reason": "Rename reason",
+	"commute_rename_reason_hint": "Leave empty to restore the original name",
+	"commute_reason_uses": "{count, plural, =1{Used on 1 day} other{Used on {count} days}}",
+	"@commute_reason_uses": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"commute_reason_actions": "Reason actions",
+	"commute_reason_in_use": "Delete (already used)",
+	"commute_trip_value_today": "One trip is worth today",
+	"commute_trip_formula": "{distance} km × {consumption} L/100 km × {price}/L",
+	"@commute_trip_formula": {
+		"placeholders": {
+			"distance": { "type": "String" },
+			"consumption": { "type": "String" },
+			"price": { "type": "String" }
+		}
+	},
+	"reason_sport": "Evening sport",
+	"reason_shopping": "Shopping",
+	"reason_lazy": "Couldn't be bothered",
+	"commute_why_car": "Why the car?",
+	"commute_why_car_detail": "{date} — this trip is worth {amount}",
+	"@commute_why_car_detail": {
+		"placeholders": {
+			"date": { "type": "String" },
+			"amount": { "type": "String" }
+		}
+	},
+	"commute_bucket_essential_hint": "The car was needed",
+	"commute_bucket_missed_hint": "The bike was possible",
+	"commute_chip_essential": "Essential",
+	"commute_chip_missed": "Missed",
+	"commute_history_title": "History",
+	"commute_legend_bike": "Bike",
+	"commute_legend_essential": "Essential",
+	"commute_legend_missed": "Missed",
+	"commute_history_hint": "Tap a day to correct or clear it.",
+	"commute_clear_day": "Clear this day",
+	"commute_validated_goals": "Goals reached",
+	"commute_validated_on": "{amount} · on {date}",
+	"@commute_validated_on": {
+		"placeholders": {
+			"amount": { "type": "String" },
+			"date": { "type": "String" }
+		}
+	},
+	"goal_label_purchase": "Goal",
+	"goal_label_milestone": "Milestone",
+	"goal_reached": "Reached",
+	"goal_progress_purchase": "{current} of {target}",
+	"@goal_progress_purchase": {
+		"placeholders": {
+			"current": { "type": "String" },
+			"target": { "type": "String" }
+		}
+	},
+	"goal_progress_milestone": "{current} saved of {target}",
+	"@goal_progress_milestone": {
+		"placeholders": {
+			"current": { "type": "String" },
+			"target": { "type": "String" }
+		}
+	},
+	"goal_remaining": "{trips, plural, =1{{amount} to go — about 1 bike trip} other{{amount} to go — about {trips} bike trips}}",
+	"@goal_remaining": {
+		"placeholders": {
+			"amount": { "type": "String" },
+			"trips": { "type": "int" }
+		}
+	},
+	"goal_remaining_amount": "{amount} to go",
+	"@goal_remaining_amount": {
+		"placeholders": {
+			"amount": { "type": "String" }
+		}
+	},
+	"goal_milestone_hint": "Measured on total savings: nothing to spend",
+	"goal_spend_validate": "Spend {amount} and validate",
+	"@goal_spend_validate": {
+		"placeholders": {
+			"amount": { "type": "String" }
+		}
+	},
+	"goal_validate_milestone": "Validate the milestone",
+	"goal_new": "New goal",
+	"goal_kind_purchase": "Purchase",
+	"goal_kind_purchase_hint": "paid with the savings",
+	"goal_kind_milestone": "Milestone",
+	"goal_kind_milestone_hint": "reached, nothing spent",
+	"goal_name": "Name",
+	"goal_amount": "Amount",
+	"goal_icon": "Icon",
+	"goal_missing": "{amount} to go",
+	"@goal_missing": {
+		"placeholders": {
+			"amount": { "type": "String" }
+		}
+	},
+	"goal_missing_trips": "{trips, plural, =1{About 1 bike trip, at today's trip value ({amount}).} other{About {trips} bike trips, at today's trip value ({amount}).}}",
+	"@goal_missing_trips": {
+		"placeholders": {
+			"trips": { "type": "int" },
+			"amount": { "type": "String" }
+		}
+	},
+	"goal_already_reached": "Already reached with what you have saved",
+	"goal_create": "Create goal",
+	"goal_validate_title": "Validate “{name}”?",
+	"@goal_validate_title": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"goal_validate_purchase_detail": "{amount} leave the savings. The goal moves to the goals reached.",
+	"@goal_validate_purchase_detail": {
+		"placeholders": {
+			"amount": { "type": "String" }
+		}
+	},
+	"goal_validate_milestone_detail": "Nothing is spent: the milestone moves to the goals reached.",
+	"goal_row_pot": "Savings",
+	"goal_row_saved": "Saved in total",
+	"goal_unchanged": "unchanged",
+	"goal_spend": "Spend {amount}",
+	"@goal_spend": {
+		"placeholders": {
+			"amount": { "type": "String" }
+		}
+	},
+	"goal_delete": "Delete goal",
+	"goal_invalid_amount": "Invalid amount"
 }
