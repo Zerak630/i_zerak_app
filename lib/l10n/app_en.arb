@@ -414,6 +414,51 @@
 	"commute_legend_missed": "Missed",
 	"commute_history_hint": "Tap a day to correct or clear it.",
 	"commute_clear_day": "Clear this day",
+	"commute_import": "Import from Google Maps",
+	"commute_import_title": "Google Maps import",
+	"commute_import_reading": "Reading the file…",
+	"commute_import_invalid": "This file is not a Google Maps Timeline export.",
+	"commute_import_empty": "No bike trip in this file.",
+	"commute_import_privacy": "The file is read on the phone: nothing is sent.",
+	"commute_import_commutes": "Home ↔ work",
+	"commute_import_commutes_hint": "Recognised by Google Maps: ticked by default.",
+	"commute_import_others": "Other weekday bike rides",
+	"commute_import_others_hint": "Tick them if they really were commutes.",
+	"commute_import_round_trip": "there and back",
+	"commute_import_legs": "{count, plural, =1{1 trip} other{{count} trips}}",
+	"@commute_import_legs": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"commute_import_detail": "{km} km · {legs}",
+	"@commute_import_detail": {
+		"placeholders": {
+			"km": { "type": "String" },
+			"legs": { "type": "String" }
+		}
+	},
+	"commute_import_already": "already recorded",
+	"commute_import_action": "{count, plural, =0{Nothing to import} =1{Import 1 day} other{Import {count} days}}",
+	"@commute_import_action": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"commute_import_value": "{amount} at today's price ({trip} per day)",
+	"@commute_import_value": {
+		"placeholders": {
+			"amount": { "type": "String" },
+			"trip": { "type": "String" }
+		}
+	},
+	"commute_import_done": "{count, plural, =1{1 day imported} other{{count} days imported}}",
+	"@commute_import_done": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"commute_import_needs_setup": "Set the commute distance first: it values every imported day.",
 	"commute_validated_goals": "Goals reached",
 	"commute_validated_on": "{amount} · on {date}",
 	"@commute_validated_on": {

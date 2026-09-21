@@ -1641,6 +1641,114 @@ abstract class AppLocalizations {
   /// **'Clear this day'**
   String get commute_clear_day;
 
+  /// No description provided for @commute_import.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Google Maps'**
+  String get commute_import;
+
+  /// No description provided for @commute_import_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Maps import'**
+  String get commute_import_title;
+
+  /// No description provided for @commute_import_reading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the file…'**
+  String get commute_import_reading;
+
+  /// No description provided for @commute_import_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is not a Google Maps Timeline export.'**
+  String get commute_import_invalid;
+
+  /// No description provided for @commute_import_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No bike trip in this file.'**
+  String get commute_import_empty;
+
+  /// No description provided for @commute_import_privacy.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is read on the phone: nothing is sent.'**
+  String get commute_import_privacy;
+
+  /// No description provided for @commute_import_commutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Home ↔ work'**
+  String get commute_import_commutes;
+
+  /// No description provided for @commute_import_commutes_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognised by Google Maps: ticked by default.'**
+  String get commute_import_commutes_hint;
+
+  /// No description provided for @commute_import_others.
+  ///
+  /// In en, this message translates to:
+  /// **'Other weekday bike rides'**
+  String get commute_import_others;
+
+  /// No description provided for @commute_import_others_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick them if they really were commutes.'**
+  String get commute_import_others_hint;
+
+  /// No description provided for @commute_import_round_trip.
+  ///
+  /// In en, this message translates to:
+  /// **'there and back'**
+  String get commute_import_round_trip;
+
+  /// No description provided for @commute_import_legs.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 trip} other{{count} trips}}'**
+  String commute_import_legs(int count);
+
+  /// No description provided for @commute_import_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km · {legs}'**
+  String commute_import_detail(String km, String legs);
+
+  /// No description provided for @commute_import_already.
+  ///
+  /// In en, this message translates to:
+  /// **'already recorded'**
+  String get commute_import_already;
+
+  /// No description provided for @commute_import_action.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Nothing to import} =1{Import 1 day} other{Import {count} days}}'**
+  String commute_import_action(int count);
+
+  /// No description provided for @commute_import_value.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} at today\'s price ({trip} per day)'**
+  String commute_import_value(String amount, String trip);
+
+  /// No description provided for @commute_import_done.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day imported} other{{count} days imported}}'**
+  String commute_import_done(int count);
+
+  /// No description provided for @commute_import_needs_setup.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the commute distance first: it values every imported day.'**
+  String get commute_import_needs_setup;
+
   /// No description provided for @commute_validated_goals.
   ///
   /// In en, this message translates to:

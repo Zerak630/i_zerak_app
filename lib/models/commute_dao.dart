@@ -266,9 +266,15 @@ class CommuteDay {
     this.reasonId,
     this.reasonLabel,
     this.bucket,
+    this.imported = false,
   });
 
-  factory CommuteDay.bike(DateTime date, CommuteSettings settings, ResolvedPrice price) =>
+  factory CommuteDay.bike(
+    DateTime date,
+    CommuteSettings settings,
+    ResolvedPrice price, {
+    bool imported = false,
+  }) =>
       CommuteDay(
         date: dateOnly(date),
         mode: CommuteMode.bike,
@@ -276,6 +282,7 @@ class CommuteDay {
         pricePerLitre: price.pricePerLitre,
         priceSource: price.source,
         stationLabel: price.stationLabel,
+        imported: imported,
       );
 
   factory CommuteDay.car(
@@ -317,6 +324,10 @@ class CommuteDay {
   /// Voiture uniquement : la cagnotte alimentee, figee au jour du trajet.
   final CarBucket? bucket;
 
+  /// Repris d'un export Google Maps : le prix est celui du jour de l'import,
+  /// pas celui du jour du trajet, que l'API ne publie plus.
+  final bool imported;
+
   bool get isBike => mode == CommuteMode.bike;
 
   Map<String, dynamic> toJson() => {
@@ -329,6 +340,7 @@ class CommuteDay {
         if (reasonId != null) 'reason': reasonId,
         if (reasonLabel != null) 'reason_label': reasonLabel,
         if (bucket != null) 'bucket': bucket!.name,
+        if (imported) 'imported': true,
       };
 
   static CommuteDay? fromJson(Object? raw) {
@@ -351,6 +363,7 @@ class CommuteDay {
       reasonId: _asString(raw['reason']),
       reasonLabel: _asString(raw['reason_label']),
       bucket: mode == CommuteMode.car ? CarBucket.fromName(_asString(raw['bucket'])) : null,
+      imported: raw['imported'] == true,
     );
   }
 }

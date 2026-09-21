@@ -887,6 +887,94 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commute_clear_day => 'Clear this day';
 
   @override
+  String get commute_import => 'Import from Google Maps';
+
+  @override
+  String get commute_import_title => 'Google Maps import';
+
+  @override
+  String get commute_import_reading => 'Reading the file…';
+
+  @override
+  String get commute_import_invalid =>
+      'This file is not a Google Maps Timeline export.';
+
+  @override
+  String get commute_import_empty => 'No bike trip in this file.';
+
+  @override
+  String get commute_import_privacy =>
+      'The file is read on the phone: nothing is sent.';
+
+  @override
+  String get commute_import_commutes => 'Home ↔ work';
+
+  @override
+  String get commute_import_commutes_hint =>
+      'Recognised by Google Maps: ticked by default.';
+
+  @override
+  String get commute_import_others => 'Other weekday bike rides';
+
+  @override
+  String get commute_import_others_hint =>
+      'Tick them if they really were commutes.';
+
+  @override
+  String get commute_import_round_trip => 'there and back';
+
+  @override
+  String commute_import_legs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count trips',
+      one: '1 trip',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String commute_import_detail(String km, String legs) {
+    return '$km km · $legs';
+  }
+
+  @override
+  String get commute_import_already => 'already recorded';
+
+  @override
+  String commute_import_action(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Import $count days',
+      one: 'Import 1 day',
+      zero: 'Nothing to import',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String commute_import_value(String amount, String trip) {
+    return '$amount at today\'s price ($trip per day)';
+  }
+
+  @override
+  String commute_import_done(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days imported',
+      one: '1 day imported',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get commute_import_needs_setup =>
+      'Set the commute distance first: it values every imported day.';
+
+  @override
   String get commute_validated_goals => 'Goals reached';
 
   @override

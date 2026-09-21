@@ -894,6 +894,94 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commute_clear_day => 'Effacer ce jour';
 
   @override
+  String get commute_import => 'Importer depuis Google Maps';
+
+  @override
+  String get commute_import_title => 'Import Google Maps';
+
+  @override
+  String get commute_import_reading => 'Lecture du fichier…';
+
+  @override
+  String get commute_import_invalid =>
+      'Ce fichier n’est pas un export de la Chronologie Google Maps.';
+
+  @override
+  String get commute_import_empty => 'Aucun trajet à vélo dans ce fichier.';
+
+  @override
+  String get commute_import_privacy =>
+      'Le fichier est lu sur le téléphone : rien n’est envoyé.';
+
+  @override
+  String get commute_import_commutes => 'Domicile ↔ travail';
+
+  @override
+  String get commute_import_commutes_hint =>
+      'Reconnus par Google Maps : cochés d’office.';
+
+  @override
+  String get commute_import_others => 'Autres sorties à vélo en semaine';
+
+  @override
+  String get commute_import_others_hint =>
+      'À cocher si c’était bien un trajet domicile-travail.';
+
+  @override
+  String get commute_import_round_trip => 'aller et retour';
+
+  @override
+  String commute_import_legs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count trajets',
+      one: '1 trajet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String commute_import_detail(String km, String legs) {
+    return '$km km · $legs';
+  }
+
+  @override
+  String get commute_import_already => 'déjà enregistré';
+
+  @override
+  String commute_import_action(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Importer $count jours',
+      one: 'Importer 1 jour',
+      zero: 'Aucun jour à importer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String commute_import_value(String amount, String trip) {
+    return '$amount au prix d’aujourd’hui ($trip par jour)';
+  }
+
+  @override
+  String commute_import_done(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours importés',
+      one: '1 jour importé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get commute_import_needs_setup =>
+      'Réglez d’abord la distance du trajet : elle sert à valoriser chaque jour importé.';
+
+  @override
   String get commute_validated_goals => 'Objectifs atteints';
 
   @override

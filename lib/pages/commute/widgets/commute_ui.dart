@@ -30,6 +30,9 @@ class CommuteFormat {
   /// « ven. 18 sept. »
   String shortDay(DateTime day) => DateFormat('E d MMM', _locale).format(day);
 
+  /// « ven. 18 sept. 2026 », pour une liste qui couvre plusieurs annees.
+  String shortDayWithYear(DateTime day) => DateFormat('E d MMM y', _locale).format(day);
+
   /// « 1 juin »
   String dayMonth(DateTime day) => DateFormat('d MMMM', _locale).format(day);
 

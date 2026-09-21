@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/commute_dao.dart';
+import 'package:i_zerak_app/pages/commute/commute_import_page.dart';
 import 'package:i_zerak_app/pages/commute/commute_page.dart';
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
+import 'package:i_zerak_app/services/timeline_import.dart';
 
 /// Ce qui a ete choisi dans la feuille d'un jour.
 sealed class _DayChoice {
@@ -46,6 +48,7 @@ class _CommuteHistoryPageState extends State<CommuteHistoryPage> {
   CommuteSettings _settings = const CommuteSettings();
   CommuteLedger _ledger = CommuteLedger(const [], const []);
   bool _loading = true;
+  bool _reading = false;
 
   static DateTime _firstOfMonth(DateTime day) => DateTime(day.year, day.month);
 
@@ -136,6 +139,50 @@ class _CommuteHistoryPageState extends State<CommuteHistoryPage> {
     await _reload();
   }
 
+  Future<void> _importTimeline() async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    void say(String message) => messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+
+    final List<TimelineBikeDay>? found;
+    setState(() => _reading = true);
+    try {
+      found = await pickTimelineBikeDays();
+    } on TimelineFormatException {
+      say(l10n.commute_import_invalid);
+      return;
+    } finally {
+      if (mounted) {
+        setState(() => _reading = false);
+      }
+    }
+    if (found == null || !mounted) {
+      return;
+    }
+    if (found.isEmpty) {
+      say(l10n.commute_import_empty);
+      return;
+    }
+
+    final count = await Navigator.push<int>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CommuteImportPage(
+          found: found!,
+          store: widget.store,
+          prices: widget.prices,
+          clock: widget.clock,
+        ),
+      ),
+    );
+    await _reload();
+    if (count != null && count > 0) {
+      say(l10n.commute_import_done(count));
+    }
+  }
+
   static String _capitalize(String text) =>
       text.isEmpty ? text : '${text[0].toUpperCase()}${text.substring(1)}';
 
@@ -154,7 +201,23 @@ class _CommuteHistoryPageState extends State<CommuteHistoryPage> {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.commute_history_title)),
+      appBar: AppBar(
+        title: Text(l10n.commute_history_title),
+        actions: [
+          IconButton(
+            tooltip: l10n.commute_import,
+            icon: const Icon(Icons.upload_file),
+            onPressed: _reading ? null : _importTimeline,
+          ),
+        ],
+        // L'export pese plusieurs dizaines de Mo : sa lecture prend un moment.
+        bottom: _reading
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(4),
+                child: LinearProgressIndicator(),
+              )
+            : null,
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
