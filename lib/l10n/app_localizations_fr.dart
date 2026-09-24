@@ -1350,4 +1350,76 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sub_no_payment_this_month => 'Aucun prélèvement ce mois-ci';
+
+  @override
+  String get bb_home => 'Accueil';
+
+  @override
+  String get budget_title => 'Budget';
+
+  @override
+  String get budget_outflow => 'Sorties du mois';
+
+  @override
+  String get budget_car => 'Trajets en voiture';
+
+  @override
+  String get budget_bike_avoided => 'Évité grâce au vélo';
+
+  @override
+  String budget_bike_detail(String days, String amount) {
+    return '$days ce mois-ci · $amount depuis le début';
+  }
+
+  @override
+  String get budget_history => 'Six derniers mois';
+
+  @override
+  String get budget_history_hint => 'Un appui sur une colonne ouvre son mois.';
+
+  @override
+  String get budget_note =>
+      'Tout vient des abonnements et des journées déjà enregistrées : rien à saisir une seconde fois.';
+
+  @override
+  String budget_less_than(String amount, String month) {
+    return '$amount de moins qu’en $month';
+  }
+
+  @override
+  String budget_more_than(String amount, String month) {
+    return '$amount de plus qu’en $month';
+  }
+
+  @override
+  String get home_month => 'Ce mois-ci';
+
+  @override
+  String get home_pi_unreachable => 'Raspberry Pi injoignable';
+
+  @override
+  String get home_pi_not_configured => 'Raspberry Pi non configuré';
+
+  @override
+  String home_services_ok(int done, int total) {
+    return '$done sur $total services';
+  }
+
+  @override
+  String get home_disk => 'disque';
+
+  @override
+  String get home_downloads_none => 'Aucun téléchargement en cours';
+
+  @override
+  String home_fuel_station(String station, int count) {
+    return '$station — $count stations suivies';
+  }
+
+  @override
+  String get home_no_fuel => 'Aucun prix relevé';
+
+  @override
+  String get home_setup_commute =>
+      'Réglez votre trajet pour enregistrer vos journées';
 }

@@ -17,6 +17,10 @@ class SubscriptionFormat {
   String euros(double value) =>
       NumberFormat.currency(locale: _locale, symbol: '€', decimalDigits: 2).format(value);
 
+  /// Trois decimales, comme l'onglet Carburants.
+  String perLitre(double value) =>
+      NumberFormat.currency(locale: _locale, symbol: '€', decimalDigits: 3).format(value);
+
   String percent(double ratio) => NumberFormat.percentPattern(_locale).format(ratio);
 
   /// « vendredi 18 septembre »
@@ -33,6 +37,12 @@ class SubscriptionFormat {
 
   /// « Septembre 2026 »
   String month(DateTime day) => _capitalize(DateFormat('MMMM y', _locale).format(day));
+
+  /// « août », pour une phrase : « 24,10 € de moins qu'en août ».
+  String monthName(DateTime day) => DateFormat('MMMM', _locale).format(day);
+
+  /// « sept. », sous une colonne de graphique.
+  String shortMonth(DateTime day) => DateFormat('MMM', _locale).format(day);
 
   /// Initiale du jour de la semaine, lundi en tete.
   List<String> weekdayInitials() => [

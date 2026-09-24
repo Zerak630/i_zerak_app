@@ -2306,6 +2306,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No payment this month'**
   String get sub_no_payment_this_month;
+
+  /// No description provided for @bb_home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get bb_home;
+
+  /// No description provided for @budget_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get budget_title;
+
+  /// No description provided for @budget_outflow.
+  ///
+  /// In en, this message translates to:
+  /// **'Outgoings this month'**
+  String get budget_outflow;
+
+  /// No description provided for @budget_car.
+  ///
+  /// In en, this message translates to:
+  /// **'Car commutes'**
+  String get budget_car;
+
+  /// No description provided for @budget_bike_avoided.
+  ///
+  /// In en, this message translates to:
+  /// **'Avoided by cycling'**
+  String get budget_bike_avoided;
+
+  /// No description provided for @budget_bike_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} this month · {amount} since the start'**
+  String budget_bike_detail(String days, String amount);
+
+  /// No description provided for @budget_history.
+  ///
+  /// In en, this message translates to:
+  /// **'Last six months'**
+  String get budget_history;
+
+  /// No description provided for @budget_history_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a column to open that month.'**
+  String get budget_history_hint;
+
+  /// No description provided for @budget_note.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything comes from the subscriptions and the days already recorded: nothing to enter twice.'**
+  String get budget_note;
+
+  /// No description provided for @budget_less_than.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} less than in {month}'**
+  String budget_less_than(String amount, String month);
+
+  /// No description provided for @budget_more_than.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} more than in {month}'**
+  String budget_more_than(String amount, String month);
+
+  /// No description provided for @home_month.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get home_month;
+
+  /// No description provided for @home_pi_unreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Raspberry Pi unreachable'**
+  String get home_pi_unreachable;
+
+  /// No description provided for @home_pi_not_configured.
+  ///
+  /// In en, this message translates to:
+  /// **'Raspberry Pi not configured'**
+  String get home_pi_not_configured;
+
+  /// No description provided for @home_services_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} services'**
+  String home_services_ok(int done, int total);
+
+  /// No description provided for @home_disk.
+  ///
+  /// In en, this message translates to:
+  /// **'disk'**
+  String get home_disk;
+
+  /// No description provided for @home_downloads_none.
+  ///
+  /// In en, this message translates to:
+  /// **'No download running'**
+  String get home_downloads_none;
+
+  /// No description provided for @home_fuel_station.
+  ///
+  /// In en, this message translates to:
+  /// **'{station} — {count} stations followed'**
+  String home_fuel_station(String station, int count);
+
+  /// No description provided for @home_no_fuel.
+  ///
+  /// In en, this message translates to:
+  /// **'No price recorded yet'**
+  String get home_no_fuel;
+
+  /// No description provided for @home_setup_commute.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your commute up to record your days'**
+  String get home_setup_commute;
 }
 
 class _AppLocalizationsDelegate

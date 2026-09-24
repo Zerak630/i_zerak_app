@@ -674,5 +674,55 @@
 			"average": { "type": "String" }
 		}
 	},
-	"sub_no_payment_this_month": "No payment this month"
+	"sub_no_payment_this_month": "No payment this month",
+	"bb_home": "Home",
+	"budget_title": "Budget",
+	"budget_outflow": "Outgoings this month",
+	"budget_car": "Car commutes",
+	"budget_bike_avoided": "Avoided by cycling",
+	"budget_bike_detail": "{days} this month · {amount} since the start",
+	"@budget_bike_detail": {
+		"placeholders": {
+			"days": { "type": "String" },
+			"amount": { "type": "String" }
+		}
+	},
+	"budget_history": "Last six months",
+	"budget_history_hint": "Tap a column to open that month.",
+	"budget_note": "Everything comes from the subscriptions and the days already recorded: nothing to enter twice.",
+	"budget_less_than": "{amount} less than in {month}",
+	"@budget_less_than": {
+		"placeholders": {
+			"amount": { "type": "String" },
+			"month": { "type": "String" }
+		}
+	},
+	"budget_more_than": "{amount} more than in {month}",
+	"@budget_more_than": {
+		"placeholders": {
+			"amount": { "type": "String" },
+			"month": { "type": "String" }
+		}
+	},
+	"home_month": "This month",
+	"home_pi_unreachable": "Raspberry Pi unreachable",
+	"home_pi_not_configured": "Raspberry Pi not configured",
+	"home_services_ok": "{done} of {total} services",
+	"@home_services_ok": {
+		"placeholders": {
+			"done": { "type": "int" },
+			"total": { "type": "int" }
+		}
+	},
+	"home_disk": "disk",
+	"home_downloads_none": "No download running",
+	"home_fuel_station": "{station} — {count} stations followed",
+	"@home_fuel_station": {
+		"placeholders": {
+			"station": { "type": "String" },
+			"count": { "type": "int" }
+		}
+	},
+	"home_no_fuel": "No price recorded yet",
+	"home_setup_commute": "Set your commute up to record your days"
 }

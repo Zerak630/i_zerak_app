@@ -1339,4 +1339,75 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sub_no_payment_this_month => 'No payment this month';
+
+  @override
+  String get bb_home => 'Home';
+
+  @override
+  String get budget_title => 'Budget';
+
+  @override
+  String get budget_outflow => 'Outgoings this month';
+
+  @override
+  String get budget_car => 'Car commutes';
+
+  @override
+  String get budget_bike_avoided => 'Avoided by cycling';
+
+  @override
+  String budget_bike_detail(String days, String amount) {
+    return '$days this month · $amount since the start';
+  }
+
+  @override
+  String get budget_history => 'Last six months';
+
+  @override
+  String get budget_history_hint => 'Tap a column to open that month.';
+
+  @override
+  String get budget_note =>
+      'Everything comes from the subscriptions and the days already recorded: nothing to enter twice.';
+
+  @override
+  String budget_less_than(String amount, String month) {
+    return '$amount less than in $month';
+  }
+
+  @override
+  String budget_more_than(String amount, String month) {
+    return '$amount more than in $month';
+  }
+
+  @override
+  String get home_month => 'This month';
+
+  @override
+  String get home_pi_unreachable => 'Raspberry Pi unreachable';
+
+  @override
+  String get home_pi_not_configured => 'Raspberry Pi not configured';
+
+  @override
+  String home_services_ok(int done, int total) {
+    return '$done of $total services';
+  }
+
+  @override
+  String get home_disk => 'disk';
+
+  @override
+  String get home_downloads_none => 'No download running';
+
+  @override
+  String home_fuel_station(String station, int count) {
+    return '$station — $count stations followed';
+  }
+
+  @override
+  String get home_no_fuel => 'No price recorded yet';
+
+  @override
+  String get home_setup_commute => 'Set your commute up to record your days';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:i_zerak_app/pages/commute/commute_page.dart';
+import 'package:i_zerak_app/pages/dashboard/dashboard_page.dart';
 import 'package:i_zerak_app/pages/gas_stations/gas_station_page.dart';
 import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/pages/torrents/torrents_page.dart';
@@ -79,10 +80,18 @@ class HomePageState extends State<HomePage> {
           child: GNav(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               gap: 4,
-              padding: const EdgeInsets.all(16.0),
+              // Serre depuis le sixieme onglet : `GNav` ne nomme que l'onglet
+              // actif, mais six icones aux marges d'origine debordaient des
+              // que « Abonnements » etait selectionne.
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 14.0),
               onTabChange: (index) => setState(() => _selectedIndex = index),
               selectedIndex: _selectedIndex,
               tabs: [
+                GButton(
+                  icon: Icons.home_outlined,
+                  text: AppLocalizations.of(context)!.bb_home,
+                  iconActiveColor: Theme.of(context).colorScheme.primary,
+                ),
                 GButton(
                   icon: Icons.euro,
                   text: AppLocalizations.of(context)!.bb_subscriptions,
@@ -103,9 +112,6 @@ class HomePageState extends State<HomePage> {
                   text: AppLocalizations.of(context)!.bb_gas_stations,
                   iconActiveColor: Theme.of(context).colorScheme.primary,
                 ),
-                // Cinquieme onglet : GNav ne nomme que l'onglet actif, les
-                // autres restent des icones, et la barre tient encore sur un
-                // ecran de 360 dp.
                 GButton(
                   icon: Icons.pedal_bike,
                   text: AppLocalizations.of(context)!.bb_commute,
@@ -121,14 +127,16 @@ class HomePageState extends State<HomePage> {
 Widget _getActivePage(int index) {
   switch (index) {
     case 0:
-      return SubscriptionsPage();
+      return DashboardPage();
     case 1:
-      return const TorrentsPage();
+      return SubscriptionsPage();
     case 2:
-      return const SystemPage();
+      return const TorrentsPage();
     case 3:
-      return GasStationPage();
+      return const SystemPage();
     case 4:
+      return GasStationPage();
+    case 5:
       return CommutePage();
     default:
       throw Exception('Invalid index');
