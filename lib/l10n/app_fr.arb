@@ -350,6 +350,7 @@
 	"sub_heaviest": "Le plus lourd : {name}, {amount} par an.",
 	"sub_expand_detail": "Déplier le détail par catégorie",
 	"sub_sorted_by_cost": "Par coût décroissant",
+	"sub_clear_filter": "Afficher toutes les catégories",
 	"sub_filter_all": "Toutes · {count}",
 	"sub_suspended_section": "Suspendus",
 	"sub_out_of_totals": "hors totaux",

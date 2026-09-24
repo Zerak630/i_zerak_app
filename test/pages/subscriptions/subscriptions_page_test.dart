@@ -90,26 +90,31 @@ void main() {
     await tester.pumpAndSettle();
 
     // Chaque categorie et son montant, sous la barre.
-    expect(find.text('Vidéo'), findsNWidgets(2));
+    expect(find.text('Vidéo'), findsOneWidget);
     expect(find.textContaining('19,48'), findsOneWidget);
     expect(find.textContaining('Le plus lourd : Panier de legumes'), findsOneWidget);
   });
 
-  testWidgets('un filtre ne garde que les abonnements de sa categorie', (tester) async {
+  testWidgets('une categorie du detail filtre la liste, et se relache', (tester) async {
     await open(tester);
-    expect(find.text('Netflix'), findsOneWidget);
     expect(find.text('Assurance auto'), findsOneWidget);
 
-    final chip = find.widgetWithText(ChoiceChip, 'Vidéo');
-    await tester.ensureVisible(chip);
+    await tester.tap(find.byIcon(Icons.expand_more));
     await tester.pumpAndSettle();
-    await tester.tap(chip);
+    await tester.tap(find.text('Vidéo'));
     await tester.pumpAndSettle();
 
     expect(find.text('Netflix'), findsOneWidget);
     expect(find.text('Disney+'), findsOneWidget);
     expect(find.text('Assurance auto'), findsNothing);
     expect(find.textContaining('2 abonnements actifs'), findsOneWidget);
+
+    // Le detail peut etre referme entre-temps : la sortie du filtre vit dans
+    // l'en-tete de la liste, qui reste visible.
+    await tester.tap(find.byTooltip('Afficher toutes les catégories'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Assurance auto'), findsOneWidget);
   });
 
   testWidgets('les suspendus sont a part et hors du total', (tester) async {
@@ -125,6 +130,7 @@ void main() {
   testWidgets('le prochain prelevement annonce le jour et le montant', (tester) async {
     await open(tester);
 
+    expect(find.text('Prochain prélèvement'), findsOneWidget);
     expect(find.textContaining('Demain'), findsOneWidget);
     expect(find.textContaining('Disney+'), findsWidgets);
     expect(find.textContaining('3 autres d’ici la fin du mois'), findsOneWidget);

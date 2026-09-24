@@ -1266,6 +1266,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sub_sorted_by_cost => 'By decreasing cost';
 
   @override
+  String get sub_clear_filter => 'Show every category';
+
+  @override
   String sub_filter_all(int count) {
     return 'All · $count';
   }

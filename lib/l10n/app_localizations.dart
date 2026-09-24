@@ -2199,6 +2199,12 @@ abstract class AppLocalizations {
   /// **'By decreasing cost'**
   String get sub_sorted_by_cost;
 
+  /// No description provided for @sub_clear_filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Show every category'**
+  String get sub_clear_filter;
+
   /// No description provided for @sub_filter_all.
   ///
   /// In en, this message translates to:

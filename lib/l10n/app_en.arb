@@ -635,6 +635,7 @@
 	},
 	"sub_expand_detail": "Expand the category breakdown",
 	"sub_sorted_by_cost": "By decreasing cost",
+	"sub_clear_filter": "Show every category",
 	"sub_filter_all": "All · {count}",
 	"@sub_filter_all": {
 		"placeholders": {

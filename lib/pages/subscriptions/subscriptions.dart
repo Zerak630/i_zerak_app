@@ -144,10 +144,6 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
           const SizedBox(height: 12),
           _nextPayment(context, l10n, ledger),
           const SizedBox(height: 14),
-          if (totals.length > 1) ...[
-            _filters(context, l10n, ledger, totals, filter),
-            const SizedBox(height: 10),
-          ],
           _listHeader(context, l10n, visible, filter),
           for (final subscription in visible) ...[
             SubscriptionRow(
@@ -296,67 +292,52 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
 
     return Card(
       margin: EdgeInsets.zero,
-      child: ListTile(
+      child: InkWell(
         onTap: _openPayments,
-        leading: const Icon(Icons.event_outlined),
-        title: Text(
-          days <= 1 ? '$title · ${format.shortDay(next.date)}' : title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Text(
-          others == 0
-              ? next.subscription.name
-              : '${next.subscription.name} · ${l10n.sub_more_this_month(others)}',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        trailing: Chip(
-          label: Text(format.euros(next.amount)),
-          backgroundColor: scheme.primaryContainer,
-          labelStyle: theme.textTheme.labelLarge?.copyWith(color: scheme.onPrimaryContainer),
-          side: BorderSide.none,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+          child: Row(children: [
+            Icon(Icons.event_outlined, color: scheme.onSurfaceVariant),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                // La carte disait quand et combien, jamais de quoi il
+                // s'agissait : le titre porte desormais son nom.
+                Text(
+                  l10n.sub_next_payment,
+                  style: theme.textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  days <= 1 ? '$title · ${format.shortDay(next.date)}' : title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  others == 0
+                      ? next.subscription.name
+                      : '${next.subscription.name} · ${l10n.sub_more_this_month(others)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.outline),
+                ),
+              ]),
+            ),
+            const SizedBox(width: 10),
+            Chip(
+              label: Text(format.euros(next.amount)),
+              backgroundColor: scheme.primaryContainer,
+              labelStyle: theme.textTheme.labelLarge?.copyWith(color: scheme.onPrimaryContainer),
+              side: BorderSide.none,
+            ),
+          ]),
         ),
       ),
     );
   }
-
-  Widget _filters(
-    BuildContext context,
-    AppLocalizations l10n,
-    SubscriptionLedger ledger,
-    List<CategoryTotal> totals,
-    String? filter,
-  ) =>
-      SizedBox(
-        height: 36,
-        // Une rangee defilante, et non une `ListView` : avec une poignee de
-        // categories, tout construire d'un coup evite qu'une puce hors ecran
-        // n'existe pas encore quand on la cherche.
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(children: [
-            ChoiceChip(
-              selected: filter == null,
-              onSelected: (_) => setState(() => _filter = null),
-              label: Text(l10n.sub_filter_all(ledger.active.length)),
-            ),
-            for (final total in totals) ...[
-              const SizedBox(width: 8),
-              ChoiceChip(
-                selected: filter == total.categoryId,
-                onSelected: (selected) =>
-                    setState(() => _filter = selected ? total.categoryId : null),
-                avatar: CircleAvatar(
-                  radius: 5,
-                  backgroundColor: subscriptionColor(context, total.categoryId, _categories),
-                ),
-                label: Text(categoryLabelOf(l10n, total.categoryId, _categories)),
-              ),
-            ],
-          ]),
-        ),
-      );
 
   Widget _listHeader(
     BuildContext context,
@@ -390,6 +371,16 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
               : '${format.euros(total)} ${unitLabel(l10n, _unit)}',
           style: theme.textTheme.labelSmall?.copyWith(color: scheme.outline),
         ),
+        // La sortie du filtre : il se pose depuis le detail deplie, qui peut
+        // etre referme entre-temps. Sans ce bouton, la liste resterait
+        // amputee sans moyen visible de la completer.
+        if (filter != null)
+          IconButton(
+            onPressed: () => setState(() => _filter = null),
+            icon: const Icon(Icons.close, size: 18),
+            visualDensity: VisualDensity.compact,
+            tooltip: l10n.sub_clear_filter,
+          ),
       ]),
     );
   }
