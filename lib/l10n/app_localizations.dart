@@ -2313,6 +2313,36 @@ abstract class AppLocalizations {
   /// **'Home'**
   String get bb_home;
 
+  /// No description provided for @bb_more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get bb_more;
+
+  /// No description provided for @more_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Three tabs at most in the bar. The pin decides which ones.'**
+  String get more_hint;
+
+  /// No description provided for @more_pin.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in the bar'**
+  String get more_pin;
+
+  /// No description provided for @more_unpin.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to this menu'**
+  String get more_unpin;
+
+  /// No description provided for @more_full.
+  ///
+  /// In en, this message translates to:
+  /// **'The bar is full: remove one to add another.'**
+  String get more_full;
+
   /// No description provided for @budget_title.
   ///
   /// In en, this message translates to:

@@ -1344,6 +1344,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bb_home => 'Home';
 
   @override
+  String get bb_more => 'More';
+
+  @override
+  String get more_hint =>
+      'Three tabs at most in the bar. The pin decides which ones.';
+
+  @override
+  String get more_pin => 'Show in the bar';
+
+  @override
+  String get more_unpin => 'Move to this menu';
+
+  @override
+  String get more_full => 'The bar is full: remove one to add another.';
+
+  @override
   String get budget_title => 'Budget';
 
   @override

@@ -7,11 +7,13 @@ import 'package:i_zerak_app/models/subscription_dao.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/gas_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
+import 'package:i_zerak_app/services/repositories/hive/hive_app_preferences.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_commute_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_gas_station_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_server_config_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_subscription_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/type_adapters.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_credentials.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_gas_stations.dart';
@@ -38,6 +40,9 @@ Future<void> setupServiceLocator() async {
   // (donnees carburants, TMDB). Les services du serveur auto-heberge
   // construisent le leur, adosse au certificat epingle.
   getIt.registerLazySingleton<http.Client>(() => http.Client());
+
+  getIt.registerSingleton<IAppPreferences>(
+      HiveAppPreferences(await Hive.openBox<String>('app_prefs')));
 
   // Deux boites : les abonnements typees, et une boite de chaines JSON pour les
   // categories ajoutees a la main (cf. HiveSubscriptionRepository).

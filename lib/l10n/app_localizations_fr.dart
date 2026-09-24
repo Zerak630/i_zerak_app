@@ -1355,6 +1355,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String get bb_home => 'Accueil';
 
   @override
+  String get bb_more => 'Plus';
+
+  @override
+  String get more_hint =>
+      'Trois onglets au maximum dans la barre. L’épingle décide de leur présence.';
+
+  @override
+  String get more_pin => 'Afficher dans la barre';
+
+  @override
+  String get more_unpin => 'Ranger dans ce menu';
+
+  @override
+  String get more_full =>
+      'La barre est pleine : retirez-en un pour en ajouter un autre.';
+
+  @override
   String get budget_title => 'Budget';
 
   @override
