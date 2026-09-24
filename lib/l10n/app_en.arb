@@ -551,5 +551,127 @@
 		}
 	},
 	"goal_delete": "Delete goal",
-	"goal_invalid_amount": "Invalid amount"
+	"goal_invalid_amount": "Invalid amount",
+	"sub_unit_week": "week",
+	"sub_unit_month": "month",
+	"sub_unit_year": "year",
+	"sub_cost_week": "Weekly cost",
+	"sub_cost_month": "Monthly cost",
+	"sub_cost_year": "Yearly cost",
+	"category_home": "Home",
+	"category_insurance": "Insurance",
+	"category_sport": "Sport",
+	"category_video": "Video",
+	"category_telecom": "Telecom",
+	"category_music": "Music",
+	"category_software": "Software",
+	"sub_category_none": "Other",
+	"sub_category": "Category",
+	"sub_new_category": "New",
+	"sub_category_name": "Category name",
+	"icon_group_home": "Home and groceries",
+	"icon_group_leisure": "Leisure",
+	"icon_group_fitness": "Fitness",
+	"icon_group_services": "Transport and services",
+	"sub_choose_icon": "Choose an icon",
+	"sub_change_icon": "Change the icon",
+	"sub_icon_color_hint": "The tint comes from the category: changing it recolours the icon.",
+	"sub_next_payment": "Next payment",
+	"sub_no_date": "Not set",
+	"sub_clear_date": "Clear the date",
+	"sub_repeat_week": "then every {weekday}",
+	"@sub_repeat_week": {
+		"placeholders": {
+			"weekday": { "type": "String" }
+		}
+	},
+	"sub_repeat_month": "then on the {day} of every month",
+	"@sub_repeat_month": {
+		"placeholders": {
+			"day": { "type": "int" }
+		}
+	},
+	"sub_repeat_year": "then on {date} every year",
+	"@sub_repeat_year": {
+		"placeholders": {
+			"date": { "type": "String" }
+		}
+	},
+	"sub_every_weekday": "every {weekday}",
+	"@sub_every_weekday": {
+		"placeholders": {
+			"weekday": { "type": "String" }
+		}
+	},
+	"sub_on_date": "on {date}",
+	"@sub_on_date": {
+		"placeholders": {
+			"date": { "type": "String" }
+		}
+	},
+	"sub_active_hint": "Counted in the totals",
+	"sub_inactive_hint": "Left out of the totals",
+	"sub_saved": "Subscription saved",
+	"sub_deleted": "Subscription deleted",
+	"sub_empty_hint": "Add one with the + button",
+	"sub_active_count": "{count, plural, =0{No active subscription} =1{1 active subscription} other{{count} active subscriptions}}",
+	"@sub_active_count": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"sub_suspended_count": "{count, plural, =1{1 suspended} other{{count} suspended}}",
+	"@sub_suspended_count": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"sub_heaviest": "Heaviest: {name}, {amount} a year.",
+	"@sub_heaviest": {
+		"placeholders": {
+			"name": { "type": "String" },
+			"amount": { "type": "String" }
+		}
+	},
+	"sub_expand_detail": "Expand the category breakdown",
+	"sub_sorted_by_cost": "By decreasing cost",
+	"sub_filter_all": "All · {count}",
+	"@sub_filter_all": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"sub_suspended_section": "Suspended",
+	"sub_out_of_totals": "out of the totals",
+	"sub_if_resumed": "If everything resumed",
+	"sub_today": "Today",
+	"sub_tomorrow": "Tomorrow",
+	"sub_more_this_month": "{count, plural, =1{1 more before the end of the month} other{{count} more before the end of the month}}",
+	"@sub_more_this_month": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"sub_no_upcoming": "No known due date",
+	"sub_no_upcoming_hint": "Set a date to see payments coming",
+	"sub_payments_title": "Payments",
+	"sub_previous_month": "Previous month",
+	"sub_next_month": "Next month",
+	"sub_already_paid": "Already paid",
+	"sub_remaining": "Left to pay",
+	"sub_payments_count": "{count, plural, =0{no payment} =1{1 payment} other{{count} payments}}",
+	"@sub_payments_count": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"sub_month_vs_average": "{month}: {amount}, against an average of {average} a month.",
+	"@sub_month_vs_average": {
+		"placeholders": {
+			"month": { "type": "String" },
+			"amount": { "type": "String" },
+			"average": { "type": "String" }
+		}
+	},
+	"sub_no_payment_this_month": "No payment this month"
 }

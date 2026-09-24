@@ -39,8 +39,12 @@ Future<void> setupServiceLocator() async {
   // construisent le leur, adosse au certificat epingle.
   getIt.registerLazySingleton<http.Client>(() => http.Client());
 
-  getIt.registerSingleton<ISubscriptions>(
-      HiveSubscriptionRepository(await Hive.openBox<Subscription>('subscriptions')));
+  // Deux boites : les abonnements typees, et une boite de chaines JSON pour les
+  // categories ajoutees a la main (cf. HiveSubscriptionRepository).
+  getIt.registerSingleton<ISubscriptions>(HiveSubscriptionRepository(
+    await Hive.openBox<Subscription>('subscriptions'),
+    await Hive.openBox<String>('subscription_prefs'),
+  ));
 
   getIt.registerSingleton<IServerConfig>(
       HiveServerConfigRepository(await Hive.openBox<ServerConfig>('server_config')));

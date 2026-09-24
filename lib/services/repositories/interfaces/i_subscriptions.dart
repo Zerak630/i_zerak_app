@@ -7,4 +7,11 @@ abstract class ISubscriptions {
   Future<void> updateSubscription(Subscription subscription);
 
   Future<void> delete(String id);
+
+  /// Les categories livrees, suivies de celles ajoutees a la main.
+  Future<List<SubscriptionCategory>> getCategories();
+
+  /// Ajoute une categorie, ou remplace celle qui porte le meme identifiant.
+  /// Une categorie livree n'est pas stockee : elle existe deja dans le code.
+  Future<void> saveCategory(SubscriptionCategory category);
 }

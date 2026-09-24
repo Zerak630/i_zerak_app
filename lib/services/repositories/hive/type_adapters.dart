@@ -19,7 +19,9 @@ import 'package:i_zerak_app/models/subscription_dao.dart';
 /// Identifiants de type deja pris : 0 `Subscription`, 1 `SubscriptionFrequency`,
 /// 2 `ServerConfig`. Un identifiant libere ne doit jamais etre reattribue.
 ///
-/// Numeros de champ brules : `ServerConfig` 6, qui portait `defaultCategory`.
+/// Numeros de champ brules : `ServerConfig` 6, qui portait `defaultCategory` ;
+/// `Subscription` 5, qui portait `iconCode`, le point de code d'une icone
+/// saisi a la main.
 
 class SubscriptionTypeAdapter extends TypeAdapter<Subscription> {
   @override
@@ -37,15 +39,21 @@ class SubscriptionTypeAdapter extends TypeAdapter<Subscription> {
       name: fields[1] as String? ?? '',
       price: (fields[2] as num?)?.toDouble() ?? 0.0,
       isActive: fields[3] as bool? ?? true,
-      subscriptionType: fields[4] as SubscriptionFrequency? ?? SubscriptionFrequency.weekly,
-      iconCode: fields[5] as int? ?? Subscription.defaultIconCode,
+      subscriptionType: fields[4] as SubscriptionFrequency? ?? SubscriptionFrequency.monthly,
+      // Le champ 5 portait `iconCode`. Les enregistrements anterieurs le
+      // contiennent encore : il est lu dans la map, puis ignore.
+      categoryId: fields[6] as String?,
+      nextPayment: fields[7] as DateTime?,
+      iconId: fields[8] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Subscription obj) {
     writer
-      ..writeByte(6)
+      // Doit valoir exactement le nombre de paires ecrites ci-dessous. Une
+      // erreur ici ne leve aucune exception : elle corrompt a la relecture.
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -56,8 +64,12 @@ class SubscriptionTypeAdapter extends TypeAdapter<Subscription> {
       ..write(obj.isActive)
       ..writeByte(4)
       ..write(obj.subscriptionType)
-      ..writeByte(5)
-      ..write(obj.iconCode);
+      ..writeByte(6)
+      ..write(obj.categoryId)
+      ..writeByte(7)
+      ..write(obj.nextPayment)
+      ..writeByte(8)
+      ..write(obj.iconId);
   }
 
   @override

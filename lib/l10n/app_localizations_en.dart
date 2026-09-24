@@ -1108,4 +1108,232 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goal_invalid_amount => 'Invalid amount';
+
+  @override
+  String get sub_unit_week => 'week';
+
+  @override
+  String get sub_unit_month => 'month';
+
+  @override
+  String get sub_unit_year => 'year';
+
+  @override
+  String get sub_cost_week => 'Weekly cost';
+
+  @override
+  String get sub_cost_month => 'Monthly cost';
+
+  @override
+  String get sub_cost_year => 'Yearly cost';
+
+  @override
+  String get category_home => 'Home';
+
+  @override
+  String get category_insurance => 'Insurance';
+
+  @override
+  String get category_sport => 'Sport';
+
+  @override
+  String get category_video => 'Video';
+
+  @override
+  String get category_telecom => 'Telecom';
+
+  @override
+  String get category_music => 'Music';
+
+  @override
+  String get category_software => 'Software';
+
+  @override
+  String get sub_category_none => 'Other';
+
+  @override
+  String get sub_category => 'Category';
+
+  @override
+  String get sub_new_category => 'New';
+
+  @override
+  String get sub_category_name => 'Category name';
+
+  @override
+  String get icon_group_home => 'Home and groceries';
+
+  @override
+  String get icon_group_leisure => 'Leisure';
+
+  @override
+  String get icon_group_fitness => 'Fitness';
+
+  @override
+  String get icon_group_services => 'Transport and services';
+
+  @override
+  String get sub_choose_icon => 'Choose an icon';
+
+  @override
+  String get sub_change_icon => 'Change the icon';
+
+  @override
+  String get sub_icon_color_hint =>
+      'The tint comes from the category: changing it recolours the icon.';
+
+  @override
+  String get sub_next_payment => 'Next payment';
+
+  @override
+  String get sub_no_date => 'Not set';
+
+  @override
+  String get sub_clear_date => 'Clear the date';
+
+  @override
+  String sub_repeat_week(String weekday) {
+    return 'then every $weekday';
+  }
+
+  @override
+  String sub_repeat_month(int day) {
+    return 'then on the $day of every month';
+  }
+
+  @override
+  String sub_repeat_year(String date) {
+    return 'then on $date every year';
+  }
+
+  @override
+  String sub_every_weekday(String weekday) {
+    return 'every $weekday';
+  }
+
+  @override
+  String sub_on_date(String date) {
+    return 'on $date';
+  }
+
+  @override
+  String get sub_active_hint => 'Counted in the totals';
+
+  @override
+  String get sub_inactive_hint => 'Left out of the totals';
+
+  @override
+  String get sub_saved => 'Subscription saved';
+
+  @override
+  String get sub_deleted => 'Subscription deleted';
+
+  @override
+  String get sub_empty_hint => 'Add one with the + button';
+
+  @override
+  String sub_active_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count active subscriptions',
+      one: '1 active subscription',
+      zero: 'No active subscription',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sub_suspended_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count suspended',
+      one: '1 suspended',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sub_heaviest(String name, String amount) {
+    return 'Heaviest: $name, $amount a year.';
+  }
+
+  @override
+  String get sub_expand_detail => 'Expand the category breakdown';
+
+  @override
+  String get sub_sorted_by_cost => 'By decreasing cost';
+
+  @override
+  String sub_filter_all(int count) {
+    return 'All · $count';
+  }
+
+  @override
+  String get sub_suspended_section => 'Suspended';
+
+  @override
+  String get sub_out_of_totals => 'out of the totals';
+
+  @override
+  String get sub_if_resumed => 'If everything resumed';
+
+  @override
+  String get sub_today => 'Today';
+
+  @override
+  String get sub_tomorrow => 'Tomorrow';
+
+  @override
+  String sub_more_this_month(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more before the end of the month',
+      one: '1 more before the end of the month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sub_no_upcoming => 'No known due date';
+
+  @override
+  String get sub_no_upcoming_hint => 'Set a date to see payments coming';
+
+  @override
+  String get sub_payments_title => 'Payments';
+
+  @override
+  String get sub_previous_month => 'Previous month';
+
+  @override
+  String get sub_next_month => 'Next month';
+
+  @override
+  String get sub_already_paid => 'Already paid';
+
+  @override
+  String get sub_remaining => 'Left to pay';
+
+  @override
+  String sub_payments_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments',
+      one: '1 payment',
+      zero: 'no payment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sub_month_vs_average(String month, String amount, String average) {
+    return '$month: $amount, against an average of $average a month.';
+  }
+
+  @override
+  String get sub_no_payment_this_month => 'No payment this month';
 }

@@ -1946,6 +1946,360 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid amount'**
   String get goal_invalid_amount;
+
+  /// No description provided for @sub_unit_week.
+  ///
+  /// In en, this message translates to:
+  /// **'week'**
+  String get sub_unit_week;
+
+  /// No description provided for @sub_unit_month.
+  ///
+  /// In en, this message translates to:
+  /// **'month'**
+  String get sub_unit_month;
+
+  /// No description provided for @sub_unit_year.
+  ///
+  /// In en, this message translates to:
+  /// **'year'**
+  String get sub_unit_year;
+
+  /// No description provided for @sub_cost_week.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly cost'**
+  String get sub_cost_week;
+
+  /// No description provided for @sub_cost_month.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly cost'**
+  String get sub_cost_month;
+
+  /// No description provided for @sub_cost_year.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly cost'**
+  String get sub_cost_year;
+
+  /// No description provided for @category_home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get category_home;
+
+  /// No description provided for @category_insurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance'**
+  String get category_insurance;
+
+  /// No description provided for @category_sport.
+  ///
+  /// In en, this message translates to:
+  /// **'Sport'**
+  String get category_sport;
+
+  /// No description provided for @category_video.
+  ///
+  /// In en, this message translates to:
+  /// **'Video'**
+  String get category_video;
+
+  /// No description provided for @category_telecom.
+  ///
+  /// In en, this message translates to:
+  /// **'Telecom'**
+  String get category_telecom;
+
+  /// No description provided for @category_music.
+  ///
+  /// In en, this message translates to:
+  /// **'Music'**
+  String get category_music;
+
+  /// No description provided for @category_software.
+  ///
+  /// In en, this message translates to:
+  /// **'Software'**
+  String get category_software;
+
+  /// No description provided for @sub_category_none.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get sub_category_none;
+
+  /// No description provided for @sub_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get sub_category;
+
+  /// No description provided for @sub_new_category.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get sub_new_category;
+
+  /// No description provided for @sub_category_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Category name'**
+  String get sub_category_name;
+
+  /// No description provided for @icon_group_home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home and groceries'**
+  String get icon_group_home;
+
+  /// No description provided for @icon_group_leisure.
+  ///
+  /// In en, this message translates to:
+  /// **'Leisure'**
+  String get icon_group_leisure;
+
+  /// No description provided for @icon_group_fitness.
+  ///
+  /// In en, this message translates to:
+  /// **'Fitness'**
+  String get icon_group_fitness;
+
+  /// No description provided for @icon_group_services.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport and services'**
+  String get icon_group_services;
+
+  /// No description provided for @sub_choose_icon.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an icon'**
+  String get sub_choose_icon;
+
+  /// No description provided for @sub_change_icon.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the icon'**
+  String get sub_change_icon;
+
+  /// No description provided for @sub_icon_color_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'The tint comes from the category: changing it recolours the icon.'**
+  String get sub_icon_color_hint;
+
+  /// No description provided for @sub_next_payment.
+  ///
+  /// In en, this message translates to:
+  /// **'Next payment'**
+  String get sub_next_payment;
+
+  /// No description provided for @sub_no_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get sub_no_date;
+
+  /// No description provided for @sub_clear_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the date'**
+  String get sub_clear_date;
+
+  /// No description provided for @sub_repeat_week.
+  ///
+  /// In en, this message translates to:
+  /// **'then every {weekday}'**
+  String sub_repeat_week(String weekday);
+
+  /// No description provided for @sub_repeat_month.
+  ///
+  /// In en, this message translates to:
+  /// **'then on the {day} of every month'**
+  String sub_repeat_month(int day);
+
+  /// No description provided for @sub_repeat_year.
+  ///
+  /// In en, this message translates to:
+  /// **'then on {date} every year'**
+  String sub_repeat_year(String date);
+
+  /// No description provided for @sub_every_weekday.
+  ///
+  /// In en, this message translates to:
+  /// **'every {weekday}'**
+  String sub_every_weekday(String weekday);
+
+  /// No description provided for @sub_on_date.
+  ///
+  /// In en, this message translates to:
+  /// **'on {date}'**
+  String sub_on_date(String date);
+
+  /// No description provided for @sub_active_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Counted in the totals'**
+  String get sub_active_hint;
+
+  /// No description provided for @sub_inactive_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Left out of the totals'**
+  String get sub_inactive_hint;
+
+  /// No description provided for @sub_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription saved'**
+  String get sub_saved;
+
+  /// No description provided for @sub_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription deleted'**
+  String get sub_deleted;
+
+  /// No description provided for @sub_empty_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add one with the + button'**
+  String get sub_empty_hint;
+
+  /// No description provided for @sub_active_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No active subscription} =1{1 active subscription} other{{count} active subscriptions}}'**
+  String sub_active_count(int count);
+
+  /// No description provided for @sub_suspended_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 suspended} other{{count} suspended}}'**
+  String sub_suspended_count(int count);
+
+  /// No description provided for @sub_heaviest.
+  ///
+  /// In en, this message translates to:
+  /// **'Heaviest: {name}, {amount} a year.'**
+  String sub_heaviest(String name, String amount);
+
+  /// No description provided for @sub_expand_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand the category breakdown'**
+  String get sub_expand_detail;
+
+  /// No description provided for @sub_sorted_by_cost.
+  ///
+  /// In en, this message translates to:
+  /// **'By decreasing cost'**
+  String get sub_sorted_by_cost;
+
+  /// No description provided for @sub_filter_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All · {count}'**
+  String sub_filter_all(int count);
+
+  /// No description provided for @sub_suspended_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get sub_suspended_section;
+
+  /// No description provided for @sub_out_of_totals.
+  ///
+  /// In en, this message translates to:
+  /// **'out of the totals'**
+  String get sub_out_of_totals;
+
+  /// No description provided for @sub_if_resumed.
+  ///
+  /// In en, this message translates to:
+  /// **'If everything resumed'**
+  String get sub_if_resumed;
+
+  /// No description provided for @sub_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get sub_today;
+
+  /// No description provided for @sub_tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get sub_tomorrow;
+
+  /// No description provided for @sub_more_this_month.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more before the end of the month} other{{count} more before the end of the month}}'**
+  String sub_more_this_month(int count);
+
+  /// No description provided for @sub_no_upcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'No known due date'**
+  String get sub_no_upcoming;
+
+  /// No description provided for @sub_no_upcoming_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a date to see payments coming'**
+  String get sub_no_upcoming_hint;
+
+  /// No description provided for @sub_payments_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get sub_payments_title;
+
+  /// No description provided for @sub_previous_month.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get sub_previous_month;
+
+  /// No description provided for @sub_next_month.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get sub_next_month;
+
+  /// No description provided for @sub_already_paid.
+  ///
+  /// In en, this message translates to:
+  /// **'Already paid'**
+  String get sub_already_paid;
+
+  /// No description provided for @sub_remaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Left to pay'**
+  String get sub_remaining;
+
+  /// No description provided for @sub_payments_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no payment} =1{1 payment} other{{count} payments}}'**
+  String sub_payments_count(int count);
+
+  /// No description provided for @sub_month_vs_average.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}: {amount}, against an average of {average} a month.'**
+  String sub_month_vs_average(String month, String amount, String average);
+
+  /// No description provided for @sub_no_payment_this_month.
+  ///
+  /// In en, this message translates to:
+  /// **'No payment this month'**
+  String get sub_no_payment_this_month;
 }
 
 class _AppLocalizationsDelegate
