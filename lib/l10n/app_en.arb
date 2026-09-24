@@ -720,6 +720,9 @@
 		}
 	},
 	"home_disk": "disk",
+	"home_metric_temp": "temp.",
+	"home_metric_load": "load",
+	"home_metric_services": "services",
 	"home_downloads_none": "No download running",
 	"home_fuel_station": "{station} — {count} stations followed",
 	"@home_fuel_station": {

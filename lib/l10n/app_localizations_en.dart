@@ -1414,6 +1414,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get home_disk => 'disk';
 
   @override
+  String get home_metric_temp => 'temp.';
+
+  @override
+  String get home_metric_load => 'load';
+
+  @override
+  String get home_metric_services => 'services';
+
+  @override
   String get home_downloads_none => 'No download running';
 
   @override

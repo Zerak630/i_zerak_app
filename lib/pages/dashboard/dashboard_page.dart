@@ -394,7 +394,14 @@ class _DashboardPageState extends State<DashboardPage> {
                   color: scheme.secondary,
                 ),
               ),
-              Container(width: 1, height: 38, color: theme.dividerColor),
+              Container(
+                width: 1,
+                height: 38,
+                // Marges de part et d'autre : colle au chiffre, le filet se
+                // lisait comme un caractere de plus.
+                margin: const EdgeInsets.symmetric(horizontal: 14),
+                color: theme.dividerColor,
+              ),
               Expanded(
                 child: _figure(
                   context,
@@ -505,7 +512,13 @@ class _DashboardPageState extends State<DashboardPage> {
               width: 9,
               height: 9,
               decoration: BoxDecoration(
-                color: active == snapshot.services.length ? scheme.primary : scheme.error,
+                // Rouge seulement quand plus rien ne tourne : un service
+                // arrete volontairement ne merite pas la couleur d'erreur.
+                color: switch (active) {
+                  0 => scheme.error,
+                  _ when active == snapshot.services.length => scheme.primary,
+                  _ => scheme.tertiary,
+                },
                 shape: BoxShape.circle,
               ),
             ),
@@ -529,14 +542,16 @@ class _DashboardPageState extends State<DashboardPage> {
                 value: stats.cpuTempC == null
                     ? '—'
                     : '${stats.cpuTempC!.toStringAsFixed(0)} °C',
-                label: l10n.cpu_temp,
+                // Libelles courts : « Température CPU » se coupe au quart de
+                // la largeur, et la valeur perd alors son unite de sens.
+                label: l10n.home_metric_temp,
               ),
             ),
             Expanded(
               child: _metric(
                 context,
                 value: stats.load1.toStringAsFixed(2),
-                label: l10n.load_average,
+                label: l10n.home_metric_load,
               ),
             ),
             Expanded(
@@ -550,8 +565,7 @@ class _DashboardPageState extends State<DashboardPage> {
               child: _metric(
                 context,
                 value: '$active/${snapshot.services.length}',
-                label: l10n.home_services_ok(active, snapshot.services.length),
-                showLabel: false,
+                label: l10n.home_metric_services,
               ),
             ),
           ]),
@@ -560,18 +574,13 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _metric(
-    BuildContext context, {
-    required String value,
-    required String label,
-    bool showLabel = true,
-  }) {
+  Widget _metric(BuildContext context, {required String value, required String label}) {
     final theme = Theme.of(context);
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(value, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
       const SizedBox(height: 2),
       Text(
-        showLabel ? label : label.split(' ').last,
+        label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline),

@@ -2433,6 +2433,24 @@ abstract class AppLocalizations {
   /// **'disk'**
   String get home_disk;
 
+  /// No description provided for @home_metric_temp.
+  ///
+  /// In en, this message translates to:
+  /// **'temp.'**
+  String get home_metric_temp;
+
+  /// No description provided for @home_metric_load.
+  ///
+  /// In en, this message translates to:
+  /// **'load'**
+  String get home_metric_load;
+
+  /// No description provided for @home_metric_services.
+  ///
+  /// In en, this message translates to:
+  /// **'services'**
+  String get home_metric_services;
+
   /// No description provided for @home_downloads_none.
   ///
   /// In en, this message translates to:

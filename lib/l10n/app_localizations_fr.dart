@@ -1426,6 +1426,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get home_disk => 'disque';
 
   @override
+  String get home_metric_temp => 'temp.';
+
+  @override
+  String get home_metric_load => 'charge';
+
+  @override
+  String get home_metric_services => 'services';
+
+  @override
   String get home_downloads_none => 'Aucun téléchargement en cours';
 
   @override
