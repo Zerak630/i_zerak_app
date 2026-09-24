@@ -52,7 +52,10 @@ class CategoryBreakdown extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final legend = totals.take(3).toList();
+    // Deux categories nommees, pas trois : au-dela, les libelles se coupent au
+    // milieu et emportent le pourcentage avec eux, qui est tout l'interet de la
+    // legende. Le reste tient dans « + N », et le detail est a un appui.
+    final legend = totals.take(2).toList();
     final hidden = totals.length - legend.length;
 
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -65,8 +68,15 @@ class CategoryBreakdown extends StatelessWidget {
             Semantics(
               label: l10n.sub_expand_detail,
               child: SizedBox(
+                key: const Key('subscription-category-bar'),
                 height: 10,
-                child: Row(children: [
+                child: Row(
+                  // `stretch`, et non l'alignement centre par defaut : celui-ci
+                  // laisse ses enfants libres en hauteur, et un `DecoratedBox`
+                  // sans enfant se replie alors sur zero pixel. La barre
+                  // occupait bien sa place, sans rien peindre.
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                   for (var i = 0; i < totals.length; i++) ...[
                     if (i > 0) const SizedBox(width: 2),
                     Expanded(
@@ -81,7 +91,8 @@ class CategoryBreakdown extends StatelessWidget {
                       ),
                     ),
                   ],
-                ]),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 10),

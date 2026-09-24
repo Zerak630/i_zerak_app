@@ -69,6 +69,19 @@ void main() {
     expect(find.textContaining('936,00'), findsOneWidget);
   });
 
+  testWidgets('la barre de repartition est reellement dessinee', (tester) async {
+    await open(tester);
+
+    final bar = find.byKey(const Key('subscription-category-bar'));
+    final segments = find.descendant(of: bar, matching: find.byType(DecoratedBox));
+
+    // Un bloc par categorie, et surtout une hauteur non nulle : sans
+    // `stretch`, les blocs occupaient leur largeur mais aucune hauteur.
+    expect(segments, findsNWidgets(3));
+    expect(tester.getSize(segments.first).height, 10);
+    expect(tester.getSize(segments.first).width, greaterThan(0));
+  });
+
   testWidgets('la barre se deplie sur le detail par categorie', (tester) async {
     await open(tester);
     expect(find.textContaining('Le plus lourd'), findsNothing);
