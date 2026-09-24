@@ -11,6 +11,7 @@ import 'package:i_zerak_app/pages/gas_stations/widgets/fuel_label.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
+import 'package:i_zerak_app/utils/confirmation_snack_bar.dart';
 
 /// L'onglet Velo : un appui par jour, a velo ou en voiture, et ce que ca
 /// rapporte.
@@ -157,22 +158,12 @@ class _CommutePageState extends State<CommutePage> {
   }
 
   /// Simple accuse de reception : l'annulation se fait depuis la carte du jour,
-  /// qui reste affichee. Une action rend une snackbar persistante par defaut,
-  /// d'ou `persist: false` pour qu'elle parte seule.
+  /// qui reste affichee.
   void _confirm(String message) {
     if (!mounted) {
       return;
     }
-    final l10n = AppLocalizations.of(context)!;
-    final messenger = ScaffoldMessenger.of(context);
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 3),
-        persist: false,
-        action: SnackBarAction(label: l10n.ok, onPressed: messenger.hideCurrentSnackBar),
-      ));
+    showConfirmation(context, message);
   }
 
   Future<void> _undo(DateTime date) async {

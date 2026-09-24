@@ -8,6 +8,7 @@ import 'package:i_zerak_app/pages/subscriptions/widgets/subscription_sheet.dart'
 import 'package:i_zerak_app/pages/subscriptions/widgets/subscription_ui.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
+import 'package:i_zerak_app/utils/confirmation_snack_bar.dart';
 
 /// L'onglet Abonnements.
 ///
@@ -64,22 +65,6 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
     }
   }
 
-  /// Une confirmation breve, qui s'efface seule : le geste est deja fait, et le
-  /// bandeau ne doit pas attendre qu'on s'en occupe.
-  void _confirm(String message) {
-    final messenger = ScaffoldMessenger.of(context);
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 3),
-        action: SnackBarAction(
-          label: AppLocalizations.of(context)!.ok,
-          onPressed: messenger.hideCurrentSnackBar,
-        ),
-      ));
-  }
-
   Future<void> _edit([Subscription? subscription]) async {
     final l10n = AppLocalizations.of(context)!;
     final result = await showSubscriptionSheet(
@@ -94,7 +79,10 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
     }
     await _load();
     if (mounted) {
-      _confirm(result == SubscriptionSheetResult.deleted ? l10n.sub_deleted : l10n.sub_saved);
+      showConfirmation(
+        context,
+        result == SubscriptionSheetResult.deleted ? l10n.sub_deleted : l10n.sub_saved,
+      );
     }
   }
 

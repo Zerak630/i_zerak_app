@@ -143,6 +143,26 @@ void main() {
     expect(store.items.values.single.name, 'Spotify');
   });
 
+  testWidgets('la confirmation s efface seule, sans qu on la touche', (tester) async {
+    store = MemorySubscriptions();
+    await open(tester);
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextFormField, 'Nom'), 'Spotify');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Prix'), '11,99');
+    await tester.tap(find.widgetWithText(FilledButton, 'Ajouter'));
+    await tester.pumpAndSettle();
+    expect(find.text('Abonnement enregistré'), findsOneWidget);
+
+    // Une action rend le bandeau persistant par defaut : sans `persist: false`,
+    // il attendrait indefiniment qu'on appuie sur OK.
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Abonnement enregistré'), findsNothing);
+  });
+
   testWidgets('un prix vide ou nul est refuse', (tester) async {
     store = MemorySubscriptions();
     await open(tester);
