@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/agent_dao.dart';
 import 'package:i_zerak_app/models/commute_dao.dart' hide dateOnly, roundCents;
+import 'package:i_zerak_app/models/companion_dao.dart';
 import 'package:i_zerak_app/services/agent/agent_service.dart';
 import 'package:i_zerak_app/models/gas_station_dao.dart';
 import 'package:i_zerak_app/models/torrent_dao.dart';
@@ -161,5 +162,48 @@ void main() {
 
     expect(find.text('Budget'), findsOneWidget);
     expect(find.text('Sorties du mois'.toUpperCase()), findsOneWidget);
+  });
+testWidgets('le defi du mois tient sur une ligne et ouvre sa page', (tester) async {
+    commute = MemoryCommute(
+      settings: _settings,
+      days: [
+        for (final day in [14, 15, 16, 17])
+          CommuteDay(
+            date: DateTime(2026, 9, day),
+            mode: CommuteMode.bike,
+            amount: 1.09,
+            pricePerLitre: 1.689,
+            priceSource: PriceSource.live,
+          ),
+      ],
+      challenges: [ChallengeTarget(month: DateTime(2026, 9), target: 10)],
+    );
+    await open(tester);
+
+    expect(find.text('Défi du mois'), findsOneWidget);
+    expect(
+      find.text('Il en reste 6 à faire, et 9 jours ouvrés pour les faire.'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Défi du mois'));
+    await tester.pumpAndSettle();
+
+    // La page poussee montre le pas-a-pas, que la carte n'a pas.
+    expect(find.text('Cible du mois'), findsOneWidget);
+  });
+
+  testWidgets('sans cible, la carte invite a en fixer une', (tester) async {
+    await open(tester);
+
+    expect(find.text('Défi du mois'), findsOneWidget);
+    expect(find.text('Se fixer une cible'), findsOneWidget);
+  });
+
+  testWidgets('sans trajet regle, le defi ne s affiche pas', (tester) async {
+    commute = MemoryCommute();
+    await open(tester);
+
+    expect(find.text('Défi du mois'), findsNothing);
   });
 }

@@ -3,13 +3,17 @@
 /// Dart pur : la regle des trois epingles se teste sans widgets.
 library;
 
+/// Dans l'ordre ou le menu « Plus » les presente : d'abord ce qui se saisit
+/// tous les jours, ensuite le serveur. L'ordre peut changer sans rien casser,
+/// les onglets epingles etant retenus par leur nom.
 enum AppTab {
   home,
   subscriptions,
+  commute,
+  goals,
   torrents,
   system,
-  gas,
-  commute;
+  gas;
 
   static AppTab? fromName(String? raw) {
     for (final tab in values) {

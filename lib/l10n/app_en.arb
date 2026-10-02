@@ -732,5 +732,222 @@
 		}
 	},
 	"home_no_fuel": "No price recorded yet",
-	"home_setup_commute": "Set your commute up to record your days"
+	"home_setup_commute": "Set your commute up to record your days",
+	"bb_goals": "Goals",
+	"goals_rate": "Your pace",
+	"goals_rate_per_month": "{amount} per month",
+	"@goals_rate_per_month": {
+		"placeholders": {
+			"amount": { "type": "String" }
+		}
+	},
+	"goals_rate_trips": "{trips} bike trips per week",
+	"@goals_rate_trips": {
+		"placeholders": {
+			"trips": { "type": "String" }
+		}
+	},
+	"goals_rate_window_recent": "8 weeks",
+	"goals_rate_window_all": "Since the start",
+	"goals_rate_window_hint": "This choice sets every date below.",
+	"goals_rate_unknown": "Not enough trips yet to work out a pace.",
+	"goals_forecast": "around {date}",
+	"@goals_forecast": {
+		"placeholders": {
+			"date": { "type": "String" }
+		}
+	},
+	"goals_forecast_year": "not before {year}, at this pace",
+	"@goals_forecast_year": {
+		"placeholders": {
+			"year": { "type": "String" }
+		}
+	},
+	"goals_forecast_trips": "{count, plural, =1{1 trip} other{{count} trips}}",
+	"@goals_forecast_trips": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"goals_shared_pot": "Purchases all draw on the same savings: validating one pushes the others back.",
+	"goals_reached_section": "Already reached",
+	"goals_empty": "No goal yet",
+	"goals_empty_hint": "A goal turns the savings into a date: “the helmet, around 10 April”.",
+	"goals_active": "{count, plural, =0{No goal under way} =1{1 goal under way} other{{count} goals under way}}",
+	"@goals_active": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"goals_reached_count": "{count, plural, =1{1 goal reached} other{{count} goals reached}}",
+	"@goals_reached_count": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"regularity_title": "Regularity",
+	"regularity_streak": "Current streak",
+	"regularity_streak_days": "{count, plural, =0{No bike day in a row} =1{1 bike day in a row} other{{count} bike days in a row}}",
+	"@regularity_streak_days": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"regularity_record": "{count, plural, =1{Record: 1 day, in {month}} other{Record: {count} days, in {month}}}",
+	"@regularity_record": {
+		"placeholders": {
+			"count": { "type": "int" },
+			"month": { "type": "String" }
+		}
+	},
+	"regularity_record_none": "No streak yet",
+	"regularity_record_held": "Your record",
+	"regularity_to_beat": "{count, plural, =1{1 more to beat it} other{{count} more to beat it}}",
+	"@regularity_to_beat": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"regularity_since": "Since {date}",
+	"@regularity_since": {
+		"placeholders": {
+			"date": { "type": "String" }
+		}
+	},
+	"regularity_last_weeks": "{count, plural, =1{The last week} other{The last {count} weeks}}",
+	"@regularity_last_weeks": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"regularity_recorded_days": "{count, plural, =1{1 day recorded} other{{count} days recorded}}",
+	"@regularity_recorded_days": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"regularity_weekdays": "By day of the week",
+	"regularity_weekday_ratio": "{bike}/{recorded}",
+	"@regularity_weekday_ratio": {
+		"placeholders": {
+			"bike": { "type": "int" },
+			"recorded": { "type": "int" }
+		}
+	},
+	"regularity_weak_day": "{day} is your weak spot: {cars} car days out of {total}.",
+	"@regularity_weak_day": {
+		"placeholders": {
+			"day": { "type": "String" },
+			"cars": { "type": "int" },
+			"total": { "type": "int" }
+		}
+	},
+	"regularity_weak_day_lazy": "{day} is your weak spot: {cars} car days out of {total}, {lazy} of them out of laziness.",
+	"@regularity_weak_day_lazy": {
+		"placeholders": {
+			"day": { "type": "String" },
+			"cars": { "type": "int" },
+			"total": { "type": "int" },
+			"lazy": { "type": "int" }
+		}
+	},
+	"regularity_best_month": "Best month",
+	"regularity_month_detail": "{bike} days out of {recorded}",
+	"@regularity_month_detail": {
+		"placeholders": {
+			"bike": { "type": "int" },
+			"recorded": { "type": "int" }
+		}
+	},
+	"regularity_flawless": "Never by car",
+	"regularity_legend_none": "nothing recorded",
+	"regularity_rule": "A day with nothing recorded does not break the streak: only the days you entered count.",
+	"regularity_empty": "Record a few days to see your streaks.",
+	"regularity_entry_streak": "{count, plural, =0{no streak under way} =1{a 1-day streak} other{a {count}-day streak}}",
+	"@regularity_entry_streak": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"challenge_title": "Monthly challenge",
+	"challenge_of_target": "of {target}",
+	"@challenge_of_target": {
+		"placeholders": {
+			"target": { "type": "int" }
+		}
+	},
+	"challenge_subtitle": "bike days in {month}",
+	"@challenge_subtitle": {
+		"placeholders": {
+			"month": { "type": "String" }
+		}
+	},
+	"challenge_remaining": "{missing, plural, =1{1 to go, and {days} working days to do it.} other{{missing} to go, and {days} working days to do them.}}",
+	"@challenge_remaining": {
+		"placeholders": {
+			"missing": { "type": "int" },
+			"days": { "type": "int" }
+		}
+	},
+	"challenge_reached": "Challenge met — {done} days out of {target}.",
+	"@challenge_reached": {
+		"placeholders": {
+			"done": { "type": "int" },
+			"target": { "type": "int" }
+		}
+	},
+	"challenge_impossible": "Out of reach this month: {missing} to go, {days} working days left.",
+	"@challenge_impossible": {
+		"placeholders": {
+			"missing": { "type": "int" },
+			"days": { "type": "int" }
+		}
+	},
+	"challenge_day_by_day": "{month}, day by day",
+	"@challenge_day_by_day": {
+		"placeholders": {
+			"month": { "type": "String" }
+		}
+	},
+	"challenge_workdays": "{count, plural, =1{1 working day} other{{count} working days}}",
+	"@challenge_workdays": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"challenge_target": "Target for the month",
+	"challenge_suggested": "suggested from your last 3 months: {count}",
+	"@challenge_suggested": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"challenge_suggested_none": "no history yet to suggest a target",
+	"challenge_less": "Less",
+	"challenge_more": "More",
+	"challenge_past": "Earlier months",
+	"challenge_past_reached": "met — {done} of {target}",
+	"@challenge_past_reached": {
+		"placeholders": {
+			"done": { "type": "int" },
+			"target": { "type": "int" }
+		}
+	},
+	"challenge_past_missed": "{done} of {target}",
+	"@challenge_past_missed": {
+		"placeholders": {
+			"done": { "type": "int" },
+			"target": { "type": "int" }
+		}
+	},
+	"challenge_none": "No target this month",
+	"challenge_none_hint": "One figure to aim at, and the app says whether it is still within reach.",
+	"challenge_set": "Set a target",
+	"challenge_card_done": "{done} bike days out of {target}",
+	"@challenge_card_done": {
+		"placeholders": {
+			"done": { "type": "int" },
+			"target": { "type": "int" }
+		}
+	}
 }

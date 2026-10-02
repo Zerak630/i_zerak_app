@@ -1435,4 +1435,309 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get home_setup_commute => 'Set your commute up to record your days';
+
+  @override
+  String get bb_goals => 'Goals';
+
+  @override
+  String get goals_rate => 'Your pace';
+
+  @override
+  String goals_rate_per_month(String amount) {
+    return '$amount per month';
+  }
+
+  @override
+  String goals_rate_trips(String trips) {
+    return '$trips bike trips per week';
+  }
+
+  @override
+  String get goals_rate_window_recent => '8 weeks';
+
+  @override
+  String get goals_rate_window_all => 'Since the start';
+
+  @override
+  String get goals_rate_window_hint => 'This choice sets every date below.';
+
+  @override
+  String get goals_rate_unknown => 'Not enough trips yet to work out a pace.';
+
+  @override
+  String goals_forecast(String date) {
+    return 'around $date';
+  }
+
+  @override
+  String goals_forecast_year(String year) {
+    return 'not before $year, at this pace';
+  }
+
+  @override
+  String goals_forecast_trips(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count trips',
+      one: '1 trip',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get goals_shared_pot =>
+      'Purchases all draw on the same savings: validating one pushes the others back.';
+
+  @override
+  String get goals_reached_section => 'Already reached';
+
+  @override
+  String get goals_empty => 'No goal yet';
+
+  @override
+  String get goals_empty_hint =>
+      'A goal turns the savings into a date: “the helmet, around 10 April”.';
+
+  @override
+  String goals_active(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count goals under way',
+      one: '1 goal under way',
+      zero: 'No goal under way',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String goals_reached_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count goals reached',
+      one: '1 goal reached',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get regularity_title => 'Regularity';
+
+  @override
+  String get regularity_streak => 'Current streak';
+
+  @override
+  String regularity_streak_days(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bike days in a row',
+      one: '1 bike day in a row',
+      zero: 'No bike day in a row',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String regularity_record(int count, String month) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Record: $count days, in $month',
+      one: 'Record: 1 day, in $month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get regularity_record_none => 'No streak yet';
+
+  @override
+  String get regularity_record_held => 'Your record';
+
+  @override
+  String regularity_to_beat(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more to beat it',
+      one: '1 more to beat it',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String regularity_since(String date) {
+    return 'Since $date';
+  }
+
+  @override
+  String regularity_last_weeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The last $count weeks',
+      one: 'The last week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String regularity_recorded_days(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days recorded',
+      one: '1 day recorded',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get regularity_weekdays => 'By day of the week';
+
+  @override
+  String regularity_weekday_ratio(int bike, int recorded) {
+    return '$bike/$recorded';
+  }
+
+  @override
+  String regularity_weak_day(String day, int cars, int total) {
+    return '$day is your weak spot: $cars car days out of $total.';
+  }
+
+  @override
+  String regularity_weak_day_lazy(String day, int cars, int total, int lazy) {
+    return '$day is your weak spot: $cars car days out of $total, $lazy of them out of laziness.';
+  }
+
+  @override
+  String get regularity_best_month => 'Best month';
+
+  @override
+  String regularity_month_detail(int bike, int recorded) {
+    return '$bike days out of $recorded';
+  }
+
+  @override
+  String get regularity_flawless => 'Never by car';
+
+  @override
+  String get regularity_legend_none => 'nothing recorded';
+
+  @override
+  String get regularity_rule =>
+      'A day with nothing recorded does not break the streak: only the days you entered count.';
+
+  @override
+  String get regularity_empty => 'Record a few days to see your streaks.';
+
+  @override
+  String regularity_entry_streak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'a $count-day streak',
+      one: 'a 1-day streak',
+      zero: 'no streak under way',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get challenge_title => 'Monthly challenge';
+
+  @override
+  String challenge_of_target(int target) {
+    return 'of $target';
+  }
+
+  @override
+  String challenge_subtitle(String month) {
+    return 'bike days in $month';
+  }
+
+  @override
+  String challenge_remaining(int missing, int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      missing,
+      locale: localeName,
+      other: '$missing to go, and $days working days to do them.',
+      one: '1 to go, and $days working days to do it.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String challenge_reached(int done, int target) {
+    return 'Challenge met — $done days out of $target.';
+  }
+
+  @override
+  String challenge_impossible(int missing, int days) {
+    return 'Out of reach this month: $missing to go, $days working days left.';
+  }
+
+  @override
+  String challenge_day_by_day(String month) {
+    return '$month, day by day';
+  }
+
+  @override
+  String challenge_workdays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count working days',
+      one: '1 working day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get challenge_target => 'Target for the month';
+
+  @override
+  String challenge_suggested(int count) {
+    return 'suggested from your last 3 months: $count';
+  }
+
+  @override
+  String get challenge_suggested_none => 'no history yet to suggest a target';
+
+  @override
+  String get challenge_less => 'Less';
+
+  @override
+  String get challenge_more => 'More';
+
+  @override
+  String get challenge_past => 'Earlier months';
+
+  @override
+  String challenge_past_reached(int done, int target) {
+    return 'met — $done of $target';
+  }
+
+  @override
+  String challenge_past_missed(int done, int target) {
+    return '$done of $target';
+  }
+
+  @override
+  String get challenge_none => 'No target this month';
+
+  @override
+  String get challenge_none_hint =>
+      'One figure to aim at, and the app says whether it is still within reach.';
+
+  @override
+  String get challenge_set => 'Set a target';
+
+  @override
+  String challenge_card_done(int done, int target) {
+    return '$done bike days out of $target';
+  }
 }

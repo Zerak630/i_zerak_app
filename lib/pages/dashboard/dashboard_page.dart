@@ -3,12 +3,14 @@ import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/agent_dao.dart';
 import 'package:i_zerak_app/models/commute_dao.dart' hide dateOnly, roundCents;
 import 'package:i_zerak_app/models/commute_dao.dart' as commute show dateOnly;
+import 'package:i_zerak_app/models/companion_dao.dart';
 import 'package:i_zerak_app/models/subscription_dao.dart';
 import 'package:i_zerak_app/pages/commute/widgets/car_reason_sheet.dart';
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart'
     show carReasonLabel, showAddReasonDialog;
 import 'package:i_zerak_app/pages/gas_stations/widgets/fuel_label.dart';
 import 'package:i_zerak_app/pages/dashboard/budget_page.dart';
+import 'package:i_zerak_app/pages/dashboard/challenge_page.dart';
 import 'package:i_zerak_app/pages/subscriptions/widgets/subscription_ui.dart';
 import 'package:i_zerak_app/services/agent/agent_service.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
@@ -67,6 +69,9 @@ class _DashboardPageState extends State<DashboardPage> {
   SubscriptionLedger _subscriptions = SubscriptionLedger(const []);
   int _stationCount = 0;
 
+  /// Les cibles mensuelles, par « aaaa-mm ».
+  Map<String, int> _targets = const {};
+
   ResolvedPrice? _price;
   SystemSnapshot? _system;
   Object? _systemError;
@@ -99,6 +104,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final settings = await widget.commuteService.readSettings();
     final days = await widget.commuteService.getDays();
     final goals = await widget.commuteService.getGoals();
+    final challenges = await widget.commuteService.getChallenges();
     final subscriptions = await widget.subscriptionService.getAll();
     final stations = await widget.stations.getAll();
     if (!mounted) {
@@ -107,6 +113,7 @@ class _DashboardPageState extends State<DashboardPage> {
     setState(() {
       _settings = settings;
       _commute = CommuteLedger(days, goals);
+      _targets = {for (final target in challenges) monthKey(target.month): target.target};
       _subscriptions = SubscriptionLedger(subscriptions);
       _stationCount = stations.length;
     });
@@ -226,6 +233,108 @@ class _DashboardPageState extends State<DashboardPage> {
     return reason;
   }
 
+  Future<void> _openChallenge() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChallengePage(store: widget.commuteService, clock: widget.clock),
+      ),
+    );
+    // La cible a pu changer la-bas : l'anneau doit le montrer au retour.
+    await _loadLocal();
+  }
+
+  /// Le defi du mois, reduit a son anneau et a ce qu'il reste a faire.
+  Widget _challenge(BuildContext context, AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final month = DateTime(_today.year, _today.month);
+    final target = _targets[monthKey(month)];
+
+    // Aucune cible : une seule ligne, juste de quoi savoir que ca existe.
+    if (target == null) {
+      return Material(
+        color: scheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: _openChallenge,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+            child: Row(children: [
+              Icon(Icons.flag_outlined, size: 20, color: scheme.onSurfaceVariant),
+              const SizedBox(width: 12),
+              Expanded(child: Text(l10n.challenge_title, style: theme.textTheme.bodyLarge)),
+              Text(l10n.challenge_set,
+                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.primary)),
+              Icon(Icons.chevron_right, size: 20, color: scheme.outline),
+            ]),
+          ),
+        ),
+      );
+    }
+
+    final challenge = MonthChallenge.of(
+      month,
+      target: target,
+      days: _commute.days,
+      now: _today,
+    );
+    final blocked = !challenge.stillPossible;
+    final color = blocked ? scheme.tertiary : scheme.primary;
+
+    return Material(
+      color: scheme.surfaceContainer,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: _openChallenge,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+          child: Row(children: [
+            SizedBox(
+              width: 44,
+              height: 44,
+              child: Stack(alignment: Alignment.center, children: [
+                SizedBox.expand(
+                  child: CircularProgressIndicator(
+                    value: challenge.ratio,
+                    strokeWidth: 4.5,
+                    color: color,
+                    backgroundColor: scheme.surfaceContainerHighest,
+                  ),
+                ),
+                Text('${challenge.done}',
+                    style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700)),
+              ]),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(l10n.challenge_title, style: theme.textTheme.bodyLarge),
+                const SizedBox(height: 2),
+                Text(
+                  challenge.reached
+                      ? l10n.challenge_card_done(challenge.done, challenge.target)
+                      : blocked
+                          ? l10n.challenge_impossible(
+                              challenge.missing, challenge.openWorkdays)
+                          : l10n.challenge_remaining(
+                              challenge.missing, challenge.openWorkdays),
+                  maxLines: 2,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: challenge.reached ? scheme.primary : color,
+                  ),
+                ),
+              ]),
+            ),
+            Icon(Icons.chevron_right, size: 20, color: scheme.outline),
+          ]),
+        ),
+      ),
+    );
+  }
+
   Future<void> _openBudget() => Navigator.push(
         context,
         MaterialPageRoute(
@@ -251,7 +360,7 @@ class _DashboardPageState extends State<DashboardPage> {
       body: RefreshIndicator(
         onRefresh: _load,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
           children: [
             Text(
               format.longDay(_today),
@@ -259,6 +368,12 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             const SizedBox(height: 10),
             _today_(context, l10n),
+            // Entre la journee a enregistrer et l'argent : le defi parle du
+            // meme geste que les deux boutons du dessus.
+            if (_settings.isConfigured) ...[
+              const SizedBox(height: 12),
+              _challenge(context, l10n),
+            ],
             const SizedBox(height: 12),
             _money(context, l10n),
             const SizedBox(height: 12),
@@ -314,37 +429,51 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     final trip = _price == null ? null : _settings.tripValue(_price!.pricePerLitre);
-    return Row(children: [
-      Expanded(
-        flex: 3,
-        child: FilledButton.icon(
-          onPressed: _busy ? null : _recordBike,
-          icon: const Icon(Icons.pedal_bike),
-          style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            alignment: Alignment.centerLeft,
+    // Une marge horizontale explicite : `symmetric(vertical:)` seul la remet a
+    // zero, et l'icone venait se coller au bord arrondi du bouton.
+    const padding = EdgeInsets.symmetric(horizontal: 16, vertical: 12);
+    // Ni titleSmall ni labelSmall tels quels : ils portent la couleur du theme
+    // et ecrasaient celle du bouton, texte clair sur fond clair.
+    return IntrinsicHeight(
+      child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Expanded(
+          flex: 3,
+          child: FilledButton.icon(
+            onPressed: _busy ? null : _recordBike,
+            icon: const Icon(Icons.pedal_bike),
+            style: FilledButton.styleFrom(padding: padding, alignment: Alignment.centerLeft),
+            label: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.commute_by_bike,
+                  style: TextStyle(fontSize: theme.textTheme.titleSmall?.fontSize),
+                ),
+                if (trip != null)
+                  Text(
+                    l10n.commute_by_bike_gain(format.euros(trip)),
+                    style: TextStyle(
+                      fontSize: theme.textTheme.labelSmall?.fontSize,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+              ],
+            ),
           ),
-          label: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(l10n.commute_by_bike, style: theme.textTheme.titleSmall),
-            if (trip != null)
-              Text(
-                l10n.commute_by_bike_gain(format.euros(trip)),
-                style: theme.textTheme.labelSmall,
-              ),
-          ]),
         ),
-      ),
-      const SizedBox(width: 10),
-      Expanded(
-        flex: 2,
-        child: OutlinedButton.icon(
-          onPressed: _busy ? null : _recordCar,
-          icon: const Icon(Icons.directions_car_outlined),
-          style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 18)),
-          label: Text(l10n.commute_by_car),
+        const SizedBox(width: 10),
+        Expanded(
+          flex: 2,
+          child: OutlinedButton.icon(
+            onPressed: _busy ? null : _recordCar,
+            icon: const Icon(Icons.directions_car_outlined),
+            style: OutlinedButton.styleFrom(padding: padding),
+            label: Text(l10n.commute_by_car),
+          ),
         ),
-      ),
-    ]);
+      ]),
+    );
   }
 
   /// Le nom de la raison retenue pour une journee en voiture.

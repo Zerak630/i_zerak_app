@@ -1,4 +1,5 @@
 import 'package:i_zerak_app/models/commute_dao.dart';
+import 'package:i_zerak_app/models/companion_dao.dart';
 import 'package:i_zerak_app/models/gas_station_dao.dart';
 
 /// Un prix du litre tel qu'il a ete releve un jour donne.
@@ -27,6 +28,15 @@ abstract class ICommute {
   Future<void> saveGoal(Goal goal);
 
   Future<void> deleteGoal(String id);
+
+  /// Les cibles mensuelles deja fixees, dans un ordre quelconque.
+  ///
+  /// C'est la seule chose que l'habitude stocke : le nombre de journees faites
+  /// et les jours restants se recomptent, eux, a partir des journees.
+  Future<List<ChallengeTarget>> getChallenges();
+
+  /// Fixe la cible du mois, ou la remplace.
+  Future<void> saveChallenge(ChallengeTarget target);
 
   /// Retient le prix le plus bas vu ce jour-la pour ce carburant.
   ///

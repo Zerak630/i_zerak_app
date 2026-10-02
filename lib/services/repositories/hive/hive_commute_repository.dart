@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:hive/hive.dart';
 import 'package:i_zerak_app/models/commute_dao.dart';
+import 'package:i_zerak_app/models/companion_dao.dart';
 import 'package:i_zerak_app/models/gas_station_dao.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
 
@@ -14,6 +15,7 @@ import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
 ///   - `settings` : les reglages du trajet ;
 ///   - `day:aaaa-mm-jj` : une journee ;
 ///   - `goal:<id>` : un objectif ;
+///   - `challenge:aaaa-mm` : la cible de journees a velo d'un mois ;
 ///   - `price:<carburant>:aaaa-mm-jj` : le prix le plus bas vu ce jour-la.
 ///
 /// Une entree illisible est ignoree plutot que de faire echouer la lecture
@@ -26,6 +28,7 @@ class HiveCommuteRepository implements ICommute {
   static const String _settingsKey = 'settings';
   static const String _dayPrefix = 'day:';
   static const String _goalPrefix = 'goal:';
+  static const String _challengePrefix = 'challenge:';
   static const String _pricePrefix = 'price:';
 
   String _priceKey(FuelType fuel, DateTime day) => '$_pricePrefix${fuel.name}:${dayKey(day)}';
@@ -92,6 +95,16 @@ class HiveCommuteRepository implements ICommute {
 
   @override
   Future<void> deleteGoal(String id) => _delete('$_goalPrefix$id');
+
+  @override
+  Future<List<ChallengeTarget>> getChallenges() async => [
+        for (final raw in _valuesWithPrefix(_challengePrefix))
+          if (ChallengeTarget.fromJson(raw) case final ChallengeTarget target) target,
+      ];
+
+  @override
+  Future<void> saveChallenge(ChallengeTarget target) =>
+      _put('$_challengePrefix${monthKey(target.month)}', target.toJson());
 
   @override
   Future<void> recordPrice(FuelType fuel, DateTime day, double price, String? station) =>

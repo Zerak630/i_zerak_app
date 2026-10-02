@@ -39,6 +39,24 @@ class CommuteFormat {
   /// « Septembre 2026 »
   String month(DateTime day) => _capitalize(DateFormat('MMMM y', _locale).format(day));
 
+  /// « septembre », pour une phrase qui le porte en son milieu.
+  String monthName(DateTime day) => DateFormat('MMMM', _locale).format(day);
+
+  /// « sept. », pour une regle de mois sous une grille serree.
+  String shortMonth(DateTime day) => DateFormat('MMM', _locale).format(day);
+
+  /// « Septembre », pour un titre.
+  String monthTitle(DateTime day) => _capitalize(monthName(day));
+
+  /// « mardi », a partir d'un `DateTime.weekday`.
+  String weekdayName(int weekday) =>
+      // Le 1er janvier 2024 est un lundi : `weekday` vaut alors 1.
+      DateFormat('EEEE', _locale).format(DateTime(2024, 1, weekday));
+
+  /// « mar. »
+  String weekdayShort(int weekday) =>
+      DateFormat('E', _locale).format(DateTime(2024, 1, weekday));
+
   /// Initiale du jour de la semaine, lundi en tete.
   List<String> weekdayInitials() => [
         for (var i = 0; i < 7; i++)

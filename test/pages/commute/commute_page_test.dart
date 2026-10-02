@@ -122,19 +122,9 @@ void main() {
     expect(find.text('Flemme'), findsNothing);
   });
 
-  testWidgets('un achat atteint se valide en depensant son montant', (tester) async {
+  testWidgets('la carte de cagnotte mene aux objectifs quand on peut y aller', (tester) async {
     store = MemoryCommute(
       settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2),
-      days: [
-        for (var d = 1; d <= 5; d++)
-          CommuteDay(
-            date: DateTime(2026, 9, d),
-            mode: CommuteMode.bike,
-            amount: 10,
-            pricePerLitre: 1.7,
-            priceSource: PriceSource.live,
-          ),
-      ],
       goals: [
         Goal(
           id: 'sacoche',
@@ -146,17 +136,55 @@ void main() {
         ),
       ],
     );
+    var opened = 0;
+    await tester.binding.setSurfaceSize(const Size(420, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(wrap(CommutePage(
+      store: store,
+      prices: CommutePriceService(
+        gas: gas,
+        favorites: StaticFavorites([(id: 1, label: 'Rue A, Saumur', customName: 'Leclerc')]),
+        store: store,
+        clock: () => now,
+      ),
+      clock: () => now,
+      onOpenGoals: () => opened++,
+    )));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('1 objectif en cours'));
+    await tester.pumpAndSettle();
+
+    expect(opened, 1);
+  });
+
+  testWidgets('sans moyen d y aller, la ligne des objectifs disparait', (tester) async {
     await open(tester);
 
-    await tester.drag(find.byType(PageView), const Offset(-400, 0));
-    await tester.pumpAndSettle();
-    await tester.tap(find.textContaining('et valider'));
+    expect(find.textContaining('objectif'), findsNothing);
+  });
+
+  testWidgets('la serie en cours mene a la regularite', (tester) async {
+    store = MemoryCommute(
+      settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2),
+      days: [
+        for (var d = 14; d <= 17; d++)
+          CommuteDay(
+            date: DateTime(2026, 9, d),
+            mode: CommuteMode.bike,
+            amount: 1.09,
+            pricePerLitre: 1.689,
+            priceSource: PriceSource.live,
+          ),
+      ],
+    );
+    await open(tester);
+
+    expect(find.text('série de 4 jours'), findsOneWidget);
+
+    await tester.tap(find.text('Régularité'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Valider « Sacoche » ?'), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilledButton, 'Dépenser 35,00 €'));
-    await tester.pumpAndSettle();
-
-    expect(store.goals['sacoche']!.isValidated, isTrue);
+    expect(find.text('PAR JOUR DE LA SEMAINE'), findsOneWidget);
   });
 }

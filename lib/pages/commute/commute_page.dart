@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/commute_dao.dart';
+import 'package:i_zerak_app/models/companion_dao.dart';
 import 'package:i_zerak_app/pages/commute/commute_history_page.dart';
 import 'package:i_zerak_app/pages/commute/commute_settings_page.dart';
+import 'package:i_zerak_app/pages/commute/regularity_page.dart';
 import 'package:i_zerak_app/pages/commute/widgets/car_reason_sheet.dart';
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
-import 'package:i_zerak_app/pages/commute/widgets/goal_sheets.dart';
-import 'package:i_zerak_app/pages/commute/widgets/pot_carousel.dart';
+import 'package:i_zerak_app/pages/commute/widgets/pot_card.dart';
 import 'package:i_zerak_app/pages/gas_stations/widgets/fuel_label.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
@@ -21,6 +22,7 @@ class CommutePage extends StatefulWidget {
     ICommute? store,
     CommutePriceService? prices,
     DateTime Function()? clock,
+    this.onOpenGoals,
   })  : store = store ?? getIt<ICommute>(),
         prices = prices ?? getIt<CommutePriceService>(),
         clock = clock ?? DateTime.now;
@@ -28,6 +30,11 @@ class CommutePage extends StatefulWidget {
   final ICommute store;
   final CommutePriceService prices;
   final DateTime Function() clock;
+
+  /// Passe a l'onglet Objectifs. C'est la barre du bas qui le fournit : elle
+  /// seule sait quel onglet est affiche, et pousser cette page sur la pile
+  /// l'afficherait deux fois dans l'application.
+  final VoidCallback? onOpenGoals;
 
   @override
   State<CommutePage> createState() => _CommutePageState();
@@ -171,45 +178,12 @@ class _CommutePageState extends State<CommutePage> {
     await _reload();
   }
 
-  Future<void> _newGoal() async {
-    final goal = await showNewGoalSheet(context, ledger: _ledger, tripValue: _tripValue);
-    if (goal == null) {
-      return;
-    }
-    await widget.store.saveGoal(goal);
-    await _reload();
-  }
-
-  Future<void> _validateGoal(Goal goal) async {
-    final confirmed = await showValidateGoalSheet(context, goal: goal, ledger: _ledger);
-    // Relu apres la feuille : un trajet annule entre-temps pourrait avoir fait
-    // repasser l'achat sous son montant.
-    if (!confirmed || !_ledger.progressOf(goal).reached) {
-      return;
-    }
-    await widget.store.saveGoal(goal.validated(widget.clock()));
-    await _reload();
-  }
-
-  Future<void> _deleteGoal(Goal goal) async {
-    final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.goal_delete),
-        content: Text(l10n.delete_confirm(goal.name)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.delete)),
-        ],
-      ),
-    );
-    if (confirmed != true) {
-      return;
-    }
-    await widget.store.deleteGoal(goal.id);
-    await _reload();
-  }
+  Future<void> _openRegularity() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => RegularityPage(store: widget.store, clock: widget.clock),
+        ),
+      );
 
   Future<void> _openSettings() async {
     await Navigator.push(
@@ -256,14 +230,7 @@ class _CommutePageState extends State<CommutePage> {
       child: ListView(
         padding: const EdgeInsets.only(bottom: 24),
         children: [
-          PotCarousel(
-            ledger: _ledger,
-            today: today,
-            tripValue: _tripValue,
-            onValidate: _validateGoal,
-            onNewGoal: _newGoal,
-            onDeleteGoal: _deleteGoal,
-          ),
+          PotCard(ledger: _ledger, today: today, onOpenGoals: widget.onOpenGoals),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -286,6 +253,11 @@ class _CommutePageState extends State<CommutePage> {
                 ),
               const SizedBox(height: 12),
               _BucketTotals(totals: _ledger.totals),
+              const SizedBox(height: 12),
+              _RegularityRow(
+                streak: StreakInfo.of(_ledger.days),
+                onTap: _openRegularity,
+              ),
               const SizedBox(height: 12),
               if (_price != null)
                 _PriceCard(
@@ -718,6 +690,56 @@ class CommuteDayRow extends StatelessWidget {
           ),
           if (onTap != null) Icon(Icons.chevron_right, size: 18, color: scheme.outline),
         ]),
+      ),
+    );
+  }
+}
+
+/// La ligne vers la Regularite : la serie en cours suffit a donner envie de
+/// l'ouvrir, et elle n'a besoin d'aucune donnee supplementaire.
+class _RegularityRow extends StatelessWidget {
+  const _RegularityRow({required this.streak, required this.onTap});
+
+  final StreakInfo streak;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final running = streak.current > 0;
+
+    return Material(
+      color: scheme.surfaceContainer,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+          child: Row(children: [
+            Icon(
+              Icons.local_fire_department_outlined,
+              size: 20,
+              color: running ? scheme.primary : scheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(l10n.regularity_title, style: theme.textTheme.bodyLarge),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.regularity_entry_streak(streak.current),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: running ? scheme.primary : scheme.outline,
+                  ),
+                ),
+              ]),
+            ),
+            Icon(Icons.chevron_right, size: 20, color: scheme.outline),
+          ]),
+        ),
       ),
     );
   }

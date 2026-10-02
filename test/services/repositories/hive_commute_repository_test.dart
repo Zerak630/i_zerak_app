@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:i_zerak_app/models/commute_dao.dart';
+import 'package:i_zerak_app/models/companion_dao.dart';
 import 'package:i_zerak_app/models/gas_station_dao.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_commute_repository.dart';
 
@@ -117,5 +118,28 @@ void main() {
 
     final days = await (await reopen()).getDays();
     expect(days.single.date, DateTime(2026, 9, 18));
+  });
+
+  test('les cibles mensuelles se relisent, et la derniere ecrase la precedente', () async {
+    final repository = await open();
+    await repository.saveChallenge(ChallengeTarget(month: DateTime(2026, 8), target: 8));
+    await repository.saveChallenge(ChallengeTarget(month: DateTime(2026, 9), target: 14));
+    // Le meme mois, une cible revue : une seule entree doit rester.
+    await repository.saveChallenge(ChallengeTarget(month: DateTime(2026, 9), target: 12));
+
+    final challenges = await (await reopen()).getChallenges();
+    final byMonth = {for (final c in challenges) monthKey(c.month): c.target};
+
+    expect(byMonth, {'2026-08': 8, '2026-09': 12});
+  });
+
+  test('une cible abimee est ignoree, les autres restent', () async {
+    final repository = await open();
+    await repository.saveChallenge(ChallengeTarget(month: DateTime(2026, 9), target: 14));
+    await Hive.box<String>('commute').put('challenge:2026-10', '{"month":"2026-10"}');
+
+    final challenges = await (await reopen()).getChallenges();
+
+    expect(challenges.single.month, DateTime(2026, 9));
   });
 }

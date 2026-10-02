@@ -1,4 +1,5 @@
 import 'package:i_zerak_app/models/commute_dao.dart';
+import 'package:i_zerak_app/models/companion_dao.dart';
 import 'package:i_zerak_app/models/gas_station_dao.dart';
 import 'package:i_zerak_app/services/gas_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
@@ -6,14 +7,23 @@ import 'package:i_zerak_app/services/repositories/interfaces/i_gas_stations.dart
 
 /// Depot des trajets en memoire : le comportement Hive est verifie a part.
 class MemoryCommute implements ICommute {
-  MemoryCommute({CommuteSettings? settings, List<CommuteDay>? days, List<Goal>? goals})
-      : settings = settings ?? const CommuteSettings(),
+  MemoryCommute({
+    CommuteSettings? settings,
+    List<CommuteDay>? days,
+    List<Goal>? goals,
+    List<ChallengeTarget>? challenges,
+  })  : settings = settings ?? const CommuteSettings(),
         days = {for (final day in days ?? const <CommuteDay>[]) dayKey(day.date): day},
-        goals = {for (final goal in goals ?? const <Goal>[]) goal.id: goal};
+        goals = {for (final goal in goals ?? const <Goal>[]) goal.id: goal},
+        challenges = {
+          for (final target in challenges ?? const <ChallengeTarget>[])
+            monthKey(target.month): target,
+        };
 
   CommuteSettings settings;
   final Map<String, CommuteDay> days;
   final Map<String, Goal> goals;
+  final Map<String, ChallengeTarget> challenges;
   final Map<String, PriceObservation> prices = {};
 
   @override
@@ -39,6 +49,13 @@ class MemoryCommute implements ICommute {
 
   @override
   Future<void> deleteGoal(String id) async => goals.remove(id);
+
+  @override
+  Future<List<ChallengeTarget>> getChallenges() async => [...challenges.values];
+
+  @override
+  Future<void> saveChallenge(ChallengeTarget target) async =>
+      challenges[monthKey(target.month)] = target;
 
   @override
   Future<void> recordPrice(FuelType fuel, DateTime day, double price, String? station) async =>

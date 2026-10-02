@@ -2474,6 +2474,354 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set your commute up to record your days'**
   String get home_setup_commute;
+
+  /// No description provided for @bb_goals.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals'**
+  String get bb_goals;
+
+  /// No description provided for @goals_rate.
+  ///
+  /// In en, this message translates to:
+  /// **'Your pace'**
+  String get goals_rate;
+
+  /// No description provided for @goals_rate_per_month.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} per month'**
+  String goals_rate_per_month(String amount);
+
+  /// No description provided for @goals_rate_trips.
+  ///
+  /// In en, this message translates to:
+  /// **'{trips} bike trips per week'**
+  String goals_rate_trips(String trips);
+
+  /// No description provided for @goals_rate_window_recent.
+  ///
+  /// In en, this message translates to:
+  /// **'8 weeks'**
+  String get goals_rate_window_recent;
+
+  /// No description provided for @goals_rate_window_all.
+  ///
+  /// In en, this message translates to:
+  /// **'Since the start'**
+  String get goals_rate_window_all;
+
+  /// No description provided for @goals_rate_window_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'This choice sets every date below.'**
+  String get goals_rate_window_hint;
+
+  /// No description provided for @goals_rate_unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough trips yet to work out a pace.'**
+  String get goals_rate_unknown;
+
+  /// No description provided for @goals_forecast.
+  ///
+  /// In en, this message translates to:
+  /// **'around {date}'**
+  String goals_forecast(String date);
+
+  /// No description provided for @goals_forecast_year.
+  ///
+  /// In en, this message translates to:
+  /// **'not before {year}, at this pace'**
+  String goals_forecast_year(String year);
+
+  /// No description provided for @goals_forecast_trips.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 trip} other{{count} trips}}'**
+  String goals_forecast_trips(int count);
+
+  /// No description provided for @goals_shared_pot.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases all draw on the same savings: validating one pushes the others back.'**
+  String get goals_shared_pot;
+
+  /// No description provided for @goals_reached_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Already reached'**
+  String get goals_reached_section;
+
+  /// No description provided for @goals_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No goal yet'**
+  String get goals_empty;
+
+  /// No description provided for @goals_empty_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'A goal turns the savings into a date: “the helmet, around 10 April”.'**
+  String get goals_empty_hint;
+
+  /// No description provided for @goals_active.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No goal under way} =1{1 goal under way} other{{count} goals under way}}'**
+  String goals_active(int count);
+
+  /// No description provided for @goals_reached_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 goal reached} other{{count} goals reached}}'**
+  String goals_reached_count(int count);
+
+  /// No description provided for @regularity_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Regularity'**
+  String get regularity_title;
+
+  /// No description provided for @regularity_streak.
+  ///
+  /// In en, this message translates to:
+  /// **'Current streak'**
+  String get regularity_streak;
+
+  /// No description provided for @regularity_streak_days.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No bike day in a row} =1{1 bike day in a row} other{{count} bike days in a row}}'**
+  String regularity_streak_days(int count);
+
+  /// No description provided for @regularity_record.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Record: 1 day, in {month}} other{Record: {count} days, in {month}}}'**
+  String regularity_record(int count, String month);
+
+  /// No description provided for @regularity_record_none.
+  ///
+  /// In en, this message translates to:
+  /// **'No streak yet'**
+  String get regularity_record_none;
+
+  /// No description provided for @regularity_record_held.
+  ///
+  /// In en, this message translates to:
+  /// **'Your record'**
+  String get regularity_record_held;
+
+  /// No description provided for @regularity_to_beat.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more to beat it} other{{count} more to beat it}}'**
+  String regularity_to_beat(int count);
+
+  /// No description provided for @regularity_since.
+  ///
+  /// In en, this message translates to:
+  /// **'Since {date}'**
+  String regularity_since(String date);
+
+  /// No description provided for @regularity_last_weeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The last week} other{The last {count} weeks}}'**
+  String regularity_last_weeks(int count);
+
+  /// No description provided for @regularity_recorded_days.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day recorded} other{{count} days recorded}}'**
+  String regularity_recorded_days(int count);
+
+  /// No description provided for @regularity_weekdays.
+  ///
+  /// In en, this message translates to:
+  /// **'By day of the week'**
+  String get regularity_weekdays;
+
+  /// No description provided for @regularity_weekday_ratio.
+  ///
+  /// In en, this message translates to:
+  /// **'{bike}/{recorded}'**
+  String regularity_weekday_ratio(int bike, int recorded);
+
+  /// No description provided for @regularity_weak_day.
+  ///
+  /// In en, this message translates to:
+  /// **'{day} is your weak spot: {cars} car days out of {total}.'**
+  String regularity_weak_day(String day, int cars, int total);
+
+  /// No description provided for @regularity_weak_day_lazy.
+  ///
+  /// In en, this message translates to:
+  /// **'{day} is your weak spot: {cars} car days out of {total}, {lazy} of them out of laziness.'**
+  String regularity_weak_day_lazy(String day, int cars, int total, int lazy);
+
+  /// No description provided for @regularity_best_month.
+  ///
+  /// In en, this message translates to:
+  /// **'Best month'**
+  String get regularity_best_month;
+
+  /// No description provided for @regularity_month_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'{bike} days out of {recorded}'**
+  String regularity_month_detail(int bike, int recorded);
+
+  /// No description provided for @regularity_flawless.
+  ///
+  /// In en, this message translates to:
+  /// **'Never by car'**
+  String get regularity_flawless;
+
+  /// No description provided for @regularity_legend_none.
+  ///
+  /// In en, this message translates to:
+  /// **'nothing recorded'**
+  String get regularity_legend_none;
+
+  /// No description provided for @regularity_rule.
+  ///
+  /// In en, this message translates to:
+  /// **'A day with nothing recorded does not break the streak: only the days you entered count.'**
+  String get regularity_rule;
+
+  /// No description provided for @regularity_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a few days to see your streaks.'**
+  String get regularity_empty;
+
+  /// No description provided for @regularity_entry_streak.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no streak under way} =1{a 1-day streak} other{a {count}-day streak}}'**
+  String regularity_entry_streak(int count);
+
+  /// No description provided for @challenge_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly challenge'**
+  String get challenge_title;
+
+  /// No description provided for @challenge_of_target.
+  ///
+  /// In en, this message translates to:
+  /// **'of {target}'**
+  String challenge_of_target(int target);
+
+  /// No description provided for @challenge_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'bike days in {month}'**
+  String challenge_subtitle(String month);
+
+  /// No description provided for @challenge_remaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{missing, plural, =1{1 to go, and {days} working days to do it.} other{{missing} to go, and {days} working days to do them.}}'**
+  String challenge_remaining(int missing, int days);
+
+  /// No description provided for @challenge_reached.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge met — {done} days out of {target}.'**
+  String challenge_reached(int done, int target);
+
+  /// No description provided for @challenge_impossible.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of reach this month: {missing} to go, {days} working days left.'**
+  String challenge_impossible(int missing, int days);
+
+  /// No description provided for @challenge_day_by_day.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}, day by day'**
+  String challenge_day_by_day(String month);
+
+  /// No description provided for @challenge_workdays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 working day} other{{count} working days}}'**
+  String challenge_workdays(int count);
+
+  /// No description provided for @challenge_target.
+  ///
+  /// In en, this message translates to:
+  /// **'Target for the month'**
+  String get challenge_target;
+
+  /// No description provided for @challenge_suggested.
+  ///
+  /// In en, this message translates to:
+  /// **'suggested from your last 3 months: {count}'**
+  String challenge_suggested(int count);
+
+  /// No description provided for @challenge_suggested_none.
+  ///
+  /// In en, this message translates to:
+  /// **'no history yet to suggest a target'**
+  String get challenge_suggested_none;
+
+  /// No description provided for @challenge_less.
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get challenge_less;
+
+  /// No description provided for @challenge_more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get challenge_more;
+
+  /// No description provided for @challenge_past.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier months'**
+  String get challenge_past;
+
+  /// No description provided for @challenge_past_reached.
+  ///
+  /// In en, this message translates to:
+  /// **'met — {done} of {target}'**
+  String challenge_past_reached(int done, int target);
+
+  /// No description provided for @challenge_past_missed.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {target}'**
+  String challenge_past_missed(int done, int target);
+
+  /// No description provided for @challenge_none.
+  ///
+  /// In en, this message translates to:
+  /// **'No target this month'**
+  String get challenge_none;
+
+  /// No description provided for @challenge_none_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'One figure to aim at, and the app says whether it is still within reach.'**
+  String get challenge_none_hint;
+
+  /// No description provided for @challenge_set.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a target'**
+  String get challenge_set;
+
+  /// No description provided for @challenge_card_done.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} bike days out of {target}'**
+  String challenge_card_done(int done, int target);
 }
 
 class _AppLocalizationsDelegate

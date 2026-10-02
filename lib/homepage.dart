@@ -6,6 +6,7 @@ import 'package:i_zerak_app/pages/app_tab_ui.dart';
 import 'package:i_zerak_app/pages/commute/commute_page.dart';
 import 'package:i_zerak_app/pages/dashboard/dashboard_page.dart';
 import 'package:i_zerak_app/pages/gas_stations/gas_station_page.dart';
+import 'package:i_zerak_app/pages/goals/goals_page.dart';
 import 'package:i_zerak_app/pages/more_sheet.dart';
 import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/pages/subscriptions/subscriptions.dart';
@@ -43,6 +44,23 @@ class HomePageState extends State<HomePage> {
       });
     }
   }
+
+  /// Seul l'onglet actif est construit : voir le commentaire du `build`.
+  ///
+  /// Une page qui mene a une autre recoit de quoi changer d'onglet, et non de
+  /// quoi pousser cette autre page : elle serait sinon joignable a deux
+  /// endroits, avec deux etats.
+  Widget _pageFor(AppTab tab) => switch (tab) {
+        AppTab.home => DashboardPage(),
+        AppTab.subscriptions => SubscriptionsPage(),
+        AppTab.commute => CommutePage(onOpenGoals: () => _open(AppTab.goals)),
+        AppTab.goals => GoalsPage(),
+        AppTab.torrents => const TorrentsPage(),
+        AppTab.system => const SystemPage(),
+        AppTab.gas => GasStationPage(),
+      };
+
+  void _open(AppTab tab) => setState(() => _current = tab);
 
   /// L'onglet actif dans la barre, ou le bouton « Plus » quand il n'y figure
   /// pas : sans cela, aucun bouton ne serait allume.
@@ -167,11 +185,3 @@ class HomePageState extends State<HomePage> {
   }
 }
 
-Widget _pageFor(AppTab tab) => switch (tab) {
-      AppTab.home => DashboardPage(),
-      AppTab.subscriptions => SubscriptionsPage(),
-      AppTab.torrents => const TorrentsPage(),
-      AppTab.system => const SystemPage(),
-      AppTab.gas => GasStationPage(),
-      AppTab.commute => CommutePage(),
-    };
