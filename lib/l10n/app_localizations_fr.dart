@@ -1461,8 +1461,18 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String goals_rate_trips(String trips) {
-    return '$trips trajets à vélo par semaine';
+  String goals_rate_trips(num trips) {
+    final intl.NumberFormat tripsNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String tripsString = tripsNumberFormat.format(trips);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      trips,
+      locale: localeName,
+      other: '$tripsString trajets à vélo par semaine',
+      one: '$tripsString trajet à vélo par semaine',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1644,7 +1654,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get regularity_rule =>
-      'Un jour sans rien d’enregistré ne casse pas la série : seuls les jours saisis comptent.';
+      'Un jour oublié ne casse pas la série, ni un week-end : seuls les jours saisis comptent. Deux jours ouvrés sans rien, en revanche, la clôturent.';
 
   @override
   String get regularity_empty =>

@@ -48,7 +48,7 @@ class _RegularityPageState extends State<RegularityPage> {
     final days = await widget.store.getDays();
     if (mounted) {
       setState(() {
-        _regularity = Regularity(days);
+        _regularity = Regularity(days, now: _today);
         _loading = false;
       });
     }
@@ -540,7 +540,11 @@ class _WeekdayBar extends StatelessWidget {
       child: Container(
         height: 9,
         color: scheme.surfaceContainerHigh,
-        child: Row(children: [
+        // `stretch` est indispensable : un `ColoredBox` sans enfant, dans un
+        // `Expanded` d'une `Row` alignee au centre, recoit une contrainte
+        // lache en hauteur et se replie a zero. La barre occupait sa place
+        // sans rien peindre.
+        child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           if (stat.bike > 0) Expanded(flex: stat.bike, child: ColoredBox(color: scheme.primary)),
           if (stat.essential > 0)
             Expanded(flex: stat.essential, child: ColoredBox(color: scheme.secondary)),

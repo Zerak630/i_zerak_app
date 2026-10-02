@@ -207,6 +207,62 @@ void main() {
       expect(streak.toBeatRecord, 0);
     });
 
+    test('un trajet par semaine ne fait pas une serie', () {
+      // Trente trajets, un par semaine, sans une seule journee en voiture :
+      // sans garde-fou, cela donnait « 30 jours d'affilee ».
+      final days = [
+        for (var week = 0; week < 30; week++)
+          bike(DateTime(2026, 1, 5).add(Duration(days: week * 7 + 2))),
+      ];
+
+      final streak = StreakInfo.of(days);
+
+      expect(streak.record, 1);
+      expect(streak.current, 1);
+    });
+
+    test('le week-end et un oubli ne cassent rien', () {
+      final days = [
+        // Vendredi, puis le lundi suivant : le week-end ne compte pas.
+        bike(DateTime(2026, 9, 11)),
+        bike(DateTime(2026, 9, 14)),
+        // Le 15 est oublie, le 16 reprend : un seul jour ouvre vide.
+        bike(DateTime(2026, 9, 16)),
+        bike(DateTime(2026, 9, 17)),
+      ];
+
+      expect(StreakInfo.of(days).current, 4);
+    });
+
+    test('deux jours ouvres vides cloturent la serie', () {
+      final days = [
+        bike(DateTime(2026, 9, 14)),
+        // Le 15 et le 16 sont vides : le 17 repart de un.
+        bike(DateTime(2026, 9, 17)),
+      ];
+
+      expect(StreakInfo.of(days).current, 1);
+      expect(StreakInfo.of(days).record, 1);
+    });
+
+    test('une serie ancienne n est plus en cours', () {
+      final days = [for (final day in [1, 2, 3]) bike(DateTime(2026, 9, day))];
+
+      // Vue du 18, la derniere journee a quinze jours.
+      expect(StreakInfo.of(days, now: today).current, 0);
+      expect(StreakInfo.of(days, now: today).record, 3);
+      // Vue du 4, lendemain du dernier trajet, elle court encore.
+      expect(StreakInfo.of(days, now: DateTime(2026, 9, 4)).current, 3);
+    });
+
+    test('les jours ouvres entre deux dates excluent les bornes', () {
+      // Du vendredi au lundi : rien entre les deux.
+      expect(workdaysBetween(DateTime(2026, 9, 11), DateTime(2026, 9, 14)), 0);
+      // Du lundi au jeudi : mardi et mercredi.
+      expect(workdaysBetween(DateTime(2026, 9, 14), DateTime(2026, 9, 17)), 2);
+      expect(workdaysBetween(DateTime(2026, 9, 14), DateTime(2026, 9, 15)), 0);
+    });
+
     test('sans journee, ni serie ni record', () {
       final streak = StreakInfo.of(const []);
 

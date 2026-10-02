@@ -2496,8 +2496,8 @@ abstract class AppLocalizations {
   /// No description provided for @goals_rate_trips.
   ///
   /// In en, this message translates to:
-  /// **'{trips} bike trips per week'**
-  String goals_rate_trips(String trips);
+  /// **'{trips, plural, one{{trips} bike trip per week} other{{trips} bike trips per week}}'**
+  String goals_rate_trips(num trips);
 
   /// No description provided for @goals_rate_window_recent.
   ///
@@ -2688,7 +2688,7 @@ abstract class AppLocalizations {
   /// No description provided for @regularity_rule.
   ///
   /// In en, this message translates to:
-  /// **'A day with nothing recorded does not break the streak: only the days you entered count.'**
+  /// **'A forgotten day does not break the streak, nor does a weekend: only the days you entered count. Two working days with nothing do end it.'**
   String get regularity_rule;
 
   /// No description provided for @regularity_empty.

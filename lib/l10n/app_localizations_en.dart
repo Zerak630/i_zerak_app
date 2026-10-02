@@ -1448,8 +1448,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String goals_rate_trips(String trips) {
-    return '$trips bike trips per week';
+  String goals_rate_trips(num trips) {
+    final intl.NumberFormat tripsNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String tripsString = tripsNumberFormat.format(trips);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      trips,
+      locale: localeName,
+      other: '$tripsString bike trips per week',
+      one: '$tripsString bike trip per week',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1629,7 +1639,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get regularity_rule =>
-      'A day with nothing recorded does not break the streak: only the days you entered count.';
+      'A forgotten day does not break the streak, nor does a weekend: only the days you entered count. Two working days with nothing do end it.';
 
   @override
   String get regularity_empty => 'Record a few days to see your streaks.';

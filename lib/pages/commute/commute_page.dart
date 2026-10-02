@@ -255,7 +255,7 @@ class _CommutePageState extends State<CommutePage> {
               _BucketTotals(totals: _ledger.totals),
               const SizedBox(height: 12),
               _RegularityRow(
-                streak: StreakInfo.of(_ledger.days),
+                streak: StreakInfo.of(_ledger.days, now: today),
                 onTap: _openRegularity,
               ),
               const SizedBox(height: 12),

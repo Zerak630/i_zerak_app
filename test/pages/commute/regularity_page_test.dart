@@ -143,6 +143,30 @@ void main() {
     expect(find.text('3 jours sur 6'), findsOneWidget);
   });
 
+  testWidgets('les barres par jour de la semaine sont bien peintes', (tester) async {
+    // Regression : un `ColoredBox` sans enfant, dans un `Expanded` d'une `Row`
+    // alignee au centre, se replie a zero. La barre gardait sa place et sa
+    // couleur de fond, mais ne peignait aucun segment.
+    store = MemoryCommute(days: [
+      bike(DateTime(2026, 9, 1)),
+      car(DateTime(2026, 9, 8)),
+      car(DateTime(2026, 9, 15), bucket: CarBucket.missed),
+    ]);
+    await open(tester);
+
+    final scheme = Theme.of(tester.element(find.text('PAR JOUR DE LA SEMAINE'))).colorScheme;
+    final segments = tester
+        .widgetList<ColoredBox>(find.byType(ColoredBox))
+        .where((box) => box.color == scheme.primary || box.color == scheme.tertiary);
+
+    expect(segments, isNotEmpty);
+    for (final segment in segments) {
+      final size = tester.getSize(find.byWidget(segment));
+      expect(size.height, 9);
+      expect(size.width, greaterThan(0));
+    }
+  });
+
   testWidgets('la regle de la serie est dite sur la page', (tester) async {
     store = MemoryCommute(days: [bike(DateTime(2026, 9, 17))]);
     await open(tester);

@@ -87,6 +87,23 @@ void main() {
     expect(find.text('7 trajets à vélo par semaine'), findsOneWidget);
   });
 
+  testWidgets('sous deux trajets par semaine, le singulier', (tester) async {
+    store = MemoryCommute(
+      settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2),
+      // Un trajet tous les sept jours sur huit semaines : 1 par semaine.
+      days: [
+        for (var back = 56; back >= 0; back -= 7)
+          bike(DateTime(2026, 9, 18).subtract(Duration(days: back)), 1),
+      ],
+    );
+    await open(tester);
+
+    // Un peu plus d'un trajet par semaine : le nom reste au singulier, comme
+    // le veut le francais en dessous de deux.
+    expect(find.textContaining('trajet à vélo par semaine'), findsOneWidget);
+    expect(find.textContaining('trajets à vélo'), findsNothing);
+  });
+
   testWidgets('un objectif en cours annonce une date', (tester) async {
     store = MemoryCommute(
       settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2),

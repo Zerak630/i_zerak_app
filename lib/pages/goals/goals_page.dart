@@ -232,7 +232,10 @@ class _RateCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            l10n.goals_rate_trips(format.number(rate.bikeDaysPerWeek)),
+            // Le nombre part brut : `intl` le met en forme lui-meme, et c'est
+            // sa partie entiere qui decide du singulier — « 1,35 trajet ».
+            l10n.goals_rate_trips(
+                double.parse(rate.bikeDaysPerWeek.toStringAsFixed(2))),
             style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
           ),
         ] else

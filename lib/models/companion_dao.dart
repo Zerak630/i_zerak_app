@@ -62,6 +62,20 @@ int workdaysIn(DateTime month) {
 DateTime mondayOf(DateTime day) =>
     dateOnly(day).subtract(Duration(days: day.weekday - DateTime.monday));
 
+/// Les jours ouvres strictement entre [from] et [to], ces deux-la exclus.
+int workdaysBetween(DateTime from, DateTime to) {
+  var count = 0;
+  var day = dateOnly(from).add(const Duration(days: 1));
+  final last = dateOnly(to);
+  while (day.isBefore(last)) {
+    if (isWorkday(day)) {
+      count++;
+    }
+    day = day.add(const Duration(days: 1));
+  }
+  return count;
+}
+
 /// Fenetre sur laquelle le rythme se mesure.
 enum RateWindow {
   /// Les huit dernieres semaines : ce que vaut l'habitude actuelle, conges
@@ -171,24 +185,46 @@ class SavingRate {
 /// Un jour sans rien d'enregistre n'interrompt pas la suite : il n'a pas ete
 /// saisi, ce n'est pas la meme chose que d'avoir pris la voiture. Un week-end,
 /// un jour de conge ou un oubli ne cassent donc pas une serie.
+///
+/// Mais un trou, si. Sans ce garde-fou, trente trajets etales sur six mois sans
+/// une seule journee en voiture donnaient « 30 jours d'affilee », ce que
+/// personne ne lit comme autre chose que trente jours de suite.
 class StreakInfo {
   const StreakInfo({required this.current, required this.record, this.recordEnd});
 
-  factory StreakInfo.of(Iterable<CommuteDay> days) {
+  /// Combien de jours ouvres vides peuvent separer deux trajets sans rompre la
+  /// suite.
+  ///
+  /// Un seul : de quoi absorber un oubli de saisie, pas de quoi relier deux
+  /// trajets hebdomadaires. Le week-end, lui, ne compte jamais.
+  static const int maxMissedWorkdays = 1;
+
+  /// [now] clot une serie que le silence a rattrapee : sans lui, un dernier
+  /// trajet vieux de trois semaines serait encore annonce « en cours ».
+  factory StreakInfo.of(Iterable<CommuteDay> days, {DateTime? now}) {
     final sorted = [...days]..sort((a, b) => a.date.compareTo(b.date));
     var run = 0;
     var record = 0;
     DateTime? recordEnd;
+    DateTime? previous;
     for (final day in sorted) {
       if (day.isBike) {
-        run++;
+        final missed = previous == null ? 0 : workdaysBetween(previous, day.date);
+        run = missed > maxMissedWorkdays ? 1 : run + 1;
+        previous = day.date;
         if (run > record) {
           record = run;
           recordEnd = day.date;
         }
       } else {
         run = 0;
+        previous = null;
       }
+    }
+    if (now != null &&
+        previous != null &&
+        workdaysBetween(previous, dateOnly(now)) > maxMissedWorkdays) {
+      run = 0;
     }
     return StreakInfo(current: run, record: record, recordEnd: recordEnd);
   }
@@ -247,9 +283,9 @@ typedef RegularityWeek = ({DateTime monday, List<CommuteDay?> days});
 
 /// Tout ce que l'ecran Regularite affiche.
 class Regularity {
-  Regularity(Iterable<CommuteDay> days)
+  Regularity(Iterable<CommuteDay> days, {DateTime? now})
       : _byDay = {for (final day in days) dayKey(day.date): day},
-        streak = StreakInfo.of(days) {
+        streak = StreakInfo.of(days, now: now) {
     for (final day in _byDay.values) {
       if (_first == null || day.date.isBefore(_first!)) {
         _first = day.date;
