@@ -22,6 +22,7 @@ import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dar
 import 'package:i_zerak_app/services/service_locator.dart';
 import 'package:i_zerak_app/utils/confirmation_snack_bar.dart';
 import 'package:i_zerak_app/utils/formatters.dart';
+import 'package:i_zerak_app/utils/wide_layout.dart';
 
 /// L'accueil : ce qui bouge aujourd'hui, en une page.
 ///
@@ -356,37 +357,68 @@ class _DashboardPageState extends State<DashboardPage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    // Trois groupes, dans l'ordre de lecture du telephone : la journee et son
+    // defi, l'argent, puis le serveur et le carburant. Sur grand ecran ils se
+    // posent cote a cote au lieu de s'empiler, sans changer d'ordre.
+    final day = [
+      _today_(context, l10n),
+      // Entre la journee a enregistrer et l'argent : le defi parle du meme
+      // geste que les deux boutons du dessus.
+      if (_settings.isConfigured) _challenge(context, l10n),
+    ];
+    final money = [_money(context, l10n)];
+    final machine = [_pi(context, l10n), _downloads(context, l10n), _fuel(context, l10n)];
+
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: _load,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-          children: [
-            Text(
-              format.longDay(_today),
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
-            ),
-            const SizedBox(height: 10),
-            _today_(context, l10n),
-            // Entre la journee a enregistrer et l'argent : le defi parle du
-            // meme geste que les deux boutons du dessus.
-            if (_settings.isConfigured) ...[
-              const SizedBox(height: 12),
-              _challenge(context, l10n),
+        child: LayoutBuilder(builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final columns = width >= WideLayout.threeColumns
+              ? [day, money, machine]
+              : width >= WideLayout.twoColumns
+                  ? [
+                      [...day, ...money],
+                      machine,
+                    ]
+                  : [
+                      [...day, ...money, ...machine],
+                    ];
+          final wide = columns.length > 1;
+
+          return ListView(
+            padding: wide
+                ? const EdgeInsets.fromLTRB(28, 20, 28, 28)
+                : const EdgeInsets.fromLTRB(16, 4, 16, 24),
+            children: [
+              Text(
+                format.longDay(_today),
+                style: (wide ? theme.textTheme.bodyMedium : theme.textTheme.bodySmall)
+                    ?.copyWith(color: theme.colorScheme.outline),
+              ),
+              SizedBox(height: wide ? 16 : 10),
+              Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                for (final (index, cards) in columns.indexed) ...[
+                  if (index > 0) const SizedBox(width: 16),
+                  Expanded(child: _stack(cards)),
+                ],
+              ]),
             ],
-            const SizedBox(height: 12),
-            _money(context, l10n),
-            const SizedBox(height: 12),
-            _pi(context, l10n),
-            const SizedBox(height: 12),
-            _downloads(context, l10n),
-            const SizedBox(height: 12),
-            _fuel(context, l10n),
-          ],
-        ),
+          );
+        }),
       ),
     );
   }
+
+  Widget _stack(List<Widget> cards) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final (index, card) in cards.indexed) ...[
+            if (index > 0) const SizedBox(height: 12),
+            card,
+          ],
+        ],
+      );
 
   /// La journee du jour : les deux boutons, ou ce qui a deja ete enregistre.
   Widget _today_(BuildContext context, AppLocalizations l10n) {

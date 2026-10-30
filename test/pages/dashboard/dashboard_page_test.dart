@@ -119,6 +119,39 @@ void main() {
     expect(find.textContaining('1,689'), findsOneWidget);
   });
 
+  testWidgets('sur grand ecran, les cartes se posent en trois colonnes', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(wrap(page()));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    final day = tester.getTopLeft(find.text('À vélo'));
+    final money = tester.getTopLeft(find.text('Cagnotte vélo'));
+    final pi = tester.getTopLeft(find.textContaining('47 °C'));
+    // Cote a cote, de gauche a droite, dans l'ordre du telephone.
+    expect(day.dx, lessThan(money.dx));
+    expect(money.dx, lessThan(pi.dx));
+    expect(pi.dy, lessThan(450));
+  });
+
+  testWidgets('entre les deux, l argent rejoint la journee', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(900, 1100));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(wrap(page()));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    final day = tester.getTopLeft(find.text('À vélo'));
+    final money = tester.getTopLeft(find.text('Cagnotte vélo'));
+    final pi = tester.getTopLeft(find.textContaining('47 °C'));
+    // La journee et l'argent a gauche, l'un sous l'autre ; le Pi a droite.
+    expect(day.dx, lessThan(450));
+    expect(money.dx, lessThan(450));
+    expect(money.dy, greaterThan(day.dy));
+    expect(pi.dx, greaterThan(450));
+  });
+
   testWidgets('un appui sur « À vélo » enregistre la journee', (tester) async {
     await open(tester);
 

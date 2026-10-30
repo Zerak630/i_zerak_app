@@ -14,6 +14,7 @@ import 'package:i_zerak_app/pages/system/system_page.dart';
 import 'package:i_zerak_app/pages/torrents/torrents_page.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
+import 'package:i_zerak_app/utils/wide_layout.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key, IAppPreferences? preferences})
@@ -92,8 +93,17 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+  void _openSettings() => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SettingsPage()),
+      );
+
   @override
   Widget build(BuildContext context) {
+    if (WideLayout.hasRail(context)) {
+      return _wide(context);
+    }
+
     final l10n = AppLocalizations.of(context)!;
     final scheme = Theme.of(context).colorScheme;
     final pinnedCurrent = _layout.isPinned(_current);
@@ -132,10 +142,7 @@ class HomePageState extends State<HomePage> {
                             IconButton(
                               icon: const Icon(Icons.settings),
                               tooltip: AppLocalizations.of(context)!.settings_title,
-                              onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const SettingsPage()),
-                              ),
+                              onPressed: _openSettings,
                             ),
                           ])),
                 ),
@@ -180,6 +187,69 @@ class HomePageState extends State<HomePage> {
                 ),
               ]),
         ),
+      ),
+    );
+  }
+
+  /// Sur grand ecran : un rail a gauche qui montre tous les onglets.
+  ///
+  /// Le choix des epingles n'a plus cours ici — il repondait au manque de
+  /// place de la barre du bas — mais il est conserve tel quel pour le jour ou
+  /// la fenetre redevient etroite.
+  Widget _wide(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final extended = MediaQuery.sizeOf(context).width >= WideLayout.extendedRail;
+
+    final rail = NavigationRail(
+      backgroundColor: scheme.scrim,
+      extended: extended,
+      minExtendedWidth: 220,
+      selectedIndex: AppTab.values.indexOf(_current),
+      onDestinationSelected: (index) => _open(AppTab.values[index]),
+      labelType: extended ? NavigationRailLabelType.none : NavigationRailLabelType.all,
+      leading: Padding(
+        padding: const EdgeInsets.only(top: 8, bottom: 16),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          const Image(image: AssetImage('assets/images/iZerak_logo.png'), width: 44, height: 44),
+          if (extended) ...[
+            const SizedBox(width: 12),
+            const Text('iZerak', style: TextStyle(fontSize: 20)),
+          ],
+        ]),
+      ),
+      trailing: Padding(
+        padding: const EdgeInsets.only(top: 16),
+        child: IconButton(
+          icon: const Icon(Icons.settings),
+          tooltip: l10n.settings_title,
+          onPressed: _openSettings,
+        ),
+      ),
+      destinations: [
+        for (final tab in AppTab.values)
+          NavigationRailDestination(
+            icon: Icon(tabIcon(tab)),
+            label: Text(tabLabel(l10n, tab)),
+          ),
+      ],
+    );
+
+    return Scaffold(
+      body: SafeArea(
+        child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          // Sept onglets ne tiennent pas dans une fenetre basse : le rail
+          // defile plutot que de deborder.
+          LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(child: rail),
+              ),
+            ),
+          ),
+          Expanded(child: _pageFor(_current)),
+        ]),
       ),
     );
   }
