@@ -2822,6 +2822,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{done} bike days out of {target}'**
   String challenge_card_done(int done, int target);
+
+  /// No description provided for @sync_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get sync_section;
+
+  /// No description provided for @sync_section_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each device writes its own file in a folder shared by Syncthing, for instance your Obsidian vault. Credentials are never copied.'**
+  String get sync_section_hint;
+
+  /// No description provided for @sync_unsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available in the browser'**
+  String get sync_unsupported;
+
+  /// No description provided for @sync_folder.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared folder'**
+  String get sync_folder;
+
+  /// No description provided for @sync_pick_folder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose…'**
+  String get sync_pick_folder;
+
+  /// No description provided for @sync_device_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of this device'**
+  String get sync_device_name;
+
+  /// No description provided for @sync_apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get sync_apply;
+
+  /// No description provided for @sync_now.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get sync_now;
+
+  /// No description provided for @sync_disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a folder to turn sync on.'**
+  String get sync_disabled;
+
+  /// No description provided for @sync_never.
+  ///
+  /// In en, this message translates to:
+  /// **'Never synced'**
+  String get sync_never;
+
+  /// No description provided for @sync_last.
+  ///
+  /// In en, this message translates to:
+  /// **'Last sync {when}'**
+  String sync_last(String when);
+
+  /// No description provided for @sync_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed: {message}'**
+  String sync_error(String message);
+
+  /// No description provided for @sync_no_peer.
+  ///
+  /// In en, this message translates to:
+  /// **'No other device in this folder yet'**
+  String get sync_no_peer;
+
+  /// No description provided for @sync_peer.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · wrote {when}'**
+  String sync_peer(String name, String when);
+
+  /// No description provided for @sync_storage_needed.
+  ///
+  /// In en, this message translates to:
+  /// **'Android must allow access to all files to read what Syncthing puts in the folder.'**
+  String get sync_storage_needed;
+
+  /// No description provided for @sync_storage_grant.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow file access'**
+  String get sync_storage_grant;
+
+  /// No description provided for @sync_rail_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced'**
+  String get sync_rail_ok;
+
+  /// No description provided for @sync_rail_syncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get sync_rail_syncing;
+
+  /// No description provided for @sync_rail_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed'**
+  String get sync_rail_error;
+
+  /// No description provided for @sync_ago_now.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get sync_ago_now;
+
+  /// No description provided for @sync_ago_minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min ago'**
+  String sync_ago_minutes(int count);
+
+  /// No description provided for @sync_ago_hours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} h ago'**
+  String sync_ago_hours(int count);
+
+  /// No description provided for @sync_ago_days.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day ago} other{{count} days ago}}'**
+  String sync_ago_days(int count);
 }
 
 class _AppLocalizationsDelegate

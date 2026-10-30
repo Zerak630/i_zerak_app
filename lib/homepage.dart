@@ -9,18 +9,24 @@ import 'package:i_zerak_app/pages/gas_stations/gas_station_page.dart';
 import 'package:i_zerak_app/pages/goals/goals_page.dart';
 import 'package:i_zerak_app/pages/more_sheet.dart';
 import 'package:i_zerak_app/pages/settings/settings_page.dart';
+import 'package:i_zerak_app/pages/settings/sync_section.dart' show syncAgo;
 import 'package:i_zerak_app/pages/subscriptions/subscriptions.dart';
 import 'package:i_zerak_app/pages/system/system_page.dart';
 import 'package:i_zerak_app/pages/torrents/torrents_page.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
+import 'package:i_zerak_app/services/sync/sync_service.dart';
 import 'package:i_zerak_app/utils/wide_layout.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({super.key, IAppPreferences? preferences})
-      : preferences = preferences ?? getIt<IAppPreferences>();
+  HomePage({super.key, IAppPreferences? preferences, SyncService? sync})
+      : preferences = preferences ?? getIt<IAppPreferences>(),
+        sync = sync ?? (getIt.isRegistered<SyncService>() ? getIt<SyncService>() : null);
 
   final IAppPreferences preferences;
+
+  /// Absent dans les tests qui ne l'enregistrent pas : la page s'en passe.
+  final SyncService? sync;
 
   @override
   HomePageState createState() => HomePageState();
@@ -30,10 +36,90 @@ class HomePageState extends State<HomePage> {
   TabLayout _layout = TabLayout.initial;
   AppTab _current = TabLayout.initial.pinned.first;
 
+  AppLifecycleListener? _lifecycle;
+
   @override
   void initState() {
     super.initState();
     _loadTabs();
+    // De retour au premier plan, l'autre appareil a pu ecrire entre-temps.
+    final sync = widget.sync;
+    if (sync != null) {
+      _lifecycle = AppLifecycleListener(onResume: () => sync.syncNow());
+    }
+  }
+
+  @override
+  void dispose() {
+    _lifecycle?.dispose();
+    super.dispose();
+  }
+
+  /// La page ouverte, reconstruite de zero quand une importation a change les
+  /// donnees : chaque page lit son depot a l'ouverture, et n'aurait sinon
+  /// aucune raison de le relire.
+  Widget _currentPage() {
+    final sync = widget.sync;
+    if (sync == null) {
+      return _pageFor(_current);
+    }
+    return ValueListenableBuilder<SyncStatus>(
+      valueListenable: sync.status,
+      builder: (context, status, _) => KeyedSubtree(
+        key: ValueKey(status.generation),
+        child: _pageFor(_current),
+      ),
+    );
+  }
+
+  /// L'etat de la synchro au pied du rail, comme le bloc « Synchronise » de la
+  /// maquette : il dit de quand datent les chiffres affiches.
+  Widget _syncIndicator(BuildContext context, {required bool extended}) {
+    final sync = widget.sync;
+    if (sync == null) {
+      return const SizedBox.shrink();
+    }
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    return ValueListenableBuilder<SyncStatus>(
+      valueListenable: sync.status,
+      builder: (context, status, _) {
+        if (status.phase == SyncPhase.disabled) {
+          return const SizedBox.shrink();
+        }
+        final (icon, color, label) = switch (status.phase) {
+          SyncPhase.error => (Icons.sync_problem, theme.colorScheme.error, l10n.sync_rail_error),
+          SyncPhase.syncing => (
+              Icons.sync,
+              theme.colorScheme.onSurfaceVariant,
+              l10n.sync_rail_syncing
+            ),
+          _ => (Icons.cloud_done_outlined, theme.colorScheme.primary, l10n.sync_rail_ok),
+        };
+        final when =
+            status.lastSync == null ? null : syncAgo(l10n, status.lastSync!, DateTime.now());
+        final tooltip = when == null ? label : '$label · $when';
+        if (!extended) {
+          return Tooltip(message: tooltip, child: Icon(icon, size: 20, color: color));
+        }
+        return SizedBox(
+          width: 190,
+          child: Row(children: [
+            Icon(icon, size: 18, color: color),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(label, style: theme.textTheme.labelLarge),
+                if (when != null)
+                  Text(when,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+              ]),
+            ),
+          ]),
+        );
+      },
+    );
   }
 
   Future<void> _loadTabs() async {
@@ -151,7 +237,7 @@ class HomePageState extends State<HomePage> {
                 // un onglet quitte doit cesser de le faire. Le remplacer un
                 // jour par un IndexedStack les garderait toutes vivantes — et
                 // toutes bavardes — derriere celle qu'on regarde.
-                Expanded(flex: 1, child: _pageFor(_current)),
+                Expanded(flex: 1, child: _currentPage()),
               ],
             );
           },
@@ -220,11 +306,15 @@ class HomePageState extends State<HomePage> {
       ),
       trailing: Padding(
         padding: const EdgeInsets.only(top: 16),
-        child: IconButton(
-          icon: const Icon(Icons.settings),
-          tooltip: l10n.settings_title,
-          onPressed: _openSettings,
-        ),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          _syncIndicator(context, extended: extended),
+          const SizedBox(height: 8),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: l10n.settings_title,
+            onPressed: _openSettings,
+          ),
+        ]),
       ),
       destinations: [
         for (final tab in AppTab.values)
@@ -248,10 +338,9 @@ class HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          Expanded(child: _pageFor(_current)),
+          Expanded(child: _currentPage()),
         ]),
       ),
     );
   }
 }
-

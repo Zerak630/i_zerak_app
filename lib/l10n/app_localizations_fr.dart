@@ -1768,4 +1768,94 @@ class AppLocalizationsFr extends AppLocalizations {
   String challenge_card_done(int done, int target) {
     return '$done jours de vélo sur $target';
   }
+
+  @override
+  String get sync_section => 'Synchronisation';
+
+  @override
+  String get sync_section_hint =>
+      'Chaque appareil écrit son propre fichier dans un dossier que Syncthing partage, par exemple celui de votre coffre Obsidian. Les identifiants ne sont jamais copiés.';
+
+  @override
+  String get sync_unsupported => 'Non disponible dans le navigateur';
+
+  @override
+  String get sync_folder => 'Dossier partagé';
+
+  @override
+  String get sync_pick_folder => 'Choisir…';
+
+  @override
+  String get sync_device_name => 'Nom de cet appareil';
+
+  @override
+  String get sync_apply => 'Appliquer';
+
+  @override
+  String get sync_now => 'Synchroniser maintenant';
+
+  @override
+  String get sync_disabled => 'Choisissez un dossier pour activer la synchro.';
+
+  @override
+  String get sync_never => 'Jamais synchronisé';
+
+  @override
+  String sync_last(String when) {
+    return 'Dernière synchro $when';
+  }
+
+  @override
+  String sync_error(String message) {
+    return 'Échec : $message';
+  }
+
+  @override
+  String get sync_no_peer =>
+      'Aucun autre appareil dans ce dossier pour l’instant';
+
+  @override
+  String sync_peer(String name, String when) {
+    return '$name · écrit $when';
+  }
+
+  @override
+  String get sync_storage_needed =>
+      'Android doit autoriser l’accès à tous les fichiers pour lire ce que Syncthing dépose dans le dossier.';
+
+  @override
+  String get sync_storage_grant => 'Autoriser l’accès aux fichiers';
+
+  @override
+  String get sync_rail_ok => 'Synchronisé';
+
+  @override
+  String get sync_rail_syncing => 'Synchronisation…';
+
+  @override
+  String get sync_rail_error => 'Synchro en échec';
+
+  @override
+  String get sync_ago_now => 'à l’instant';
+
+  @override
+  String sync_ago_minutes(int count) {
+    return 'il y a $count min';
+  }
+
+  @override
+  String sync_ago_hours(int count) {
+    return 'il y a $count h';
+  }
+
+  @override
+  String sync_ago_days(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'il y a $count jours',
+      one: 'il y a 1 jour',
+    );
+    return '$_temp0';
+  }
 }

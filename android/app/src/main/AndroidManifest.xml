@@ -1,8 +1,32 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
+    <!-- Synchronisation par le dossier Syncthing. Depuis Android 11, lire un
+         fichier qu'une autre application a depose dans le stockage partage
+         demande l'acces a tous les fichiers : c'est ce que fait Obsidian pour
+         son coffre. L'application n'est pas destinee au Play Store, dont la
+         politique encadre cette permission. -->
+    <uses-permission
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage"/>
+    <!-- Android 10 et moins ignorent la permission ci-dessus : les deux
+         permissions classiques y suffisent. Au-dela, elles n'accordent plus
+         rien pour des fichiers qui ne sont pas des medias. -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"/>
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29"
+        tools:ignore="ScopedStorage"/>
+
+    <!-- requestLegacyExternalStorage : sous Android 10, le stockage cloisonne
+         s'applique deja, et seul ce drapeau rend au chemin brut du dossier
+         partage son sens. Ignore a partir d'Android 11. -->
     <application
+        android:requestLegacyExternalStorage="true"
         android:label="iZerak"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"

@@ -1750,4 +1750,93 @@ class AppLocalizationsEn extends AppLocalizations {
   String challenge_card_done(int done, int target) {
     return '$done bike days out of $target';
   }
+
+  @override
+  String get sync_section => 'Sync';
+
+  @override
+  String get sync_section_hint =>
+      'Each device writes its own file in a folder shared by Syncthing, for instance your Obsidian vault. Credentials are never copied.';
+
+  @override
+  String get sync_unsupported => 'Not available in the browser';
+
+  @override
+  String get sync_folder => 'Shared folder';
+
+  @override
+  String get sync_pick_folder => 'Choose…';
+
+  @override
+  String get sync_device_name => 'Name of this device';
+
+  @override
+  String get sync_apply => 'Apply';
+
+  @override
+  String get sync_now => 'Sync now';
+
+  @override
+  String get sync_disabled => 'Choose a folder to turn sync on.';
+
+  @override
+  String get sync_never => 'Never synced';
+
+  @override
+  String sync_last(String when) {
+    return 'Last sync $when';
+  }
+
+  @override
+  String sync_error(String message) {
+    return 'Failed: $message';
+  }
+
+  @override
+  String get sync_no_peer => 'No other device in this folder yet';
+
+  @override
+  String sync_peer(String name, String when) {
+    return '$name · wrote $when';
+  }
+
+  @override
+  String get sync_storage_needed =>
+      'Android must allow access to all files to read what Syncthing puts in the folder.';
+
+  @override
+  String get sync_storage_grant => 'Allow file access';
+
+  @override
+  String get sync_rail_ok => 'Synced';
+
+  @override
+  String get sync_rail_syncing => 'Syncing…';
+
+  @override
+  String get sync_rail_error => 'Sync failed';
+
+  @override
+  String get sync_ago_now => 'just now';
+
+  @override
+  String sync_ago_minutes(int count) {
+    return '$count min ago';
+  }
+
+  @override
+  String sync_ago_hours(int count) {
+    return '$count h ago';
+  }
+
+  @override
+  String sync_ago_days(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days ago',
+      one: '1 day ago',
+    );
+    return '$_temp0';
+  }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -20,6 +21,8 @@ import 'package:i_zerak_app/services/repositories/interfaces/i_gas_stations.dart
 import 'package:i_zerak_app/services/repositories/interfaces/i_server_config.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
 import 'package:i_zerak_app/services/repositories/secure/secure_credentials_store.dart';
+import 'package:i_zerak_app/services/sync/storage_access.dart';
+import 'package:i_zerak_app/services/sync/sync_service.dart';
 import 'package:i_zerak_app/services/tmdb/tmdb_service.dart';
 
 final getIt = GetIt.instance;
@@ -64,6 +67,25 @@ Future<void> setupServiceLocator() async {
   // (cf. HiveCommuteRepository).
   getIt.registerSingleton<ICommute>(
       HiveCommuteRepository(await Hive.openBox<String>('commute')));
+
+  // La synchro ne couvre que ce que l'utilisateur saisit et qui vaut sur tous
+  // ses appareils. Restent a part : app_prefs (la barre du bas depend de
+  // l'ecran), server_config (le certificat se valide appareil par appareil) et,
+  // surtout, les identifiants du stockage securise.
+  final syncSettings = await Hive.openBox<String>('sync');
+  final syncMeta = await Hive.openBox<String>('sync_meta');
+  getIt.registerLazySingleton<SyncService>(() => SyncService(
+        settings: syncSettings,
+        meta: syncMeta,
+        boxes: [
+          SyncedBox.subscriptions('subscriptions', Hive.box<Subscription>('subscriptions')),
+          SyncedBox.strings('subscription_prefs', Hive.box<String>('subscription_prefs')),
+          SyncedBox.strings('gas_stations', Hive.box<String>('gas_stations')),
+          SyncedBox.strings('commute', Hive.box<String>('commute')),
+        ],
+        supported: !kIsWeb,
+      ));
+  getIt.registerLazySingleton<StorageAccess>(() => const StorageAccess());
 
   getIt.registerLazySingleton<CommutePriceService>(() => CommutePriceService(
         gas: GasService(client: getIt<http.Client>()),

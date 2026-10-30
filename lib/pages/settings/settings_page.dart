@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/pages/commute/commute_settings_page.dart';
+import 'package:i_zerak_app/pages/settings/sync_section.dart';
 import 'package:i_zerak_app/services/agent/agent_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_exceptions.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_credentials.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_server_config.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
+import 'package:i_zerak_app/services/sync/sync_service.dart';
 
 enum _TestState { idle, running, ok, failed }
 
@@ -367,6 +369,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   _embyCard(context, l10n),
                   const SizedBox(height: 16),
                   _tmdbCard(context, l10n),
+                  // Hors du Pi, comme le trajet : la carte s'applique d'elle-meme
+                  // et ne passe pas par le bouton « Enregistrer ».
+                  if (getIt.isRegistered<SyncService>()) ...[
+                    const SizedBox(height: 16),
+                    SyncSection(),
+                  ],
                   const SizedBox(height: 24),
                   FilledButton.icon(
                     onPressed: _saving ? null : _save,

@@ -949,5 +949,59 @@
 			"done": { "type": "int" },
 			"target": { "type": "int" }
 		}
+	},
+	"sync_section": "Sync",
+	"sync_section_hint": "Each device writes its own file in a folder shared by Syncthing, for instance your Obsidian vault. Credentials are never copied.",
+	"sync_unsupported": "Not available in the browser",
+	"sync_folder": "Shared folder",
+	"sync_pick_folder": "Choose…",
+	"sync_device_name": "Name of this device",
+	"sync_apply": "Apply",
+	"sync_now": "Sync now",
+	"sync_disabled": "Choose a folder to turn sync on.",
+	"sync_never": "Never synced",
+	"sync_last": "Last sync {when}",
+	"@sync_last": {
+		"placeholders": {
+			"when": { "type": "String" }
+		}
+	},
+	"sync_error": "Failed: {message}",
+	"@sync_error": {
+		"placeholders": {
+			"message": { "type": "String" }
+		}
+	},
+	"sync_no_peer": "No other device in this folder yet",
+	"sync_peer": "{name} · wrote {when}",
+	"@sync_peer": {
+		"placeholders": {
+			"name": { "type": "String" },
+			"when": { "type": "String" }
+		}
+	},
+	"sync_storage_needed": "Android must allow access to all files to read what Syncthing puts in the folder.",
+	"sync_storage_grant": "Allow file access",
+	"sync_rail_ok": "Synced",
+	"sync_rail_syncing": "Syncing…",
+	"sync_rail_error": "Sync failed",
+	"sync_ago_now": "just now",
+	"sync_ago_minutes": "{count} min ago",
+	"@sync_ago_minutes": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"sync_ago_hours": "{count} h ago",
+	"@sync_ago_hours": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"sync_ago_days": "{count, plural, =1{1 day ago} other{{count} days ago}}",
+	"@sync_ago_days": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
 	}
 }
