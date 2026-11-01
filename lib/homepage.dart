@@ -5,6 +5,7 @@ import 'package:i_zerak_app/models/app_tab.dart';
 import 'package:i_zerak_app/pages/app_tab_ui.dart';
 import 'package:i_zerak_app/pages/commute/commute_page.dart';
 import 'package:i_zerak_app/pages/dashboard/dashboard_page.dart';
+import 'package:i_zerak_app/pages/free_time/free_time_page.dart';
 import 'package:i_zerak_app/pages/gas_stations/gas_station_page.dart';
 import 'package:i_zerak_app/pages/more_sheet.dart';
 import 'package:i_zerak_app/pages/settings/settings_page.dart';
@@ -174,4 +175,5 @@ Widget _pageFor(AppTab tab) => switch (tab) {
       AppTab.system => const SystemPage(),
       AppTab.gas => GasStationPage(),
       AppTab.commute => CommutePage(),
+      AppTab.freeTime => FreeTimePage(),
     };

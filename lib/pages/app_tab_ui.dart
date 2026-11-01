@@ -10,6 +10,7 @@ String tabLabel(AppLocalizations l10n, AppTab tab) => switch (tab) {
       AppTab.system => l10n.bb_system,
       AppTab.gas => l10n.bb_gas_stations,
       AppTab.commute => l10n.bb_commute,
+      AppTab.freeTime => l10n.bb_free_time,
     };
 
 IconData tabIcon(AppTab tab) => switch (tab) {
@@ -19,4 +20,5 @@ IconData tabIcon(AppTab tab) => switch (tab) {
       AppTab.system => Icons.developer_board,
       AppTab.gas => Icons.local_gas_station,
       AppTab.commute => Icons.pedal_bike,
+      AppTab.freeTime => Icons.hourglass_bottom,
     };

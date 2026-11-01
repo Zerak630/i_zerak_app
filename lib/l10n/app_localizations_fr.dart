@@ -1439,4 +1439,326 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get home_setup_commute =>
       'Réglez votre trajet pour enregistrer vos journées';
+
+  @override
+  String get bb_free_time => 'Temps libre';
+
+  @override
+  String free_minutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String free_hours(int hours, String minutes) {
+    return '$hours h $minutes';
+  }
+
+  @override
+  String free_per_hour(String amount) {
+    return '$amount/h';
+  }
+
+  @override
+  String get free_per_hour_suffix => '€/h';
+
+  @override
+  String get free_unsupported_title => 'Disponible sur Android';
+
+  @override
+  String get free_unsupported_body =>
+      'Le temps passé dans chaque application n’est accessible qu’aux applications Android.';
+
+  @override
+  String get free_intro_title => 'Reprendre la main sur son temps';
+
+  @override
+  String get free_intro_body =>
+      'iZerak mesure le temps passé sur les réseaux, fixe un quota qui baisse chaque semaine, et transforme chaque heure gagnée en argent pour vos objectifs.';
+
+  @override
+  String get free_intro_action => 'Commencer';
+
+  @override
+  String get free_setup_title => 'Mise en route';
+
+  @override
+  String get free_setup_intro =>
+      'Trois étapes. Tout reste sur le téléphone : rien n’est envoyé nulle part.';
+
+  @override
+  String get free_setup_access => 'Accès aux données d’utilisation';
+
+  @override
+  String get free_setup_access_ok => 'Accès accordé.';
+
+  @override
+  String get free_setup_access_hint =>
+      'Android l’accorde dans ses réglages : trouvez iZerak dans la liste et activez l’accès, puis revenez ici.';
+
+  @override
+  String get free_setup_access_action => 'Ouvrir les réglages';
+
+  @override
+  String get free_setup_apps => 'Applications à surveiller';
+
+  @override
+  String get free_setup_apps_action => 'Choisir les applications';
+
+  @override
+  String get free_setup_baseline => 'Votre moyenne de départ';
+
+  @override
+  String get free_setup_baseline_hint =>
+      'Android garde l’historique des derniers jours : iZerak en tire votre moyenne actuelle, sans attendre une semaine.';
+
+  @override
+  String get free_setup_baseline_action => 'Mesurer ma moyenne';
+
+  @override
+  String free_setup_baseline_result(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'par jour en moyenne, sur $days jours',
+      one: 'par jour, mesuré sur 1 jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get free_setup_baseline_none =>
+      'Android n’a encore rien gardé pour ces applications. Indiquez une estimation de votre temps quotidien :';
+
+  @override
+  String get free_setup_baseline_manual => 'Minutes par jour';
+
+  @override
+  String free_setup_first_quota(String quota) {
+    return 'Votre quota cette semaine : $quota par jour.';
+  }
+
+  @override
+  String get free_setup_start => 'C’est parti';
+
+  @override
+  String get free_apps_title => 'Applications suivies';
+
+  @override
+  String free_apps_done(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Valider ($count)',
+      zero: 'Valider',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get free_apps_search => 'Rechercher';
+
+  @override
+  String get free_apps_none => 'Aucune application trouvée';
+
+  @override
+  String get free_apps_empty => 'Aucune application choisie';
+
+  @override
+  String free_apps_summary(String first, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count autres',
+      one: '1 autre',
+    );
+    return '$first et $_temp0';
+  }
+
+  @override
+  String get free_pot => 'Cagnotte temps libre';
+
+  @override
+  String get free_pot_first_day =>
+      'Premier gain demain matin, une fois la journée close';
+
+  @override
+  String free_pot_hours(String hours, String date) {
+    return '$hours gagnées depuis le $date';
+  }
+
+  @override
+  String get free_last_14_days => 'Les 14 derniers jours';
+
+  @override
+  String free_goal_remaining(String amount, String hours) {
+    return 'Encore $amount — environ $hours h loin des réseaux';
+  }
+
+  @override
+  String free_goal_missing_hours(String hours, String rate) {
+    return 'Environ $hours h loin des réseaux, à $rate l’heure.';
+  }
+
+  @override
+  String get free_access_lost => 'Accès aux données retiré';
+
+  @override
+  String get free_access_lost_hint =>
+      'Sans lui, iZerak ne peut plus mesurer votre temps : la cagnotte est en pause.';
+
+  @override
+  String free_today_quota(String quota) {
+    return 'sur $quota';
+  }
+
+  @override
+  String free_today_left(String minutes) {
+    return 'Encore $minutes avant le quota';
+  }
+
+  @override
+  String free_today_over(String minutes) {
+    return 'Quota dépassé de $minutes';
+  }
+
+  @override
+  String free_opens(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ouvertures',
+      one: 'ouverture',
+      zero: 'ouverture',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String free_opens_short(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ouv.',
+      one: '1 ouv.',
+      zero: '',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get free_today_gain => 'si la journée s’arrêtait là';
+
+  @override
+  String get free_week_title => 'Cette semaine';
+
+  @override
+  String get free_streak => 'jours tenus d’affilée';
+
+  @override
+  String free_streak_days(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jours',
+      one: '1 jour',
+      zero: '0 jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String free_week_average(String minutes) {
+    return 'moyenne : $minutes par jour';
+  }
+
+  @override
+  String get free_week_no_data => 'pas encore de journée close';
+
+  @override
+  String free_week_quota(String now, String next) {
+    return 'Quota : $now par jour, puis $next la semaine prochaine.';
+  }
+
+  @override
+  String free_week_baseline(String minutes) {
+    return 'Moyenne de départ : $minutes par jour.';
+  }
+
+  @override
+  String get free_hours_title => 'Les heures à risque';
+
+  @override
+  String get free_hours_empty => 'Rien de mesuré pour l’instant.';
+
+  @override
+  String free_hours_peak(String hour, String minutes) {
+    return 'Pic vers $hour : $minutes en moyenne';
+  }
+
+  @override
+  String free_day_detail(String minutes, String quota) {
+    return '$minutes / $quota';
+  }
+
+  @override
+  String get free_settings_title => 'Réglages du temps libre';
+
+  @override
+  String get free_settings_tracking => 'Suivi';
+
+  @override
+  String get free_settings_apps => 'Applications suivies';
+
+  @override
+  String get free_settings_apps_changed =>
+      'La moyenne de départ a été mesurée sur d’autres applications : pensez à la recalculer.';
+
+  @override
+  String get free_settings_restart => 'Recalculer la moyenne de départ';
+
+  @override
+  String free_settings_baseline(String minutes, String date) {
+    return '$minutes par jour, depuis le $date';
+  }
+
+  @override
+  String get free_settings_restart_confirm =>
+      'Le quota repartira de la première semaine. La cagnotte, les objectifs et l’historique sont conservés.';
+
+  @override
+  String get free_settings_restart_action => 'Recalculer';
+
+  @override
+  String get free_settings_quota => 'Quota';
+
+  @override
+  String get free_settings_decrease => 'Baisse chaque semaine';
+
+  @override
+  String get free_settings_floor => 'Plancher';
+
+  @override
+  String get free_settings_floor_hint => 'Le quota ne descend pas plus bas';
+
+  @override
+  String get free_settings_pot => 'Cagnotte';
+
+  @override
+  String get free_settings_rate => 'Tarif d’une heure gagnée';
+
+  @override
+  String get free_settings_rate_hint => 'Comparée à votre moyenne de départ';
+
+  @override
+  String get free_settings_report => 'Bilan du soir';
+
+  @override
+  String get free_settings_report_enabled => 'Bilan quotidien';
+
+  @override
+  String get free_settings_report_hint =>
+      'Une notification avec le temps du jour, le gain et la série';
+
+  @override
+  String get free_settings_report_time => 'Heure du bilan';
 }

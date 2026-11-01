@@ -9,7 +9,8 @@ enum AppTab {
   torrents,
   system,
   gas,
-  commute;
+  commute,
+  freeTime;
 
   static AppTab? fromName(String? raw) {
     for (final tab in values) {
@@ -23,7 +24,7 @@ enum AppTab {
 
 /// Ce que la barre du bas montre en permanence.
 ///
-/// Six onglets ne tiennent pas cote a cote sans devenir illisibles. Trois sont
+/// Sept onglets ne tiennent pas cote a cote sans devenir illisibles. Trois sont
 /// epingles, le reste se range derriere « Plus » — et c'est l'utilisateur qui
 /// decide lesquels.
 class TabLayout {
