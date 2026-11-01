@@ -515,26 +515,19 @@ class CommuteTotals {
   final int missedDays;
 }
 
-/// Tout ce que l'onglet affiche, calcule a partir des jours et des objectifs.
+/// Des objectifs, et la cagnotte dans laquelle ils puisent.
 ///
-/// Rien de ce qui est ici n'est stocke : la cagnotte se recalcule a chaque
-/// fois, elle ne peut donc pas diverger des jours qui la composent.
-class CommuteLedger {
-  CommuteLedger(Iterable<CommuteDay> days, Iterable<Goal> goals)
-      : days = [...days]..sort((a, b) => b.date.compareTo(a.date)),
-        goals = [...goals]..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
-        totals = CommuteTotals.of(days);
-
-  /// Du plus recent au plus ancien.
-  final List<CommuteDay> days;
+/// Partage par les onglets Velo et Temps libre : seule change la facon dont
+/// la cagnotte se remplit, pas celle dont on la depense.
+class GoalBook {
+  GoalBook(Iterable<Goal> goals, {required this.totalSaved})
+      : goals = [...goals]..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
   /// Du plus ancien au plus recent : l'ordre dans lequel ils ont ete crees.
   final List<Goal> goals;
 
-  final CommuteTotals totals;
-
-  /// Tout ce que le velo a rapporte depuis le premier trajet. Ne baisse jamais.
-  double get totalSaved => totals.bike;
+  /// Tout ce que la cagnotte a recu depuis le debut. Ne baisse jamais.
+  final double totalSaved;
 
   /// Les achats valides.
   double get spent => roundCents(goals
@@ -543,6 +536,58 @@ class CommuteLedger {
 
   /// Ce qui reste a depenser.
   double get balance => roundCents(totalSaved - spent);
+
+  List<Goal> get activeGoals => [for (final goal in goals) if (!goal.isValidated) goal];
+
+  List<Goal> get validatedGoals =>
+      [for (final goal in goals) if (goal.isValidated) goal]
+        ..sort((a, b) => b.validatedAt!.compareTo(a.validatedAt!));
+
+  GoalProgress progressOf(Goal goal) =>
+      GoalProgress(goal, goal.kind == GoalKind.purchase ? balance : totalSaved);
+
+  /// Le meme carnet, une fois [goal] valide : de quoi montrer ce que la
+  /// validation changerait avant de la confirmer.
+  GoalBook validating(Goal goal, DateTime at) => GoalBook(
+        [for (final other in goals) other.id == goal.id ? other.validated(at) : other],
+        totalSaved: totalSaved,
+      );
+}
+
+/// Tout ce que l'onglet affiche, calcule a partir des jours et des objectifs.
+///
+/// Rien de ce qui est ici n'est stocke : la cagnotte se recalcule a chaque
+/// fois, elle ne peut donc pas diverger des jours qui la composent.
+class CommuteLedger {
+  factory CommuteLedger(Iterable<CommuteDay> days, Iterable<Goal> goals) {
+    final totals = CommuteTotals.of(days);
+    return CommuteLedger._(
+      [...days]..sort((a, b) => b.date.compareTo(a.date)),
+      totals,
+      GoalBook(goals, totalSaved: totals.bike),
+    );
+  }
+
+  CommuteLedger._(this.days, this.totals, this.book);
+
+  /// Du plus recent au plus ancien.
+  final List<CommuteDay> days;
+
+  final CommuteTotals totals;
+
+  final GoalBook book;
+
+  /// Du plus ancien au plus recent : l'ordre dans lequel ils ont ete crees.
+  List<Goal> get goals => book.goals;
+
+  /// Tout ce que le velo a rapporte depuis le premier trajet. Ne baisse jamais.
+  double get totalSaved => totals.bike;
+
+  /// Les achats valides.
+  double get spent => book.spent;
+
+  /// Ce qui reste a depenser.
+  double get balance => book.balance;
 
   DateTime? get firstBikeDay {
     DateTime? first;
@@ -564,14 +609,11 @@ class CommuteLedger {
     return null;
   }
 
-  List<Goal> get activeGoals => [for (final goal in goals) if (!goal.isValidated) goal];
+  List<Goal> get activeGoals => book.activeGoals;
 
-  List<Goal> get validatedGoals =>
-      [for (final goal in goals) if (goal.isValidated) goal]
-        ..sort((a, b) => b.validatedAt!.compareTo(a.validatedAt!));
+  List<Goal> get validatedGoals => book.validatedGoals;
 
-  GoalProgress progressOf(Goal goal) =>
-      GoalProgress(goal, goal.kind == GoalKind.purchase ? balance : totalSaved);
+  GoalProgress progressOf(Goal goal) => book.progressOf(goal);
 
   CommuteTotals monthTotals(int year, int month) => CommuteTotals.of(
       days.where((day) => day.date.year == year && day.date.month == month));
