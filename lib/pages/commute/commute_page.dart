@@ -21,6 +21,7 @@ class CommutePage extends StatefulWidget {
     ICommute? store,
     CommutePriceService? prices,
     DateTime Function()? clock,
+    this.askCarOnOpen = false,
   })  : store = store ?? getIt<ICommute>(),
         prices = prices ?? getIt<CommutePriceService>(),
         clock = clock ?? DateTime.now;
@@ -28,6 +29,10 @@ class CommutePage extends StatefulWidget {
   final ICommute store;
   final CommutePriceService prices;
   final DateTime Function() clock;
+
+  /// Ouvert depuis le bouton « Voiture » d'un widget : la raison est demandee
+  /// des le chargement, si la journee n'est pas deja enregistree.
+  final bool askCarOnOpen;
 
   @override
   State<CommutePage> createState() => _CommutePageState();
@@ -54,8 +59,13 @@ class _CommutePageState extends State<CommutePage> {
   }
 
   Future<void> _load() async {
+    // Lu une fois : l'ecran d'accueil reconstruit la page sans le drapeau.
+    final askCar = widget.askCarOnOpen;
     await _reload();
     await _refreshPrice();
+    if (askCar && mounted && _settings.isConfigured && _ledger.dayOn(_today) == null) {
+      await _recordCar();
+    }
   }
 
   Future<void> _reload() async {
@@ -172,7 +182,17 @@ class _CommutePageState extends State<CommutePage> {
   }
 
   Future<void> _newGoal() async {
-    final goal = await showNewGoalSheet(context, ledger: _ledger, tripValue: _tripValue);
+    final l10n = AppLocalizations.of(context)!;
+    final format = CommuteFormat(context);
+    final tripValue = _tripValue;
+    final goal = await showNewGoalSheet(
+      context,
+      book: _ledger.book,
+      missingHint: (missing) {
+        final trips = tripsFor(missing, tripValue);
+        return trips == null ? null : l10n.goal_missing_trips(trips, format.euros(tripValue));
+      },
+    );
     if (goal == null) {
       return;
     }
@@ -181,7 +201,7 @@ class _CommutePageState extends State<CommutePage> {
   }
 
   Future<void> _validateGoal(Goal goal) async {
-    final confirmed = await showValidateGoalSheet(context, goal: goal, ledger: _ledger);
+    final confirmed = await showValidateGoalSheet(context, goal: goal, book: _ledger.book);
     // Relu apres la feuille : un trajet annule entre-temps pourrait avoir fait
     // repasser l'achat sous son montant.
     if (!confirmed || !_ledger.progressOf(goal).reached) {

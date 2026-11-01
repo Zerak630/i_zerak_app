@@ -3,12 +3,9 @@ import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/commute_dao.dart';
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
 
-/// La tuile de tete, qui defile : la cagnotte, puis un objectif par tuile, puis
-/// de quoi en ajouter un.
-///
-/// La tuile suivante depasse sur le bord droit, et des points suivent : sans
-/// eux, rien ne dirait qu'il y a quelque chose a faire defiler.
-class PotCarousel extends StatefulWidget {
+/// La tuile de tete de l'onglet Velo : la cagnotte, ses objectifs, et de quoi
+/// en ajouter un.
+class PotCarousel extends StatelessWidget {
   const PotCarousel({
     super.key,
     required this.ledger,
@@ -29,15 +26,63 @@ class PotCarousel extends StatefulWidget {
   final VoidCallback onNewGoal;
   final ValueChanged<Goal> onDeleteGoal;
 
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final format = CommuteFormat(context);
+    return GoalCarousel(
+      book: ledger.book,
+      leading: _PotTile(ledger: ledger, today: today),
+      remainingLabel: (remaining) {
+        final trips = tripsFor(remaining, tripValue);
+        return trips == null
+            ? l10n.goal_remaining_amount(format.euros(remaining))
+            : l10n.goal_remaining(format.euros(remaining), trips);
+      },
+      onValidate: onValidate,
+      onNewGoal: onNewGoal,
+      onDeleteGoal: onDeleteGoal,
+    );
+  }
+}
+
+/// Une cagnotte qui defile : sa tuile de tete, puis un objectif par tuile,
+/// puis de quoi en ajouter un.
+///
+/// La tuile suivante depasse sur le bord droit, et des points suivent : sans
+/// eux, rien ne dirait qu'il y a quelque chose a faire defiler.
+class GoalCarousel extends StatefulWidget {
+  const GoalCarousel({
+    super.key,
+    required this.book,
+    required this.leading,
+    required this.remainingLabel,
+    required this.onValidate,
+    required this.onNewGoal,
+    required this.onDeleteGoal,
+  });
+
+  final GoalBook book;
+
+  /// La tuile de la cagnotte elle-meme, propre a chaque onglet.
+  final Widget leading;
+
+  /// Ce qui manque a un objectif, dit dans l'unite de l'onglet.
+  final String Function(double remaining) remainingLabel;
+
+  final ValueChanged<Goal> onValidate;
+  final VoidCallback onNewGoal;
+  final ValueChanged<Goal> onDeleteGoal;
+
   /// Assez pour la tuile la plus chargee, celle d'un objectif atteint et de
   /// son bouton.
   static const double height = 206;
 
   @override
-  State<PotCarousel> createState() => _PotCarouselState();
+  State<GoalCarousel> createState() => _GoalCarouselState();
 }
 
-class _PotCarouselState extends State<PotCarousel> {
+class _GoalCarouselState extends State<GoalCarousel> {
   final _controller = PageController(viewportFraction: 0.9);
   var _page = 0;
 
@@ -49,13 +94,13 @@ class _PotCarouselState extends State<PotCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final goals = widget.ledger.activeGoals;
+    final goals = widget.book.activeGoals;
     final count = goals.length + 2;
     final scheme = Theme.of(context).colorScheme;
 
     return Column(children: [
       SizedBox(
-        height: PotCarousel.height,
+        height: GoalCarousel.height,
         child: PageView.builder(
           controller: _controller,
           padEnds: false,
@@ -64,12 +109,13 @@ class _PotCarouselState extends State<PotCarousel> {
           itemBuilder: (context, index) {
             final Widget tile;
             if (index == 0) {
-              tile = _PotTile(ledger: widget.ledger, today: widget.today);
+              tile = widget.leading;
             } else if (index <= goals.length) {
               final goal = goals[index - 1];
+              final progress = widget.book.progressOf(goal);
               tile = _GoalTile(
-                progress: widget.ledger.progressOf(goal),
-                tripValue: widget.tripValue,
+                progress: progress,
+                remaining: widget.remainingLabel(progress.remaining),
                 onValidate: () => widget.onValidate(goal),
                 onDelete: () => widget.onDeleteGoal(goal),
               );
@@ -102,8 +148,8 @@ class _PotCarouselState extends State<PotCarousel> {
   }
 }
 
-class _TileFrame extends StatelessWidget {
-  const _TileFrame({required this.child, this.highlight});
+class PotTileFrame extends StatelessWidget {
+  const PotTileFrame({super.key, required this.child, this.highlight});
 
   final Widget child;
 
@@ -122,8 +168,14 @@ class _TileFrame extends StatelessWidget {
       );
 }
 
-class _TileHeader extends StatelessWidget {
-  const _TileHeader({required this.icon, required this.label, required this.color, this.trailing});
+class PotTileHeader extends StatelessWidget {
+  const PotTileHeader({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.color,
+    this.trailing,
+  });
 
   final IconData icon;
   final String label;
@@ -174,9 +226,9 @@ class _PotTile extends StatelessWidget {
       subtitle = l10n.commute_bike_trips(ledger.totals.bikeDays, format.dayMonth(first));
     }
 
-    return _TileFrame(
+    return PotTileFrame(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        _TileHeader(
+        PotTileHeader(
           icon: Icons.account_balance_wallet_outlined,
           label: l10n.commute_pot,
           color: scheme.primary,
@@ -233,13 +285,13 @@ class _DayDot extends StatelessWidget {
 class _GoalTile extends StatelessWidget {
   const _GoalTile({
     required this.progress,
-    required this.tripValue,
+    required this.remaining,
     required this.onValidate,
     required this.onDelete,
   });
 
   final GoalProgress progress;
-  final double tripValue;
+  final String remaining;
   final VoidCallback onValidate;
   final VoidCallback onDelete;
 
@@ -252,14 +304,13 @@ class _GoalTile extends StatelessWidget {
     final goal = progress.goal;
     final milestone = goal.kind == GoalKind.milestone;
     final color = goalColor(scheme, goal.kind);
-    final trips = tripsFor(progress.remaining, tripValue);
 
     return GestureDetector(
       onLongPress: onDelete,
-      child: _TileFrame(
+      child: PotTileFrame(
         highlight: progress.reached ? color : null,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _TileHeader(
+          PotTileHeader(
             icon: milestone ? Icons.flag_outlined : goalIconData(goal.icon),
             label: milestone ? l10n.goal_label_milestone : l10n.goal_label_purchase,
             color: color,
@@ -318,9 +369,7 @@ class _GoalTile extends StatelessWidget {
             )
           else
             Text(
-              trips == null
-                  ? l10n.goal_remaining_amount(format.euros(progress.remaining))
-                  : l10n.goal_remaining(format.euros(progress.remaining), trips),
+              remaining,
               style: theme.textTheme.bodySmall?.copyWith(color: scheme.outline),
             ),
         ]),

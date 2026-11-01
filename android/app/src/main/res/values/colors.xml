@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#312F4E</color>
+    <!-- Widgets de l'ecran d'accueil : la palette sombre de l'application
+         (graine blueGrey), figee ici puisque le natif ne lit pas le theme
+         Flutter. -->
+    <color name="widget_background">#F01D2228</color>
+    <color name="widget_text">#E1E2E8</color>
+    <color name="widget_muted">#A4ACB6</color>
+    <color name="widget_primary">#A1CAF1</color>
+    <color name="widget_on_primary">#00344F</color>
+    <color name="widget_surface">#2E353C</color>
+    <color name="widget_track">#3A424A</color>
 </resources>

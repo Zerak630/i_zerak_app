@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Textes du bilan du soir, ecrit par le natif application fermee : ils ne
+     peuvent pas passer par les fichiers .arb du Dart. -->
+<resources>
+    <string name="report_channel">Daily free time summary</string>
+    <string name="report_title">Today\'s summary</string>
+    <string name="report_minutes">%1$d min</string>
+    <string name="report_hours">%1$d h %2$02d</string>
+    <string name="report_under">%1$s today, under your %2$s limit · +%3$s</string>
+    <string name="report_over">%1$s today, over your %2$s limit · %3$s of savings missed</string>
+    <plurals name="report_streak">
+        <item quantity="one">" · streak: %d day"</item>
+        <item quantity="other">" · streak: %d days"</item>
+    </plurals>
+    <!-- Widgets de l'ecran d'accueil (cf. HomeWidgets.kt). -->
+    <string name="widget_commute_name">Bike or car?</string>
+    <string name="widget_commute_description">Record today\'s commute in one tap</string>
+    <string name="widget_goal_name">Goal</string>
+    <string name="widget_goal_description">A goal from your pots; tap to see the next one</string>
+    <string name="widget_bike">By bike</string>
+    <string name="widget_car">Car</string>
+    <string name="widget_bike_gain">+%1$s</string>
+    <string name="widget_recorded_bike">✓ By bike today · +%1$s</string>
+    <string name="widget_recorded_bike_estimate">✓ By bike today · ≈ +%1$s</string>
+    <string name="widget_recorded_car">Car today</string>
+    <string name="widget_setup">Set up your commute in iZerak</string>
+    <string name="widget_pot_commute">Bike pot</string>
+    <string name="widget_pot_free">Free time</string>
+    <string name="widget_milestone">Milestone</string>
+    <string name="widget_goal_progress">%1$s of %2$s</string>
+    <string name="widget_goal_reached">Reached</string>
+    <string name="widget_goal_position">%1$d/%2$d</string>
+    <string name="widget_no_goal">No goal yet</string>
+    <string name="widget_no_goal_hint">Tap to create one in iZerak</string>
+    <string name="widget_open_app">Open iZerak</string>
+</resources>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_channel">Bilan du temps libre</string>
+    <string name="report_title">Bilan du jour</string>
+    <string name="report_minutes">%1$d min</string>
+    <string name="report_hours">%1$d h %2$02d</string>
+    <string name="report_under">%1$s aujourd’hui, sous le quota de %2$s · +%3$s</string>
+    <string name="report_over">%1$s aujourd’hui, au-dessus du quota de %2$s · %3$s d’économies loupées</string>
+    <plurals name="report_streak">
+        <item quantity="one">" · série : %d jour"</item>
+        <item quantity="other">" · série : %d jours"</item>
+    </plurals>
+    <!-- Widgets de l'ecran d'accueil (cf. HomeWidgets.kt). -->
+    <string name="widget_commute_name">Vélo / Voiture ?</string>
+    <string name="widget_commute_description">Enregistrez le trajet du jour en un appui</string>
+    <string name="widget_goal_name">Objectif</string>
+    <string name="widget_goal_description">Un objectif de vos cagnottes ; touchez pour passer au suivant</string>
+    <string name="widget_bike">À vélo</string>
+    <string name="widget_car">Voiture</string>
+    <string name="widget_bike_gain">+%1$s</string>
+    <string name="widget_recorded_bike">✓ À vélo aujourd’hui · +%1$s</string>
+    <string name="widget_recorded_bike_estimate">✓ À vélo aujourd’hui · ≈ +%1$s</string>
+    <string name="widget_recorded_car">En voiture aujourd’hui</string>
+    <string name="widget_setup">Réglez votre trajet dans iZerak</string>
+    <string name="widget_pot_commute">Cagnotte vélo</string>
+    <string name="widget_pot_free">Temps libre</string>
+    <string name="widget_milestone">Palier</string>
+    <string name="widget_goal_progress">%1$s sur %2$s</string>
+    <string name="widget_goal_reached">Atteint</string>
+    <string name="widget_goal_position">%1$d/%2$d</string>
+    <string name="widget_no_goal">Aucun objectif</string>
+    <string name="widget_no_goal_hint">Touchez pour en créer un dans iZerak</string>
+    <string name="widget_open_app">Ouvrir iZerak</string>
+</resources>

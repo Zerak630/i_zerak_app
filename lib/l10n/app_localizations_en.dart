@@ -1426,4 +1426,330 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get home_setup_commute => 'Set your commute up to record your days';
+
+  @override
+  String get bb_free_time => 'Free time';
+
+  @override
+  String free_minutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String free_hours(int hours, String minutes) {
+    return '$hours h $minutes';
+  }
+
+  @override
+  String free_per_hour(String amount) {
+    return '$amount/h';
+  }
+
+  @override
+  String get free_per_hour_suffix => '€/h';
+
+  @override
+  String get free_unsupported_title => 'Available on Android';
+
+  @override
+  String get free_unsupported_body =>
+      'Time spent in each app is only available to Android apps.';
+
+  @override
+  String get free_intro_title => 'Take your time back';
+
+  @override
+  String get free_intro_body =>
+      'iZerak measures the time you spend on social media, sets a limit that drops every week, and turns every hour won back into money for your goals.';
+
+  @override
+  String get free_intro_action => 'Get started';
+
+  @override
+  String get free_setup_title => 'Setup';
+
+  @override
+  String get free_setup_intro =>
+      'Three steps. Everything stays on the phone: nothing is sent anywhere.';
+
+  @override
+  String get free_setup_access => 'Usage access';
+
+  @override
+  String get free_setup_access_ok => 'Access granted.';
+
+  @override
+  String get free_setup_access_hint =>
+      'Android grants it in its settings: find iZerak in the list, allow access, then come back here.';
+
+  @override
+  String get free_setup_access_action => 'Open settings';
+
+  @override
+  String get free_setup_apps => 'Apps to watch';
+
+  @override
+  String get free_setup_apps_action => 'Choose apps';
+
+  @override
+  String get free_setup_baseline => 'Your starting average';
+
+  @override
+  String get free_setup_baseline_hint =>
+      'Android keeps the last few days of history: iZerak works out your current average from it, no need to wait a week.';
+
+  @override
+  String get free_setup_baseline_action => 'Measure my average';
+
+  @override
+  String free_setup_baseline_result(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'a day on average, over $days days',
+      one: 'a day, measured over 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get free_setup_baseline_none =>
+      'Android has nothing on record for these apps yet. Enter an estimate of your daily time:';
+
+  @override
+  String get free_setup_baseline_manual => 'Minutes per day';
+
+  @override
+  String free_setup_first_quota(String quota) {
+    return 'Your limit this week: $quota a day.';
+  }
+
+  @override
+  String get free_setup_start => 'Let\'s go';
+
+  @override
+  String get free_apps_title => 'Watched apps';
+
+  @override
+  String free_apps_done(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Done ($count)',
+      zero: 'Done',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get free_apps_search => 'Search';
+
+  @override
+  String get free_apps_none => 'No app found';
+
+  @override
+  String get free_apps_empty => 'No app chosen';
+
+  @override
+  String free_apps_summary(String first, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count others',
+      one: '1 other',
+    );
+    return '$first and $_temp0';
+  }
+
+  @override
+  String get free_pot => 'Free time pot';
+
+  @override
+  String get free_pot_first_day =>
+      'First gain tomorrow morning, once the day is over';
+
+  @override
+  String free_pot_hours(String hours, String date) {
+    return '$hours won back since $date';
+  }
+
+  @override
+  String get free_last_14_days => 'Last 14 days';
+
+  @override
+  String free_goal_remaining(String amount, String hours) {
+    return '$amount to go — about $hours h away from social media';
+  }
+
+  @override
+  String free_goal_missing_hours(String hours, String rate) {
+    return 'About $hours h away from social media, at $rate an hour.';
+  }
+
+  @override
+  String get free_access_lost => 'Usage access revoked';
+
+  @override
+  String get free_access_lost_hint =>
+      'Without it, iZerak can no longer measure your time: the pot is on hold.';
+
+  @override
+  String free_today_quota(String quota) {
+    return 'of $quota';
+  }
+
+  @override
+  String free_today_left(String minutes) {
+    return '$minutes left before the limit';
+  }
+
+  @override
+  String free_today_over(String minutes) {
+    return 'Limit exceeded by $minutes';
+  }
+
+  @override
+  String free_opens(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'opens',
+      one: 'open',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String free_opens_short(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count opens',
+      one: '1 open',
+      zero: '',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get free_today_gain => 'if the day ended now';
+
+  @override
+  String get free_week_title => 'This week';
+
+  @override
+  String get free_streak => 'days in a row under the limit';
+
+  @override
+  String free_streak_days(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String free_week_average(String minutes) {
+    return 'average: $minutes a day';
+  }
+
+  @override
+  String get free_week_no_data => 'no finished day yet';
+
+  @override
+  String free_week_quota(String now, String next) {
+    return 'Limit: $now a day, then $next next week.';
+  }
+
+  @override
+  String free_week_baseline(String minutes) {
+    return 'Starting average: $minutes a day.';
+  }
+
+  @override
+  String get free_hours_title => 'Risky hours';
+
+  @override
+  String get free_hours_empty => 'Nothing measured yet.';
+
+  @override
+  String free_hours_peak(String hour, String minutes) {
+    return 'Peak around $hour: $minutes on average';
+  }
+
+  @override
+  String free_day_detail(String minutes, String quota) {
+    return '$minutes / $quota';
+  }
+
+  @override
+  String get free_settings_title => 'Free time settings';
+
+  @override
+  String get free_settings_tracking => 'Tracking';
+
+  @override
+  String get free_settings_apps => 'Watched apps';
+
+  @override
+  String get free_settings_apps_changed =>
+      'Your starting average was measured on other apps: consider measuring it again.';
+
+  @override
+  String get free_settings_restart => 'Measure the starting average again';
+
+  @override
+  String free_settings_baseline(String minutes, String date) {
+    return '$minutes a day, since $date';
+  }
+
+  @override
+  String get free_settings_restart_confirm =>
+      'The limit will start again from week one. The pot, goals and history are kept.';
+
+  @override
+  String get free_settings_restart_action => 'Measure again';
+
+  @override
+  String get free_settings_quota => 'Limit';
+
+  @override
+  String get free_settings_decrease => 'Weekly decrease';
+
+  @override
+  String get free_settings_floor => 'Floor';
+
+  @override
+  String get free_settings_floor_hint => 'The limit never goes below this';
+
+  @override
+  String get free_settings_pot => 'Pot';
+
+  @override
+  String get free_settings_rate => 'Value of an hour won back';
+
+  @override
+  String get free_settings_rate_hint => 'Compared with your starting average';
+
+  @override
+  String get free_settings_report => 'Evening summary';
+
+  @override
+  String get free_settings_report_enabled => 'Daily summary';
+
+  @override
+  String get free_settings_report_hint =>
+      'A notification with today\'s time, the gain and your streak';
+
+  @override
+  String get free_settings_report_time => 'Summary time';
+
+  @override
+  String get free_today_missed => 'missed if the day ended now';
+
+  @override
+  String get free_kept => 'Earned on days kept';
 }

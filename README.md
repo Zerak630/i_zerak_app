@@ -2,7 +2,8 @@
 
 Application Flutter personnelle qui pilote un serveur auto-hébergé depuis le téléphone :
 téléchargements qBittorrent, supervision d'un Raspberry Pi, suivi d'abonnements et prix des
-carburants.
+carburants. Deux onglets aident aussi au quotidien : une cagnotte pour les trajets à vélo, et le
+**Temps libre** pour décrocher des réseaux sociaux.
 
 ## Architecture
 
@@ -44,8 +45,36 @@ doit l'être dans les deux langues.
 
 ```bash
 flutter analyze   # doit rester sans avertissement
-flutter test      # 79 tests
+flutter test      # 342 tests
 ```
+
+## Temps libre (Android)
+
+L'onglet **Temps libre** aide à décrocher des réseaux sociaux. Il lit les statistiques d'utilisation
+d'Android (autorisation « Accès aux données d'utilisation », accordée à la main dans les réglages du
+téléphone), mesure une moyenne de départ sur les jours que le téléphone a gardés, puis fixe un quota
+qui baisse chaque semaine (−10 % par défaut, plancher de 20 min).
+
+Chaque journée terminée sous le quota alimente une cagnotte (2 € par heure gagnée sur la moyenne de
+départ, par défaut) qui finance les mêmes objectifs que la cagnotte vélo. Une journée au-dessus du
+quota ne rapporte rien : ce que le quota aurait rapporté part dans la case « Économies loupées ». Une notification dresse le bilan chaque
+soir (21 h 30 par défaut).
+
+Tout reste sur l'appareil : les journées sont figées dans Hive à minuit, et rien n'est envoyé nulle
+part. Le bilan du soir est calculé côté natif, application fermée (`DailyReport.kt`), avec la même
+formule que `ScreenTimeSettings` (`quotaFor`, `earnedOn`, `missedOn`) : toute modification du calcul doit être faite des deux côtés.
+
+## Widgets de l'écran d'accueil (Android)
+
+- **Vélo / Voiture ?** : « À vélo » enregistre la journée sans ouvrir l'application ; « Voiture »
+  l'ouvre sur la question de la raison.
+- **Objectif** : un objectif actif des cagnottes Vélo et Temps libre. Un appui passe au suivant,
+  l'icône en haut à droite ouvre l'application.
+
+Les widgets ne lisent pas Hive. L'application leur transmet un instantané chaque fois qu'elle passe
+en arrière-plan (`HomeWidgetsService`) ; en retour, un appui sur « À vélo » ne fait que noter la
+date, et l'application enregistre la journée à son lancement suivant, au prix du carburant de ce
+jour-là. Le montant affiché par le widget entre-temps est une estimation (« ≈ »).
 
 ## Côté serveur
 

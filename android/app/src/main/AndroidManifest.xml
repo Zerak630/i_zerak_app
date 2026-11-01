@@ -1,6 +1,15 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!-- Onglet Temps libre. L'acces aux donnees d'utilisation ne s'accorde
+         pas par une boite de dialogue : l'utilisateur l'active lui-meme dans
+         les reglages, d'ou le tools:ignore. Les trois autres servent au bilan
+         du soir : l'afficher, et le reprogrammer apres un redemarrage. -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:label="iZerak"
@@ -30,6 +39,39 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Bilan du soir de l'onglet Temps libre (cf. DailyReport.kt). Non
+             exporte : seuls l'alarme d'iZerak et le systeme le reveillent. -->
+        <receiver
+            android:name=".DailyReportReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+        <!-- Widgets de l'ecran d'accueil (cf. HomeWidgets.kt). -->
+        <receiver
+            android:name=".CommuteWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_commute_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_commute_info" />
+        </receiver>
+        <receiver
+            android:name=".GoalWidgetProvider"
+            android:exported="false"
+            android:label="@string/widget_goal_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_goal_info" />
+        </receiver>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
@@ -43,6 +85,12 @@
          inerte sans le moindre message. Le repli https reste couvert par
          l'entree VIEW / https. -->
     <queries>
+        <!-- Liste des applications a suivre dans l'onglet Temps libre : celles
+             qui ont une icone dans le lanceur. -->
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="google.navigation" />
