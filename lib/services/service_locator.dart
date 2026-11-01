@@ -6,6 +6,7 @@ import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/models/subscription_dao.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/gas_service.dart';
+import 'package:i_zerak_app/services/home_widgets/home_widgets_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_app_preferences.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_commute_repository.dart';
@@ -84,6 +85,16 @@ Future<void> setupServiceLocator() async {
         gas: GasService(client: getIt<http.Client>()),
         favorites: getIt<IGasStations>(),
         store: getIt<ICommute>(),
+      ));
+
+  // Widgets de l'ecran d'accueil : ils lisent les trajets et les deux
+  // cagnottes, et enregistrent au prix du jour ce qui a ete fait sans
+  // l'application.
+  getIt.registerLazySingleton<HomeWidgetsService>(() => HomeWidgetsService(
+        commute: getIt<ICommute>(),
+        screenTime: getIt<IScreenTime>(),
+        prices: getIt<CommutePriceService>(),
+        bridge: AndroidHomeWidgetBridge(),
       ));
 
   getIt.registerLazySingleton<ICredentials>(() => const SecureCredentialsStore());

@@ -12,14 +12,21 @@ import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/pages/subscriptions/subscriptions.dart';
 import 'package:i_zerak_app/pages/system/system_page.dart';
 import 'package:i_zerak_app/pages/torrents/torrents_page.dart';
+import 'package:i_zerak_app/services/home_widgets/home_widgets_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({super.key, IAppPreferences? preferences})
-      : preferences = preferences ?? getIt<IAppPreferences>();
+  HomePage({super.key, IAppPreferences? preferences, HomeWidgetsService? widgets})
+      : preferences = preferences ?? getIt<IAppPreferences>(),
+        widgets = widgets ??
+            (getIt.isRegistered<HomeWidgetsService>() ? getIt<HomeWidgetsService>() : null);
 
   final IAppPreferences preferences;
+
+  /// Les widgets de l'ecran d'accueil. Nul dans les tests qui n'en ont pas
+  /// besoin.
+  final HomeWidgetsService? widgets;
 
   @override
   HomePageState createState() => HomePageState();
@@ -29,10 +36,55 @@ class HomePageState extends State<HomePage> {
   TabLayout _layout = TabLayout.initial;
   AppTab _current = TabLayout.initial.pinned.first;
 
+  late final AppLifecycleListener _lifecycle;
+
+  /// Change quand un widget a modifie les donnees : l'onglet affiche est
+  /// alors reconstruit, et relit ce qui a ete enregistre sans lui.
+  int _generation = 0;
+
+  /// Le bouton « Voiture » d'un widget a ouvert l'application : l'onglet Velo
+  /// demande la raison des son ouverture.
+  bool _askCar = false;
+
   @override
   void initState() {
     super.initState();
-    _loadTabs();
+    _lifecycle = AppLifecycleListener(
+      onResume: _syncWidgets,
+      // Les widgets ne se voient que l'application quittee : c'est le moment
+      // de leur transmettre ce qui a change.
+      onHide: () => widget.widgets?.refresh(),
+    );
+    _loadTabs().then((_) => _syncWidgets());
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  /// Rapatrie ce qui a ete fait depuis les widgets.
+  Future<void> _syncWidgets() async {
+    final widgets = widget.widgets;
+    if (widgets == null) {
+      return;
+    }
+    final imported = await widgets.importPendingBikeDays();
+    final action = await widgets.takeLaunchAction();
+    if (!mounted) {
+      return;
+    }
+    if (imported > 0 || action == 'car') {
+      setState(() {
+        _generation++;
+        if (action == 'car') {
+          _current = AppTab.commute;
+          _askCar = true;
+        }
+      });
+    }
+    await widgets.refresh();
   }
 
   Future<void> _loadTabs() async {
@@ -127,7 +179,10 @@ class HomePageState extends State<HomePage> {
                 // un onglet quitte doit cesser de le faire. Le remplacer un
                 // jour par un IndexedStack les garderait toutes vivantes — et
                 // toutes bavardes — derriere celle qu'on regarde.
-                Expanded(flex: 1, child: _pageFor(_current)),
+                Expanded(
+                  flex: 1,
+                  child: KeyedSubtree(key: ValueKey(_generation), child: _page()),
+                ),
               ],
             );
           },
@@ -166,14 +221,20 @@ class HomePageState extends State<HomePage> {
       ),
     );
   }
-}
 
-Widget _pageFor(AppTab tab) => switch (tab) {
+  Widget _page() {
+    // Consommee une seule fois : revenir plus tard sur l'onglet ne doit pas
+    // reposer la question.
+    final askCar = _askCar && _current == AppTab.commute;
+    _askCar = false;
+    return switch (_current) {
       AppTab.home => DashboardPage(),
       AppTab.subscriptions => SubscriptionsPage(),
       AppTab.torrents => const TorrentsPage(),
       AppTab.system => const SystemPage(),
       AppTab.gas => GasStationPage(),
-      AppTab.commute => CommutePage(),
+      AppTab.commute => CommutePage(askCarOnOpen: askCar),
       AppTab.freeTime => FreeTimePage(),
     };
+  }
+}

@@ -17,10 +17,52 @@ class MainActivity : FlutterActivity() {
     private val worker = Executors.newSingleThreadExecutor()
     private var pendingNotificationResult: MethodChannel.Result? = null
 
+    /** Ce qu'un widget a demande en ouvrant l'application, jusqu'a ce que le Dart le lise. */
+    private var launchAction: String? = null
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        readLaunchAction(intent)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "izerak/screen_time")
             .setMethodCallHandler(::onScreenTimeCall)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "izerak/home_widgets")
+            .setMethodCallHandler(::onHomeWidgetsCall)
+    }
+
+    // L'activite est en singleTop : un widget touche alors qu'iZerak est deja
+    // ouvert arrive ici plutot qu'a la creation.
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        readLaunchAction(intent)
+    }
+
+    private fun readLaunchAction(intent: Intent?) {
+        val action = intent?.getStringExtra(HomeWidgetStore.EXTRA_ACTION) ?: return
+        launchAction = action
+        // Retiree de l'intent : une rotation recree l'activite avec le meme,
+        // et ne doit pas reposer la question.
+        intent.removeExtra(HomeWidgetStore.EXTRA_ACTION)
+    }
+
+    private fun onHomeWidgetsCall(call: MethodCall, result: MethodChannel.Result) {
+        when (call.method) {
+            "update" -> {
+                val snapshot = call.arguments as? Map<*, *>
+                if (snapshot == null) {
+                    result.error("bad_args", "instantane attendu", null)
+                    return
+                }
+                HomeWidgetStore.save(this, snapshot)
+                result.success(null)
+            }
+            "takePendingBikeDays" -> result.success(HomeWidgetStore.takePendingBikeDays(this))
+            "takeLaunchAction" -> {
+                result.success(launchAction)
+                launchAction = null
+            }
+            else -> result.notImplemented()
+        }
     }
 
     override fun onDestroy() {

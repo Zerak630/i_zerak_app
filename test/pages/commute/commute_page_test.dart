@@ -43,6 +43,27 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  testWidgets('ouvert depuis le bouton Voiture du widget, la raison est demandee',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(420, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(wrap(CommutePage(
+      store: store,
+      prices: CommutePriceService(
+        gas: gas,
+        favorites: StaticFavorites([(id: 1, label: 'Rue A, Saumur', customName: 'Leclerc')]),
+        store: store,
+        clock: () => now,
+      ),
+      clock: () => now,
+      askCarOnOpen: true,
+    )));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pourquoi la voiture ?'), findsOneWidget);
+    expect(find.text('Sport le soir'), findsOneWidget);
+  });
+
   testWidgets('sans distance, l onglet demande de regler le trajet', (tester) async {
     store.settings = const CommuteSettings();
     await open(tester);
