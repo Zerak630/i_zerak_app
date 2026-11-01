@@ -41,6 +41,8 @@ void main() {
     expect(store.days.keys, unorderedEquals(['2026-11-08', '2026-11-09']));
     expect(ledger.dayOn(DateTime(2026, 11, 9))!.amount, 2.0);
     expect(ledger.dayOn(DateTime(2026, 11, 8))!.amount, 0);
+    expect(ledger.dayOn(DateTime(2026, 11, 8))!.missed, 0.4,
+        reason: '150 min au-dessus du quota de 108 : le gain du quota est loupe');
     expect(ledger.live.minutes, 20);
     // Les jours sans trace ne sont pas comptes comme des journees parfaites.
     expect(ledger.dayOn(DateTime(2026, 11, 7)), isNull);

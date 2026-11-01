@@ -2912,6 +2912,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Summary time'**
   String get free_settings_report_time;
+
+  /// No description provided for @free_today_missed.
+  ///
+  /// In en, this message translates to:
+  /// **'missed if the day ended now'**
+  String get free_today_missed;
+
+  /// No description provided for @free_kept.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned on days kept'**
+  String get free_kept;
 }
 
 class _AppLocalizationsDelegate

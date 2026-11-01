@@ -98,10 +98,35 @@ void main() {
     await open(tester);
 
     // 60 puis 90 minutes gagnees, a 2 €/h.
-    expect(find.text('5,00\u00a0€'), findsOneWidget);
-    expect(find.text('2 jours'), findsOneWidget);
+    // La cagnotte, et la case des jours tenus.
+    expect(find.text('5,00\u00a0€'), findsNWidgets(2));
+    // La serie, et le nombre de jours tenus.
+    expect(find.text('2 jours'), findsNWidgets(2));
     expect(find.text('sur 1 h 48'), findsOneWidget);
     expect(find.text('Instagram'), findsOneWidget);
+  });
+
+  testWidgets('les jours au-dessus du quota remplissent les economies loupees', (tester) async {
+    store.settings = ScreenTimeSettings(
+      apps: const [TrackedApp(package: insta, label: 'Instagram')],
+      baselineMinutes: 120,
+      startDate: daysAgo(3),
+    );
+    source.recordedDays.addAll([daysAgo(2), daysAgo(1)]);
+    source.recorded.addAll([
+      // 3 h : au-dessus du quota de 108 minutes.
+      UsageSession(insta, daysAgo(2).add(const Duration(hours: 12)),
+          daysAgo(2).add(const Duration(hours: 15))),
+      UsageSession(insta, daysAgo(1).add(const Duration(hours: 22)),
+          daysAgo(1).add(const Duration(hours: 22, minutes: 30))),
+    ]);
+    await open(tester);
+
+    expect(find.text('Économies loupées'), findsOneWidget);
+    // (120 - 108) minutes a 2 €/h, sur la case et sur la ligne du jour.
+    expect(find.text('0,40\u00a0€'), findsNWidgets(2));
+    // Seule la journee tenue alimente la cagnotte : 90 minutes gagnees.
+    expect(find.text('3,00\u00a0€'), findsWidgets);
   });
 
   testWidgets('acces retire : la carte le signale et renvoie aux reglages', (tester) async {

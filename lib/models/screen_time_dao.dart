@@ -295,21 +295,38 @@ class ScreenTimeSettings {
     return math.max(target, floor).roundToDouble();
   }
 
-  /// Ce que rapporte une journee de [minutes].
+  /// Ce que vaudraient [minutes] passees sous la moyenne de depart.
   ///
-  /// Mesure sur la moyenne de depart, pas sur le quota : chaque minute gagnee
-  /// compte, meme les jours ou le quota est depasse.
+  /// Mesure sur la moyenne, pas sur le quota : sous le quota, chaque minute
+  /// gagnee en plus compte.
   double gainFor(double minutes) {
     final saved = math.max(0.0, (baselineMinutes ?? 0) - minutes);
     return roundCents(saved / 60 * ratePerHour);
   }
 
-  /// Fige une journee terminee : quota, moyenne et gain ne bougeront plus.
+  /// Ce que rapporte une journee de [minutes] le jour [day] : son gain si le
+  /// quota est tenu, rien sinon.
+  double earnedOn(DateTime day, double minutes) =>
+      minutes * 60 <= quotaFor(day) * 60 + 1e-6 ? gainFor(minutes) : 0;
+
+  /// Ce qu'une journee au-dessus du quota a laisse passer : ce que le quota
+  /// tenu tout juste aurait rapporte. Rien les jours ou il est tenu.
+  ///
+  /// Le montant ne grossit pas avec le depassement : une journee ratee est
+  /// ratee, et une soiree perdue n'a pas a peser comme une semaine.
+  double missedOn(DateTime day, double minutes) {
+    final quota = quotaFor(day);
+    return minutes * 60 <= quota * 60 + 1e-6 ? 0 : gainFor(quota);
+  }
+
+  /// Fige une journee terminee : quota, moyenne, gain et economie loupee ne
+  /// bougeront plus.
   ScreenTimeDay close(DailyUsage usage) => ScreenTimeDay(
         usage: usage,
         quotaMinutes: quotaFor(usage.date),
         baselineMinutes: baselineMinutes ?? 0,
-        amount: gainFor(usage.minutes),
+        amount: earnedOn(usage.date, usage.minutes),
+        missed: missedOn(usage.date, usage.minutes),
       );
 
   ScreenTimeSettings copyWith({
@@ -390,6 +407,7 @@ class ScreenTimeDay {
     required this.quotaMinutes,
     required this.baselineMinutes,
     required this.amount,
+    this.missed = 0,
   });
 
   final DailyUsage usage;
@@ -400,8 +418,13 @@ class ScreenTimeDay {
   /// La moyenne de depart en vigueur ce jour-la.
   final double baselineMinutes;
 
-  /// Ce que la journee a rapporte, en euros.
+  /// Ce que la journee a rapporte a la cagnotte, en euros. Nul au-dessus du
+  /// quota.
   final double amount;
+
+  /// Ce que la journee a laisse passer, en euros : la case « Economies
+  /// loupees ». Nul sous le quota.
+  final double missed;
 
   DateTime get date => usage.date;
 
@@ -410,8 +433,9 @@ class ScreenTimeDay {
   /// A la seconde pres : 30 minutes et 20 secondes depassent un quota de 30.
   bool get underQuota => usage.seconds <= quotaMinutes * 60;
 
-  /// Minutes gagnees sur la moyenne de depart.
-  double get savedMinutes => math.max(0.0, baselineMinutes - minutes);
+  /// Minutes gagnees sur la moyenne de depart, et comptees dans la
+  /// cagnotte : aucune un jour au-dessus du quota.
+  double get savedMinutes => underQuota ? math.max(0.0, baselineMinutes - minutes) : 0;
 
   Map<String, dynamic> toJson() => {
         'date': dayKey(date),
@@ -419,6 +443,7 @@ class ScreenTimeDay {
         'quota': quotaMinutes,
         'baseline': baselineMinutes,
         'amount': amount,
+        if (missed > 0) 'missed': missed,
       };
 
   static ScreenTimeDay? fromJson(Object? raw) {
@@ -436,6 +461,9 @@ class ScreenTimeDay {
       quotaMinutes: quota,
       baselineMinutes: _asDouble(raw['baseline']) ?? 0,
       amount: amount,
+      // Absent des journees figees avant l'existence de la case : elles
+      // gardent ce qu'elles ont rapporte.
+      missed: _asDouble(raw['missed']) ?? 0,
     );
   }
 }
@@ -485,6 +513,15 @@ class ScreenTimeLedger {
 
   double get balance => book.balance;
 
+  /// La case « Economies loupees » : ce que les jours au-dessus du quota ont
+  /// laisse passer.
+  double get totalMissed => roundCents(days.fold(0.0, (sum, day) => sum + day.missed));
+
+  int get missedDays => days.where((day) => day.missed > 0).length;
+
+  /// Les journees qui ont alimente la cagnotte.
+  int get earningDays => days.where((day) => day.amount > 0).length;
+
   /// Heures gagnees sur la moyenne de depart depuis la mise en route.
   double get hoursSaved => days.fold(0.0, (sum, day) => sum + day.savedMinutes) / 60;
 
@@ -498,7 +535,10 @@ class ScreenTimeLedger {
   }
 
   /// Ce qu'aujourd'hui rapporterait s'il s'arretait la.
-  double get todayGain => settings.gainFor(live.minutes);
+  double get todayGain => settings.earnedOn(today, live.minutes);
+
+  /// Ce qu'aujourd'hui laisserait passer s'il s'arretait la.
+  double get todayMissed => settings.missedOn(today, live.minutes);
 
   bool get todayUnderQuota => live.seconds <= todayQuota * 60;
 

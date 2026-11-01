@@ -468,5 +468,7 @@
 	"free_settings_report": "Bilan du soir",
 	"free_settings_report_enabled": "Bilan quotidien",
 	"free_settings_report_hint": "Une notification avec le temps du jour, le gain et la série",
-	"free_settings_report_time": "Heure du bilan"
+	"free_settings_report_time": "Heure du bilan",
+	"free_today_missed": "loupés si la journée s’arrêtait là",
+	"free_kept": "Gagné les jours tenus"
 }

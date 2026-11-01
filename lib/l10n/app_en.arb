@@ -827,5 +827,7 @@
 	"free_settings_report": "Evening summary",
 	"free_settings_report_enabled": "Daily summary",
 	"free_settings_report_hint": "A notification with today's time, the gain and your streak",
-	"free_settings_report_time": "Summary time"
+	"free_settings_report_time": "Summary time",
+	"free_today_missed": "missed if the day ended now",
+	"free_kept": "Earned on days kept"
 }

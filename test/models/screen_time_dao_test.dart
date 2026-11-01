@@ -126,6 +126,33 @@ void main() {
       expect(settings.gainFor(150), 0);
     });
 
+    test('au-dessus du quota, rien dans la cagnotte : le gain du quota est loupe', () {
+      final settings = configured(baseline: 120);
+      // Semaine 0 : quota de 108 minutes.
+      final over = closedDay(settings, DateTime(2026, 11, 2), 110);
+      expect(over.underQuota, isFalse);
+      expect(over.amount, 0);
+      // (120 - 108) minutes a 2 €/h.
+      expect(over.missed, 0.4);
+      expect(over.savedMinutes, 0);
+
+      // Le montant loupe ne grossit pas avec le depassement.
+      expect(closedDay(settings, DateTime(2026, 11, 2), 300).missed, 0.4);
+
+      final kept = closedDay(settings, DateTime(2026, 11, 2), 108);
+      expect(kept.amount, 0.4);
+      expect(kept.missed, 0);
+    });
+
+    test('l economie loupee se relit, et manque sans dommage aux anciennes journees', () {
+      final settings = configured(baseline: 120);
+      final over = closedDay(settings, DateTime(2026, 11, 2), 200);
+      expect(ScreenTimeDay.fromJson(over.toJson())!.missed, 0.4);
+
+      final legacy = {...closedDay(settings, DateTime(2026, 11, 2), 60).toJson()}..remove('missed');
+      expect(ScreenTimeDay.fromJson(legacy)!.missed, 0);
+    });
+
     test('relu tel qu\'ecrit, et tolerant', () {
       final settings = configured().copyWith(ratePerHour: 3, reportHour: 22);
       final copy = ScreenTimeSettings.fromJson(settings.toJson());
@@ -205,6 +232,37 @@ void main() {
       expect(ledger.totalSaved, 2.0);
       expect(ledger.balance, 0.5);
       expect(ledger.hoursSaved, 1.0);
+    });
+
+    test('la case economies loupees additionne les jours au-dessus du quota', () {
+      final ledger = ScreenTimeLedger(
+        settings: settings,
+        days: [
+          closedDay(settings, DateTime(2026, 11, 9), 60),
+          closedDay(settings, DateTime(2026, 11, 8), 180),
+          closedDay(settings, DateTime(2026, 11, 7), 150),
+        ],
+        goals: const [],
+        today: today,
+      );
+      expect(ledger.totalSaved, 2.0);
+      expect(ledger.earningDays, 1);
+      expect(ledger.totalMissed, 0.8);
+      expect(ledger.missedDays, 2);
+    });
+
+    test('aujourd hui, au-dessus du quota : rien a gagner, le quota a perdre', () {
+      final live = DailyUsage(
+        date: today,
+        apps: const {insta: AppUsage(seconds: 100 * 60)},
+        hourly: List.filled(24, 0),
+      );
+      final ledger = ScreenTimeLedger(
+          settings: settings, days: const [], goals: const [], today: today, live: live);
+      // Semaine 1 : quota de 97 minutes.
+      expect(ledger.todayUnderQuota, isFalse);
+      expect(ledger.todayGain, 0);
+      expect(ledger.todayMissed, 0.77);
     });
 
     test('moyenne de la semaine et tendance', () {

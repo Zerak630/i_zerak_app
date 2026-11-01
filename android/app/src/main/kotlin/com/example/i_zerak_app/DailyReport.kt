@@ -28,8 +28,9 @@ import kotlin.math.roundToLong
  * ScreenTimeService.reportConfig) ; ils sont gardes dans les preferences, et
  * l'alarme se reprogramme d'elle-meme chaque soir et apres un redemarrage.
  *
- * Le quota et le gain sont recalcules ici avec la meme formule que
- * ScreenTimeSettings.quotaFor et gainFor : les deux doivent rester d'accord.
+ * Le quota, le gain et l'economie loupee sont recalcules ici avec la meme
+ * formule que ScreenTimeSettings.quotaFor, earnedOn et missedOn : les deux
+ * doivent rester d'accord.
  */
 object DailyReport {
     const val ACTION = "com.example.i_zerak_app.DAILY_REPORT"
@@ -135,13 +136,16 @@ object DailyReport {
         val target = baseline * (1 - config.optDouble("decrease", 0.1)).pow((week + 1).toDouble())
         val floor = min(config.optDouble("floor", 20.0), baseline)
         val quota = Math.round(max(target, floor)).toDouble()
-        val gain = (max(0.0, baseline - minutes) / 60 * config.optDouble("rate", 2.0) * 100)
-            .roundToLong() / 100.0
+        val rate = config.optDouble("rate", 2.0)
+        fun gainFor(spent: Double) = (max(0.0, baseline - spent) / 60 * rate * 100).roundToLong() / 100.0
         val under = seconds <= quota * 60
+        // Sous le quota, le gain du jour ; au-dessus, rien dans la cagnotte,
+        // et ce que le quota aurait rapporte part en economies loupees.
+        val amount = if (under) gainFor(minutes) else gainFor(quota)
 
         val euros = NumberFormat.getCurrencyInstance().apply {
             currency = Currency.getInstance("EUR")
-        }.format(gain)
+        }.format(amount)
         val spent = formatMinutes(context, minutes.toLong())
         val limit = formatMinutes(context, quota.toLong())
         var text = context.getString(

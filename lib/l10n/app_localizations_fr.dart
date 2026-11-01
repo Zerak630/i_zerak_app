@@ -1761,4 +1761,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get free_settings_report_time => 'Heure du bilan';
+
+  @override
+  String get free_today_missed => 'loupés si la journée s’arrêtait là';
+
+  @override
+  String get free_kept => 'Gagné les jours tenus';
 }

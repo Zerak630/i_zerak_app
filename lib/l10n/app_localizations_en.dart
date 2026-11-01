@@ -1746,4 +1746,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get free_settings_report_time => 'Summary time';
+
+  @override
+  String get free_today_missed => 'missed if the day ended now';
+
+  @override
+  String get free_kept => 'Earned on days kept';
 }

@@ -195,6 +195,8 @@ class _FreeTimePageState extends State<FreeTimePage> {
               ],
               _TodayCard(ledger: ledger, onSettings: _openSettings),
               const SizedBox(height: 12),
+              _Totals(ledger: ledger),
+              const SizedBox(height: 12),
               _WeekCard(ledger: ledger),
               const SizedBox(height: 12),
               _HoursCard(ledger: ledger),
@@ -433,11 +435,18 @@ class _TodayCard extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: _Figure(
-              icon: Icons.savings_outlined,
-              value: '+ ${format.euros(ledger.todayGain)}',
-              label: l10n.free_today_gain,
-            ),
+            child: under
+                ? _Figure(
+                    icon: Icons.savings_outlined,
+                    value: '+ ${format.euros(ledger.todayGain)}',
+                    label: l10n.free_today_gain,
+                  )
+                : _Figure(
+                    icon: Icons.money_off,
+                    value: format.euros(ledger.todayMissed),
+                    label: l10n.free_today_missed,
+                    color: scheme.tertiary,
+                  ),
           ),
         ]),
         if (live.ranked.isNotEmpty) ...[
@@ -468,22 +477,23 @@ class _TodayCard extends StatelessWidget {
 }
 
 class _Figure extends StatelessWidget {
-  const _Figure({required this.icon, required this.value, required this.label});
+  const _Figure({required this.icon, required this.value, required this.label, this.color});
 
   final IconData icon;
   final String value;
   final String label;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Row(children: [
-      Icon(icon, size: 20, color: scheme.onSurfaceVariant),
+      Icon(icon, size: 20, color: color ?? scheme.onSurfaceVariant),
       const SizedBox(width: 8),
       Flexible(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(value, style: theme.textTheme.titleMedium),
+          Text(value, style: theme.textTheme.titleMedium?.copyWith(color: color)),
           Text(label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -543,6 +553,81 @@ class _WeekCard extends StatelessWidget {
           l10n.free_week_baseline(formatMinutes(l10n, ledger.settings.baselineMinutes ?? 0)),
           style: theme.textTheme.bodySmall?.copyWith(color: scheme.outline),
         ),
+      ]),
+    );
+  }
+}
+
+/// Les deux cases sous la cagnotte : ce qu'ont rapporte les jours tenus, et
+/// ce qu'ont laisse passer les autres.
+class _Totals extends StatelessWidget {
+  const _Totals({required this.ledger});
+
+  final ScreenTimeLedger ledger;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Expanded(
+        child: _TotalCard(
+          label: l10n.free_kept,
+          amount: ledger.totalSaved,
+          days: ledger.earningDays,
+          color: scheme.primary,
+        ),
+      ),
+      const SizedBox(width: 10),
+      Expanded(
+        child: _TotalCard(
+          label: l10n.commute_missed,
+          amount: ledger.totalMissed,
+          days: ledger.missedDays,
+          color: scheme.tertiary,
+        ),
+      ),
+    ]);
+  }
+}
+
+class _TotalCard extends StatelessWidget {
+  const _TotalCard({
+    required this.label,
+    required this.amount,
+    required this.days,
+    required this.color,
+  });
+
+  final String label;
+  final double amount;
+  final int days;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration:
+          BoxDecoration(color: scheme.surfaceContainer, borderRadius: BorderRadius.circular(16)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant)),
+          ),
+        ]),
+        const SizedBox(height: 4),
+        Text(CommuteFormat(context).euros(amount),
+            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, color: color)),
+        Text(l10n.commute_days(days), style: theme.textTheme.bodySmall?.copyWith(color: scheme.outline)),
       ]),
     );
   }
@@ -641,7 +726,9 @@ class _RecentDays extends StatelessWidget {
             SizedBox(
               width: 72,
               child: Text(
-                '+ ${format.euros(day.amount)}',
+                // Au-dessus du quota, la ligne montre ce qui a ete loupe, sans
+                // signe : comme une journee en voiture dans l'onglet Velo.
+                day.missed > 0 ? format.euros(day.missed) : '+ ${format.euros(day.amount)}',
                 textAlign: TextAlign.right,
                 style: theme.textTheme.bodyMedium
                     ?.copyWith(fontWeight: FontWeight.w500, color: _dayColor(scheme, day)),

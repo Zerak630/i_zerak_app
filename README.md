@@ -45,7 +45,7 @@ doit l'être dans les deux langues.
 
 ```bash
 flutter analyze   # doit rester sans avertissement
-flutter test      # 337 tests
+flutter test      # 342 tests
 ```
 
 ## Temps libre (Android)
@@ -55,13 +55,14 @@ d'Android (autorisation « Accès aux données d'utilisation », accordée à la
 téléphone), mesure une moyenne de départ sur les jours que le téléphone a gardés, puis fixe un quota
 qui baisse chaque semaine (−10 % par défaut, plancher de 20 min).
 
-Chaque journée terminée sous la moyenne de départ alimente une cagnotte (2 € par heure gagnée par
-défaut) qui finance les mêmes objectifs que la cagnotte vélo. Une notification dresse le bilan chaque
+Chaque journée terminée sous le quota alimente une cagnotte (2 € par heure gagnée sur la moyenne de
+départ, par défaut) qui finance les mêmes objectifs que la cagnotte vélo. Une journée au-dessus du
+quota ne rapporte rien : ce que le quota aurait rapporté part dans la case « Économies loupées ». Une notification dresse le bilan chaque
 soir (21 h 30 par défaut).
 
 Tout reste sur l'appareil : les journées sont figées dans Hive à minuit, et rien n'est envoyé nulle
 part. Le bilan du soir est calculé côté natif, application fermée (`DailyReport.kt`), avec la même
-formule que `ScreenTimeSettings` : toute modification du calcul doit être faite des deux côtés.
+formule que `ScreenTimeSettings` (`quotaFor`, `earnedOn`, `missedOn`) : toute modification du calcul doit être faite des deux côtés.
 
 ## Widgets de l'écran d'accueil (Android)
 
