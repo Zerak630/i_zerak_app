@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mise a jour toutes les 30 minutes : c'est ce qui fait reapparaitre les
+     boutons apres minuit. Le reste du temps, c'est l'application qui pousse. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/widget_commute_description"
+    android:initialLayout="@layout/widget_commute"
+    android:minWidth="180dp"
+    android:minHeight="56dp"
+    android:minResizeWidth="150dp"
+    android:minResizeHeight="48dp"
+    android:previewLayout="@layout/widget_commute"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="3"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="1800000"
+    android:widgetCategory="home_screen" />

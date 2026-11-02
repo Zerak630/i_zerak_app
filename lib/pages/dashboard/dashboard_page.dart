@@ -4,6 +4,7 @@ import 'package:i_zerak_app/models/agent_dao.dart';
 import 'package:i_zerak_app/models/commute_dao.dart' hide dateOnly, roundCents;
 import 'package:i_zerak_app/models/commute_dao.dart' as commute show dateOnly;
 import 'package:i_zerak_app/models/companion_dao.dart';
+import 'package:i_zerak_app/models/screen_time_dao.dart' show ScreenTimeLedger;
 import 'package:i_zerak_app/models/subscription_dao.dart';
 import 'package:i_zerak_app/pages/commute/widgets/car_reason_sheet.dart';
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart'
@@ -11,6 +12,7 @@ import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart'
 import 'package:i_zerak_app/pages/gas_stations/widgets/fuel_label.dart';
 import 'package:i_zerak_app/pages/dashboard/budget_page.dart';
 import 'package:i_zerak_app/pages/dashboard/challenge_page.dart';
+import 'package:i_zerak_app/pages/free_time/widgets/free_time_ui.dart' show formatMinutes;
 import 'package:i_zerak_app/pages/subscriptions/widgets/subscription_ui.dart';
 import 'package:i_zerak_app/services/agent/agent_service.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
@@ -19,6 +21,7 @@ import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_gas_stations.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
+import 'package:i_zerak_app/services/screen_time/screen_time_service.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 import 'package:i_zerak_app/utils/confirmation_snack_bar.dart';
 import 'package:i_zerak_app/utils/formatters.dart';
@@ -43,6 +46,7 @@ class DashboardPage extends StatefulWidget {
     IGasStations? stations,
     Future<SystemSnapshot> Function()? systemLoader,
     Future<TorrentsSnapshot> Function()? torrentsLoader,
+    Future<ScreenTimeLedger?> Function()? freeTimeLoader,
     DateTime Function()? clock,
   })  : subscriptionService = subscriptionService ?? getIt<ISubscriptions>(),
         commuteService = commuteService ?? getIt<ICommute>(),
@@ -50,6 +54,7 @@ class DashboardPage extends StatefulWidget {
         stations = stations ?? getIt<IGasStations>(),
         systemLoader = systemLoader ?? getIt<AgentService>().snapshot,
         torrentsLoader = torrentsLoader ?? getIt<QbService>().snapshot,
+        freeTimeLoader = freeTimeLoader ?? _syncFreeTime,
         clock = clock ?? DateTime.now;
 
   final ISubscriptions subscriptionService;
@@ -58,6 +63,21 @@ class DashboardPage extends StatefulWidget {
   final IGasStations stations;
   final Future<SystemSnapshot> Function() systemLoader;
   final Future<TorrentsSnapshot> Function() torrentsLoader;
+
+  /// Le temps libre du jour. Nul quand l'onglet n'est pas configure, ou hors
+  /// Android.
+  final Future<ScreenTimeLedger?> Function() freeTimeLoader;
+
+  static Future<ScreenTimeLedger?> _syncFreeTime() async {
+    if (!getIt.isRegistered<ScreenTimeService>()) {
+      return null;
+    }
+    final service = getIt<ScreenTimeService>();
+    if (!service.source.isSupported) {
+      return null;
+    }
+    return service.sync();
+  }
   final DateTime Function() clock;
 
   @override
@@ -77,6 +97,7 @@ class _DashboardPageState extends State<DashboardPage> {
   SystemSnapshot? _system;
   Object? _systemError;
   TorrentsSnapshot? _torrents;
+  ScreenTimeLedger? _freeTime;
   Object? _torrentsError;
 
   bool _loading = true;
@@ -98,7 +119,7 @@ class _DashboardPageState extends State<DashboardPage> {
     if (mounted) {
       setState(() => _loading = false);
     }
-    await Future.wait([_loadPrice(), _loadSystem(), _loadTorrents()]);
+    await Future.wait([_loadPrice(), _loadSystem(), _loadTorrents(), _loadFreeTime()]);
   }
 
   Future<void> _loadLocal() async {
@@ -118,6 +139,19 @@ class _DashboardPageState extends State<DashboardPage> {
       _subscriptions = SubscriptionLedger(subscriptions);
       _stationCount = stations.length;
     });
+  }
+
+  Future<void> _loadFreeTime() async {
+    try {
+      final ledger = await widget.freeTimeLoader();
+      if (mounted) {
+        setState(() => _freeTime = ledger);
+      }
+    } catch (error) {
+      // La carte reste simplement absente : le reste de l'accueil n'en
+      // depend pas.
+      debugPrint('Temps libre indisponible : $error');
+    }
   }
 
   Future<void> _loadPrice() async {
@@ -366,7 +400,10 @@ class _DashboardPageState extends State<DashboardPage> {
       // geste que les deux boutons du dessus.
       if (_settings.isConfigured) _challenge(context, l10n),
     ];
-    final money = [_money(context, l10n)];
+    final money = [
+      _money(context, l10n),
+      if (_freeTime?.settings.isConfigured ?? false) _freeTimeCard(context, l10n, _freeTime!),
+    ];
     final machine = [_pi(context, l10n), _downloads(context, l10n), _fuel(context, l10n)];
 
     return Scaffold(
@@ -600,6 +637,57 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           ]),
         ),
+      ),
+    );
+  }
+
+  /// Le temps passe aujourd'hui sur les reseaux, face au quota du jour.
+  Widget _freeTimeCard(BuildContext context, AppLocalizations l10n, ScreenTimeLedger ledger) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final format = SubscriptionFormat(context);
+    final quota = ledger.todayQuota;
+    final minutes = ledger.live.minutes;
+    final color = ledger.todayUnderQuota ? scheme.primary : scheme.tertiary;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text(
+            l10n.bb_free_time.toUpperCase(),
+            style: theme.textTheme.labelSmall
+                ?.copyWith(color: scheme.onSurfaceVariant, letterSpacing: 0.8),
+          ),
+          const SizedBox(height: 8),
+          Row(crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, children: [
+            Text(formatMinutes(l10n, minutes),
+                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: color)),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(l10n.free_today_quota(formatMinutes(l10n, quota)),
+                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+            ),
+            Text(format.euros(ledger.balance),
+                style: theme.textTheme.labelLarge?.copyWith(color: scheme.primary)),
+          ]),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: quota <= 0 ? 1 : (minutes / quota).clamp(0.0, 1.0),
+              minHeight: 6,
+              color: color,
+              backgroundColor: scheme.surfaceContainerHighest,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '${l10n.free_streak_days(ledger.streak)} · ${l10n.free_streak}',
+            style: theme.textTheme.bodySmall?.copyWith(color: scheme.outline),
+          ),
+        ]),
       ),
     );
   }

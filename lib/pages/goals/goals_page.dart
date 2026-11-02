@@ -74,7 +74,17 @@ class _GoalsPageState extends State<GoalsPage> {
   double get _tripValue => _price == null ? 0 : _settings.tripValue(_price!.pricePerLitre);
 
   Future<void> _newGoal() async {
-    final goal = await showNewGoalSheet(context, ledger: _ledger, tripValue: _tripValue);
+    final l10n = AppLocalizations.of(context)!;
+    final format = CommuteFormat(context);
+    final tripValue = _tripValue;
+    final goal = await showNewGoalSheet(
+      context,
+      book: _ledger.book,
+      missingHint: (missing) {
+        final trips = tripsFor(missing, tripValue);
+        return trips == null ? null : l10n.goal_missing_trips(trips, format.euros(tripValue));
+      },
+    );
     if (goal == null) {
       return;
     }
@@ -83,7 +93,7 @@ class _GoalsPageState extends State<GoalsPage> {
   }
 
   Future<void> _validate(Goal goal) async {
-    final confirmed = await showValidateGoalSheet(context, goal: goal, ledger: _ledger);
+    final confirmed = await showValidateGoalSheet(context, goal: goal, book: _ledger.book);
     // Relu apres la feuille : un trajet annule entre-temps pourrait avoir fait
     // repasser l'achat sous son montant.
     if (!confirmed || !_ledger.progressOf(goal).reached) {

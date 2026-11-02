@@ -9,6 +9,7 @@ import 'package:i_zerak_app/models/gas_station_dao.dart';
 import 'package:i_zerak_app/models/torrent_dao.dart';
 import 'package:i_zerak_app/models/torrent_state.dart';
 import 'package:i_zerak_app/models/transfer_info_dao.dart';
+import 'package:i_zerak_app/models/screen_time_dao.dart';
 import 'package:i_zerak_app/pages/dashboard/dashboard_page.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_exceptions.dart';
@@ -73,6 +74,7 @@ void main() {
   DashboardPage page({
     Future<SystemSnapshot> Function()? system,
     Future<TorrentsSnapshot> Function()? torrents,
+    Future<ScreenTimeLedger?> Function()? freeTime,
   }) {
     final favorites = StaticFavorites([(id: 1, label: 'Rue A, Saumur', customName: 'Leclerc')]);
     return DashboardPage(
@@ -87,6 +89,7 @@ void main() {
       ),
       systemLoader: system ?? _system,
       torrentsLoader: torrents ?? _torrents,
+      freeTimeLoader: freeTime,
       clock: () => now,
     );
   }
@@ -161,6 +164,35 @@ void main() {
     expect(commute.days, hasLength(1));
     expect(find.text('Vélo, aujourd’hui'), findsOneWidget);
     expect(find.text('À vélo'), findsNothing);
+  });
+
+  testWidgets('sans temps libre configure, pas de carte', (tester) async {
+    await open(tester);
+    expect(find.text('TEMPS LIBRE'), findsNothing);
+  });
+
+  testWidgets('le temps libre configure a sa carte', (tester) async {
+    final settings = ScreenTimeSettings(
+      apps: const [TrackedApp(package: 'com.instagram.android', label: 'Instagram')],
+      baselineMinutes: 120,
+      startDate: DateTime(2026, 9, 14),
+    );
+    final ledger = ScreenTimeLedger(
+      settings: settings,
+      days: const [],
+      goals: const [],
+      today: now,
+      live: DailyUsage(
+        date: now,
+        apps: const {'com.instagram.android': AppUsage(seconds: 42 * 60, opens: 9)},
+        hourly: List.filled(24, 0),
+      ),
+    );
+    await open(tester, given: page(freeTime: () async => ledger));
+
+    expect(find.text('TEMPS LIBRE'), findsOneWidget);
+    expect(find.text('42 min'), findsOneWidget);
+    expect(find.text('sur 1 h 48'), findsOneWidget);
   });
 
   testWidgets('le Pi injoignable n efface pas le reste de la page', (tester) async {

@@ -2960,6 +2960,474 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 day ago} other{{count} days ago}}'**
   String sync_ago_days(int count);
+
+  /// No description provided for @bb_free_time.
+  ///
+  /// In en, this message translates to:
+  /// **'Free time'**
+  String get bb_free_time;
+
+  /// No description provided for @free_minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String free_minutes(int minutes);
+
+  /// No description provided for @free_hours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes}'**
+  String free_hours(int hours, String minutes);
+
+  /// No description provided for @free_per_hour.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount}/h'**
+  String free_per_hour(String amount);
+
+  /// No description provided for @free_per_hour_suffix.
+  ///
+  /// In en, this message translates to:
+  /// **'€/h'**
+  String get free_per_hour_suffix;
+
+  /// No description provided for @free_unsupported_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Available on Android'**
+  String get free_unsupported_title;
+
+  /// No description provided for @free_unsupported_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Time spent in each app is only available to Android apps.'**
+  String get free_unsupported_body;
+
+  /// No description provided for @free_intro_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Take your time back'**
+  String get free_intro_title;
+
+  /// No description provided for @free_intro_body.
+  ///
+  /// In en, this message translates to:
+  /// **'iZerak measures the time you spend on social media, sets a limit that drops every week, and turns every hour won back into money for your goals.'**
+  String get free_intro_body;
+
+  /// No description provided for @free_intro_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get free_intro_action;
+
+  /// No description provided for @free_setup_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup'**
+  String get free_setup_title;
+
+  /// No description provided for @free_setup_intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Three steps. Everything stays on the phone: nothing is sent anywhere.'**
+  String get free_setup_intro;
+
+  /// No description provided for @free_setup_access.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage access'**
+  String get free_setup_access;
+
+  /// No description provided for @free_setup_access_ok.
+  ///
+  /// In en, this message translates to:
+  /// **'Access granted.'**
+  String get free_setup_access_ok;
+
+  /// No description provided for @free_setup_access_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Android grants it in its settings: find iZerak in the list, allow access, then come back here.'**
+  String get free_setup_access_hint;
+
+  /// No description provided for @free_setup_access_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get free_setup_access_action;
+
+  /// No description provided for @free_setup_apps.
+  ///
+  /// In en, this message translates to:
+  /// **'Apps to watch'**
+  String get free_setup_apps;
+
+  /// No description provided for @free_setup_apps_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose apps'**
+  String get free_setup_apps_action;
+
+  /// No description provided for @free_setup_baseline.
+  ///
+  /// In en, this message translates to:
+  /// **'Your starting average'**
+  String get free_setup_baseline;
+
+  /// No description provided for @free_setup_baseline_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Android keeps the last few days of history: iZerak works out your current average from it, no need to wait a week.'**
+  String get free_setup_baseline_hint;
+
+  /// No description provided for @free_setup_baseline_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Measure my average'**
+  String get free_setup_baseline_action;
+
+  /// No description provided for @free_setup_baseline_result.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{a day, measured over 1 day} other{a day on average, over {days} days}}'**
+  String free_setup_baseline_result(int days);
+
+  /// No description provided for @free_setup_baseline_none.
+  ///
+  /// In en, this message translates to:
+  /// **'Android has nothing on record for these apps yet. Enter an estimate of your daily time:'**
+  String get free_setup_baseline_none;
+
+  /// No description provided for @free_setup_baseline_manual.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes per day'**
+  String get free_setup_baseline_manual;
+
+  /// No description provided for @free_setup_first_quota.
+  ///
+  /// In en, this message translates to:
+  /// **'Your limit this week: {quota} a day.'**
+  String free_setup_first_quota(String quota);
+
+  /// No description provided for @free_setup_start.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s go'**
+  String get free_setup_start;
+
+  /// No description provided for @free_apps_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched apps'**
+  String get free_apps_title;
+
+  /// No description provided for @free_apps_done.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Done} other{Done ({count})}}'**
+  String free_apps_done(int count);
+
+  /// No description provided for @free_apps_search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get free_apps_search;
+
+  /// No description provided for @free_apps_none.
+  ///
+  /// In en, this message translates to:
+  /// **'No app found'**
+  String get free_apps_none;
+
+  /// No description provided for @free_apps_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No app chosen'**
+  String get free_apps_empty;
+
+  /// No description provided for @free_apps_summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{first} and {count, plural, =1{1 other} other{{count} others}}'**
+  String free_apps_summary(String first, int count);
+
+  /// No description provided for @free_pot.
+  ///
+  /// In en, this message translates to:
+  /// **'Free time pot'**
+  String get free_pot;
+
+  /// No description provided for @free_pot_first_day.
+  ///
+  /// In en, this message translates to:
+  /// **'First gain tomorrow morning, once the day is over'**
+  String get free_pot_first_day;
+
+  /// No description provided for @free_pot_hours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} won back since {date}'**
+  String free_pot_hours(String hours, String date);
+
+  /// No description provided for @free_last_14_days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 14 days'**
+  String get free_last_14_days;
+
+  /// No description provided for @free_goal_remaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} to go — about {hours} h away from social media'**
+  String free_goal_remaining(String amount, String hours);
+
+  /// No description provided for @free_goal_missing_hours.
+  ///
+  /// In en, this message translates to:
+  /// **'About {hours} h away from social media, at {rate} an hour.'**
+  String free_goal_missing_hours(String hours, String rate);
+
+  /// No description provided for @free_access_lost.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage access revoked'**
+  String get free_access_lost;
+
+  /// No description provided for @free_access_lost_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Without it, iZerak can no longer measure your time: the pot is on hold.'**
+  String get free_access_lost_hint;
+
+  /// No description provided for @free_today_quota.
+  ///
+  /// In en, this message translates to:
+  /// **'of {quota}'**
+  String free_today_quota(String quota);
+
+  /// No description provided for @free_today_left.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} left before the limit'**
+  String free_today_left(String minutes);
+
+  /// No description provided for @free_today_over.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit exceeded by {minutes}'**
+  String free_today_over(String minutes);
+
+  /// No description provided for @free_opens.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{open} other{opens}}'**
+  String free_opens(int count);
+
+  /// No description provided for @free_opens_short.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{} =1{1 open} other{{count} opens}}'**
+  String free_opens_short(int count);
+
+  /// No description provided for @free_today_gain.
+  ///
+  /// In en, this message translates to:
+  /// **'if the day ended now'**
+  String get free_today_gain;
+
+  /// No description provided for @free_week_title.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get free_week_title;
+
+  /// No description provided for @free_streak.
+  ///
+  /// In en, this message translates to:
+  /// **'days in a row under the limit'**
+  String get free_streak;
+
+  /// No description provided for @free_streak_days.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String free_streak_days(int count);
+
+  /// No description provided for @free_week_average.
+  ///
+  /// In en, this message translates to:
+  /// **'average: {minutes} a day'**
+  String free_week_average(String minutes);
+
+  /// No description provided for @free_week_no_data.
+  ///
+  /// In en, this message translates to:
+  /// **'no finished day yet'**
+  String get free_week_no_data;
+
+  /// No description provided for @free_week_quota.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit: {now} a day, then {next} next week.'**
+  String free_week_quota(String now, String next);
+
+  /// No description provided for @free_week_baseline.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting average: {minutes} a day.'**
+  String free_week_baseline(String minutes);
+
+  /// No description provided for @free_hours_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Risky hours'**
+  String get free_hours_title;
+
+  /// No description provided for @free_hours_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing measured yet.'**
+  String get free_hours_empty;
+
+  /// No description provided for @free_hours_peak.
+  ///
+  /// In en, this message translates to:
+  /// **'Peak around {hour}: {minutes} on average'**
+  String free_hours_peak(String hour, String minutes);
+
+  /// No description provided for @free_day_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} / {quota}'**
+  String free_day_detail(String minutes, String quota);
+
+  /// No description provided for @free_settings_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Free time settings'**
+  String get free_settings_title;
+
+  /// No description provided for @free_settings_tracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking'**
+  String get free_settings_tracking;
+
+  /// No description provided for @free_settings_apps.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched apps'**
+  String get free_settings_apps;
+
+  /// No description provided for @free_settings_apps_changed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your starting average was measured on other apps: consider measuring it again.'**
+  String get free_settings_apps_changed;
+
+  /// No description provided for @free_settings_restart.
+  ///
+  /// In en, this message translates to:
+  /// **'Measure the starting average again'**
+  String get free_settings_restart;
+
+  /// No description provided for @free_settings_baseline.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} a day, since {date}'**
+  String free_settings_baseline(String minutes, String date);
+
+  /// No description provided for @free_settings_restart_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'The limit will start again from week one. The pot, goals and history are kept.'**
+  String get free_settings_restart_confirm;
+
+  /// No description provided for @free_settings_restart_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Measure again'**
+  String get free_settings_restart_action;
+
+  /// No description provided for @free_settings_quota.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit'**
+  String get free_settings_quota;
+
+  /// No description provided for @free_settings_decrease.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly decrease'**
+  String get free_settings_decrease;
+
+  /// No description provided for @free_settings_floor.
+  ///
+  /// In en, this message translates to:
+  /// **'Floor'**
+  String get free_settings_floor;
+
+  /// No description provided for @free_settings_floor_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'The limit never goes below this'**
+  String get free_settings_floor_hint;
+
+  /// No description provided for @free_settings_pot.
+  ///
+  /// In en, this message translates to:
+  /// **'Pot'**
+  String get free_settings_pot;
+
+  /// No description provided for @free_settings_rate.
+  ///
+  /// In en, this message translates to:
+  /// **'Value of an hour won back'**
+  String get free_settings_rate;
+
+  /// No description provided for @free_settings_rate_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Compared with your starting average'**
+  String get free_settings_rate_hint;
+
+  /// No description provided for @free_settings_report.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening summary'**
+  String get free_settings_report;
+
+  /// No description provided for @free_settings_report_enabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily summary'**
+  String get free_settings_report_enabled;
+
+  /// No description provided for @free_settings_report_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'A notification with today\'s time, the gain and your streak'**
+  String get free_settings_report_hint;
+
+  /// No description provided for @free_settings_report_time.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary time'**
+  String get free_settings_report_time;
+
+  /// No description provided for @free_today_missed.
+  ///
+  /// In en, this message translates to:
+  /// **'missed if the day ended now'**
+  String get free_today_missed;
+
+  /// No description provided for @free_kept.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned on days kept'**
+  String get free_kept;
 }
 
 class _AppLocalizationsDelegate

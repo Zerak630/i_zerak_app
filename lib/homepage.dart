@@ -5,6 +5,7 @@ import 'package:i_zerak_app/models/app_tab.dart';
 import 'package:i_zerak_app/pages/app_tab_ui.dart';
 import 'package:i_zerak_app/pages/commute/commute_page.dart';
 import 'package:i_zerak_app/pages/dashboard/dashboard_page.dart';
+import 'package:i_zerak_app/pages/free_time/free_time_page.dart';
 import 'package:i_zerak_app/pages/gas_stations/gas_station_page.dart';
 import 'package:i_zerak_app/pages/goals/goals_page.dart';
 import 'package:i_zerak_app/pages/more_sheet.dart';
@@ -13,20 +14,28 @@ import 'package:i_zerak_app/pages/settings/sync_section.dart' show syncAgo;
 import 'package:i_zerak_app/pages/subscriptions/subscriptions.dart';
 import 'package:i_zerak_app/pages/system/system_page.dart';
 import 'package:i_zerak_app/pages/torrents/torrents_page.dart';
+import 'package:i_zerak_app/services/home_widgets/home_widgets_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 import 'package:i_zerak_app/services/sync/sync_service.dart';
 import 'package:i_zerak_app/utils/wide_layout.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({super.key, IAppPreferences? preferences, SyncService? sync})
+  HomePage(
+      {super.key, IAppPreferences? preferences, SyncService? sync, HomeWidgetsService? widgets})
       : preferences = preferences ?? getIt<IAppPreferences>(),
-        sync = sync ?? (getIt.isRegistered<SyncService>() ? getIt<SyncService>() : null);
+        sync = sync ?? (getIt.isRegistered<SyncService>() ? getIt<SyncService>() : null),
+        widgets = widgets ??
+            (getIt.isRegistered<HomeWidgetsService>() ? getIt<HomeWidgetsService>() : null);
 
   final IAppPreferences preferences;
 
   /// Absent dans les tests qui ne l'enregistrent pas : la page s'en passe.
   final SyncService? sync;
+
+  /// Les widgets de l'ecran d'accueil. Nul dans les tests qui n'en ont pas
+  /// besoin.
+  final HomeWidgetsService? widgets;
 
   @override
   HomePageState createState() => HomePageState();
@@ -36,37 +45,73 @@ class HomePageState extends State<HomePage> {
   TabLayout _layout = TabLayout.initial;
   AppTab _current = TabLayout.initial.pinned.first;
 
-  AppLifecycleListener? _lifecycle;
+  late final AppLifecycleListener _lifecycle;
+
+  /// Change quand un widget a modifie les donnees : l'onglet affiche est
+  /// alors reconstruit, et relit ce qui a ete enregistre sans lui.
+  int _generation = 0;
+
+  /// Le bouton « Voiture » d'un widget a ouvert l'application : l'onglet Velo
+  /// demande la raison des son ouverture.
+  bool _askCar = false;
 
   @override
   void initState() {
     super.initState();
-    _loadTabs();
-    // De retour au premier plan, l'autre appareil a pu ecrire entre-temps.
-    final sync = widget.sync;
-    if (sync != null) {
-      _lifecycle = AppLifecycleListener(onResume: () => sync.syncNow());
-    }
+    _lifecycle = AppLifecycleListener(
+      onResume: () {
+        // De retour au premier plan, l'autre appareil a pu ecrire entre-temps.
+        widget.sync?.syncNow();
+        _syncWidgets();
+      },
+      // Les widgets ne se voient que l'application quittee : c'est le moment
+      // de leur transmettre ce qui a change.
+      onHide: () => widget.widgets?.refresh(),
+    );
+    _loadTabs().then((_) => _syncWidgets());
   }
 
   @override
   void dispose() {
-    _lifecycle?.dispose();
+    _lifecycle.dispose();
     super.dispose();
   }
 
-  /// La page ouverte, reconstruite de zero quand une importation a change les
-  /// donnees : chaque page lit son depot a l'ouverture, et n'aurait sinon
-  /// aucune raison de le relire.
+  /// Rapatrie ce qui a ete fait depuis les widgets.
+  Future<void> _syncWidgets() async {
+    final widgets = widget.widgets;
+    if (widgets == null) {
+      return;
+    }
+    final imported = await widgets.importPendingBikeDays();
+    final action = await widgets.takeLaunchAction();
+    if (!mounted) {
+      return;
+    }
+    if (imported > 0 || action == 'car') {
+      setState(() {
+        _generation++;
+        if (action == 'car') {
+          _current = AppTab.commute;
+          _askCar = true;
+        }
+      });
+    }
+    await widgets.refresh();
+  }
+
+  /// La page ouverte, reconstruite de zero quand une importation ou un widget a
+  /// change les donnees : chaque page lit son depot a l'ouverture, et n'aurait
+  /// sinon aucune raison de le relire.
   Widget _currentPage() {
     final sync = widget.sync;
     if (sync == null) {
-      return _pageFor(_current);
+      return KeyedSubtree(key: ValueKey(_generation), child: _pageFor(_current));
     }
     return ValueListenableBuilder<SyncStatus>(
       valueListenable: sync.status,
       builder: (context, status, _) => KeyedSubtree(
-        key: ValueKey(status.generation),
+        key: ValueKey((status.generation, _generation)),
         child: _pageFor(_current),
       ),
     );
@@ -137,15 +182,23 @@ class HomePageState extends State<HomePage> {
   /// Une page qui mene a une autre recoit de quoi changer d'onglet, et non de
   /// quoi pousser cette autre page : elle serait sinon joignable a deux
   /// endroits, avec deux etats.
-  Widget _pageFor(AppTab tab) => switch (tab) {
-        AppTab.home => DashboardPage(),
-        AppTab.subscriptions => SubscriptionsPage(),
-        AppTab.commute => CommutePage(onOpenGoals: () => _open(AppTab.goals)),
-        AppTab.goals => GoalsPage(),
-        AppTab.torrents => const TorrentsPage(),
-        AppTab.system => const SystemPage(),
-        AppTab.gas => GasStationPage(),
-      };
+  Widget _pageFor(AppTab tab) {
+    // Consommee une seule fois : revenir plus tard sur l'onglet ne doit pas
+    // reposer la question.
+    final askCar = _askCar && tab == AppTab.commute;
+    _askCar = false;
+    return switch (tab) {
+      AppTab.home => DashboardPage(),
+      AppTab.subscriptions => SubscriptionsPage(),
+      AppTab.commute =>
+        CommutePage(onOpenGoals: () => _open(AppTab.goals), askCarOnOpen: askCar),
+      AppTab.goals => GoalsPage(),
+      AppTab.freeTime => FreeTimePage(),
+      AppTab.torrents => const TorrentsPage(),
+      AppTab.system => const SystemPage(),
+      AppTab.gas => GasStationPage(),
+    };
+  }
 
   void _open(AppTab tab) => setState(() => _current = tab);
 
@@ -328,7 +381,7 @@ class HomePageState extends State<HomePage> {
     return Scaffold(
       body: SafeArea(
         child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          // Sept onglets ne tiennent pas dans une fenetre basse : le rail
+          // Huit onglets ne tiennent pas dans une fenetre basse : le rail
           // defile plutot que de deborder.
           LayoutBuilder(
             builder: (context, constraints) => SingleChildScrollView(

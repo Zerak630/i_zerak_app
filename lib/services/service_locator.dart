@@ -7,10 +7,12 @@ import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/models/subscription_dao.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/gas_service.dart';
+import 'package:i_zerak_app/services/home_widgets/home_widgets_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_app_preferences.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_commute_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_gas_station_repository.dart';
+import 'package:i_zerak_app/services/repositories/hive/hive_screen_time_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_server_config_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_subscription_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/type_adapters.dart';
@@ -18,11 +20,14 @@ import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.d
 import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_credentials.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_gas_stations.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_screen_time.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_server_config.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
 import 'package:i_zerak_app/services/repositories/secure/secure_credentials_store.dart';
 import 'package:i_zerak_app/services/sync/storage_access.dart';
 import 'package:i_zerak_app/services/sync/sync_service.dart';
+import 'package:i_zerak_app/services/screen_time/screen_time_service.dart';
+import 'package:i_zerak_app/services/screen_time/usage_source.dart';
 import 'package:i_zerak_app/services/tmdb/tmdb_service.dart';
 
 final getIt = GetIt.instance;
@@ -87,10 +92,31 @@ Future<void> setupServiceLocator() async {
       ));
   getIt.registerLazySingleton<StorageAccess>(() => const StorageAccess());
 
+  // Temps libre : meme format que les trajets (cf. HiveScreenTimeRepository).
+  getIt.registerSingleton<IScreenTime>(
+      HiveScreenTimeRepository(await Hive.openBox<String>('screen_time')));
+
+  getIt.registerLazySingleton<IUsageSource>(() => AndroidUsageSource());
+
+  getIt.registerLazySingleton<ScreenTimeService>(() => ScreenTimeService(
+        store: getIt<IScreenTime>(),
+        source: getIt<IUsageSource>(),
+      ));
+
   getIt.registerLazySingleton<CommutePriceService>(() => CommutePriceService(
         gas: GasService(client: getIt<http.Client>()),
         favorites: getIt<IGasStations>(),
         store: getIt<ICommute>(),
+      ));
+
+  // Widgets de l'ecran d'accueil : ils lisent les trajets et les deux
+  // cagnottes, et enregistrent au prix du jour ce qui a ete fait sans
+  // l'application.
+  getIt.registerLazySingleton<HomeWidgetsService>(() => HomeWidgetsService(
+        commute: getIt<ICommute>(),
+        screenTime: getIt<IScreenTime>(),
+        prices: getIt<CommutePriceService>(),
+        bridge: AndroidHomeWidgetBridge(),
       ));
 
   getIt.registerLazySingleton<ICredentials>(() => const SecureCredentialsStore());

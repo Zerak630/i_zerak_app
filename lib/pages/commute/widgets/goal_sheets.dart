@@ -4,24 +4,27 @@ import 'package:i_zerak_app/models/commute_dao.dart';
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
 
 /// Creation d'un objectif. Renvoie l'objectif, pas encore enregistre.
+///
+/// [missingHint] traduit ce qui manque dans l'unite de l'onglet — des trajets
+/// a velo, des heures loin des reseaux. Nul quand il n'a rien a dire.
 Future<Goal?> showNewGoalSheet(
   BuildContext context, {
-  required CommuteLedger ledger,
-  required double tripValue,
+  required GoalBook book,
+  String? Function(double missing)? missingHint,
 }) =>
     showModalBottomSheet<Goal>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,
-      builder: (_) => _NewGoalSheet(ledger: ledger, tripValue: tripValue),
+      builder: (_) => _NewGoalSheet(book: book, missingHint: missingHint),
     );
 
 class _NewGoalSheet extends StatefulWidget {
-  const _NewGoalSheet({required this.ledger, required this.tripValue});
+  const _NewGoalSheet({required this.book, required this.missingHint});
 
-  final CommuteLedger ledger;
-  final double tripValue;
+  final GoalBook book;
+  final String? Function(double missing)? missingHint;
 
   @override
   State<_NewGoalSheet> createState() => _NewGoalSheetState();
@@ -74,8 +77,7 @@ class _NewGoalSheetState extends State<_NewGoalSheet> {
     final format = CommuteFormat(context);
 
     final target = parseDecimal(_amount.text);
-    final current =
-        _kind == GoalKind.purchase ? widget.ledger.balance : widget.ledger.totalSaved;
+    final current = _kind == GoalKind.purchase ? widget.book.balance : widget.book.totalSaved;
 
     return Form(
       key: _formKey,
@@ -165,7 +167,7 @@ class _NewGoalSheetState extends State<_NewGoalSheet> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final missing = roundCents(target - current);
-    final trips = tripsFor(missing, widget.tripValue);
+    final hint = missing > 0 ? widget.missingHint?.call(missing) : null;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -177,10 +179,10 @@ class _NewGoalSheetState extends State<_NewGoalSheet> {
           missing <= 0 ? l10n.goal_already_reached : l10n.goal_missing(format.euros(missing)),
           style: theme.textTheme.titleSmall,
         ),
-        if (missing > 0 && trips != null) ...[
+        if (hint != null) ...[
           const SizedBox(height: 4),
           Text(
-            l10n.goal_missing_trips(trips, format.euros(widget.tripValue)),
+            hint,
             style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
           ),
         ],
@@ -237,22 +239,22 @@ class _KindCard extends StatelessWidget {
 Future<bool> showValidateGoalSheet(
   BuildContext context, {
   required Goal goal,
-  required CommuteLedger ledger,
+  required GoalBook book,
 }) async =>
     await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,
-      builder: (_) => _ValidateGoalSheet(goal: goal, ledger: ledger),
+      builder: (_) => _ValidateGoalSheet(goal: goal, book: book),
     ) ??
     false;
 
 class _ValidateGoalSheet extends StatelessWidget {
-  const _ValidateGoalSheet({required this.goal, required this.ledger});
+  const _ValidateGoalSheet({required this.goal, required this.book});
 
   final Goal goal;
-  final CommuteLedger ledger;
+  final GoalBook book;
 
   @override
   Widget build(BuildContext context) {
@@ -261,9 +263,7 @@ class _ValidateGoalSheet extends StatelessWidget {
     final scheme = theme.colorScheme;
     final format = CommuteFormat(context);
     final purchase = goal.kind == GoalKind.purchase;
-    final after = CommuteLedger(ledger.days, [
-      for (final other in ledger.goals) other.id == goal.id ? other.validated(DateTime.now()) : other
-    ]);
+    final after = book.validating(goal, DateTime.now());
 
     return CommuteSheet(children: [
       Align(
@@ -293,29 +293,29 @@ class _ValidateGoalSheet extends StatelessWidget {
           if (purchase)
             _ChangeRow(
               label: l10n.goal_row_pot,
-              before: format.euros(ledger.balance),
+              before: format.euros(book.balance),
               after: format.euros(after.balance),
               color: scheme.primary,
             ),
-          for (final other in ledger.activeGoals)
+          for (final other in book.activeGoals)
             if (other.id != goal.id)
               if (purchase && other.kind == GoalKind.purchase)
                 _ChangeRow(
                   label: other.name,
-                  before: format.percent(ledger.progressOf(other).ratio),
+                  before: format.percent(book.progressOf(other).ratio),
                   after: format.percent(after.progressOf(other).ratio),
                   color: goalColor(scheme, other.kind),
                 )
               else if (other.kind == GoalKind.milestone)
                 _ChangeRow(
                   label: other.name,
-                  after: format.percent(ledger.progressOf(other).ratio),
+                  after: format.percent(book.progressOf(other).ratio),
                   color: goalColor(scheme, other.kind),
                   note: l10n.goal_unchanged,
                 ),
           _ChangeRow(
             label: l10n.goal_row_saved,
-            after: format.euros(ledger.totalSaved),
+            after: format.euros(book.totalSaved),
             color: scheme.onSurface,
             note: l10n.goal_unchanged,
           ),
