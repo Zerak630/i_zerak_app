@@ -45,7 +45,7 @@ doit l'être dans les deux langues.
 
 ```bash
 flutter analyze   # doit rester sans avertissement
-flutter test      # 342 tests
+flutter test      # 441 tests
 ```
 
 ## Temps libre (Android)
@@ -67,7 +67,11 @@ formule que `ScreenTimeSettings` (`quotaFor`, `earnedOn`, `missedOn`) : toute mo
 ## Widgets de l'écran d'accueil (Android)
 
 - **Vélo / Voiture ?** : « À vélo » enregistre la journée sans ouvrir l'application ; « Voiture »
-  l'ouvre sur la question de la raison.
+  l'ouvre sur la question de la raison. Une fois la journée saisie, le widget affiche le montant et
+  la case où il est parti : cagnotte vélo, coûts indispensables ou économies loupées.
+- **Temps libre** : le temps passé aujourd'hui sur les réseaux, face au quota, avec le gain ou
+  l'économie loupée du jour et la série. Il se mesure seul, côté natif (`ScreenTimeToday`), toutes
+  les 30 minutes, à chaque appui et chaque fois qu'iZerak passe en arrière-plan.
 - **Objectif** : un objectif actif des cagnottes Vélo et Temps libre. Un appui passe au suivant,
   l'icône en haut à droite ouvre l'application.
 

@@ -95,10 +95,12 @@ class ScreenTimeService {
     return count == 0 ? null : (minutes: total / count, days: count);
   }
 
-  /// Transmet au bilan du soir de quoi se calculer seul, application fermee.
+  /// Transmet au bilan du soir et au widget Temps libre de quoi se calculer
+  /// seuls, application fermee.
   ///
-  /// Le natif refait le calcul du quota et du gain (cf. DailyReport.kt) : il
-  /// recoit donc les memes parametres, et la serie arretee a hier.
+  /// Le natif refait le calcul du quota et du gain (cf. ScreenTimeToday dans
+  /// DailyReport.kt) : il recoit donc les memes parametres, et la serie
+  /// arretee a hier.
   Future<void> pushReport(ScreenTimeLedger ledger) async {
     try {
       await source.configureReport(reportConfig(ledger));
@@ -109,15 +111,18 @@ class ScreenTimeService {
     }
   }
 
-  /// Nul quand il n'y a rien a programmer.
+  /// Nul tant que l'onglet n'est pas configure. Bilan desactive, les
+  /// reglages partent quand meme, avec `enabled` a faux : le widget en a
+  /// besoin.
   @visibleForTesting
   static Map<String, Object?>? reportConfig(ScreenTimeLedger ledger) {
     final settings = ledger.settings;
-    if (!settings.isConfigured || !settings.reportEnabled) {
+    if (!settings.isConfigured) {
       return null;
     }
     final yesterday = DateTime(ledger.today.year, ledger.today.month, ledger.today.day - 1);
     return {
+      'enabled': settings.reportEnabled,
       'hour': settings.reportHour,
       'minute': settings.reportMinute,
       'packages': settings.packages.toList(),

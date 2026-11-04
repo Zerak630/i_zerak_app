@@ -12,9 +12,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import org.json.JSONObject
-import java.text.NumberFormat
 import java.util.Calendar
-import java.util.Currency
 import java.util.TimeZone
 import kotlin.math.max
 import kotlin.math.min
@@ -39,6 +37,11 @@ object DailyReport {
     private const val CHANNEL_ID = "screen_time_report"
     private const val NOTIFICATION_ID = 4201
 
+    /**
+     * Les reglages du Temps libre, partages avec le widget du meme nom : ils
+     * sont transmis des que l'onglet est configure, bilan active ou non
+     * (cf. `enabled`).
+     */
     fun configure(context: Context, config: Map<*, *>?) {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         if (config == null) {
@@ -47,9 +50,10 @@ object DailyReport {
             prefs.edit().putString(KEY, JSONObject(config).toString()).apply()
         }
         schedule(context)
+        FreeTimeWidgetProvider.refreshAll(context)
     }
 
-    private fun load(context: Context): JSONObject? {
+    fun load(context: Context): JSONObject? {
         val raw = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, null)
             ?: return null
         return try {
@@ -76,6 +80,9 @@ object DailyReport {
         val pending = pendingIntent(context)
         alarms.cancel(pending)
         val config = load(context) ?: return
+        if (!config.optBoolean("enabled", true)) {
+            return
+        }
         val next = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, config.optInt("hour", 21))
             set(Calendar.MINUTE, config.optInt("minute", 30))
@@ -88,16 +95,7 @@ object DailyReport {
         alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, next.timeInMillis, pending)
     }
 
-    /** Jours depuis le 1er janvier 1970, sur la date calendaire locale. */
-    private fun epochDay(calendar: Calendar): Long {
-        val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
-            clear()
-            set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
-        }
-        return utc.timeInMillis / 86_400_000L
-    }
-
-    private fun formatMinutes(context: Context, minutes: Long): String =
+    fun formatMinutes(context: Context, minutes: Long): String =
         if (minutes < 60) {
             context.getString(R.string.report_minutes, minutes)
         } else {
@@ -106,7 +104,7 @@ object DailyReport {
 
     fun post(context: Context) {
         val config = load(context) ?: return
-        if (!UsageSessions.hasAccess(context)) {
+        if (!config.optBoolean("enabled", true) || !UsageSessions.hasAccess(context)) {
             return
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -116,45 +114,15 @@ object DailyReport {
             return
         }
 
-        val packages = mutableSetOf<String>()
-        val list = config.optJSONArray("packages")
-        for (i in 0 until (list?.length() ?: 0)) {
-            packages.add(list!!.getString(i))
-        }
-        val midnight = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        val seconds = UsageSessions.secondsSince(context, midnight.timeInMillis, packages)
-        val minutes = seconds / 60.0
-
-        val baseline = config.optDouble("baseline", 0.0)
-        val today = epochDay(midnight)
-        val week = max(0L, (today - config.optLong("startEpochDay", today)) / 7)
-        val target = baseline * (1 - config.optDouble("decrease", 0.1)).pow((week + 1).toDouble())
-        val floor = min(config.optDouble("floor", 20.0), baseline)
-        val quota = Math.round(max(target, floor)).toDouble()
-        val rate = config.optDouble("rate", 2.0)
-        fun gainFor(spent: Double) = (max(0.0, baseline - spent) / 60 * rate * 100).roundToLong() / 100.0
-        val under = seconds <= quota * 60
-        // Sous le quota, le gain du jour ; au-dessus, rien dans la cagnotte,
-        // et ce que le quota aurait rapporte part en economies loupees.
-        val amount = if (under) gainFor(minutes) else gainFor(quota)
-
-        val euros = NumberFormat.getCurrencyInstance().apply {
-            currency = Currency.getInstance("EUR")
-        }.format(amount)
-        val spent = formatMinutes(context, minutes.toLong())
-        val limit = formatMinutes(context, quota.toLong())
+        val day = ScreenTimeToday.measure(context, config)
+        val euros = HomeWidgetStore.euros(day.amount)
+        val spent = formatMinutes(context, day.minutes.toLong())
+        val limit = formatMinutes(context, day.quota.toLong())
         var text = context.getString(
-            if (under) R.string.report_under else R.string.report_over, spent, limit, euros
+            if (day.under) R.string.report_under else R.string.report_over, spent, limit, euros
         )
-        // La serie n'est connue que si l'onglet a ete ouvert depuis hier.
-        if (under && config.optLong("streakThroughEpochDay", -1) == today - 1) {
-            val streak = config.optInt("streak", 0) + 1
-            text += context.resources.getQuantityString(R.plurals.report_streak, streak, streak)
+        if (day.streak != null) {
+            text += context.resources.getQuantityString(R.plurals.report_streak, day.streak, day.streak)
         }
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -185,6 +153,72 @@ object DailyReport {
             .setAutoCancel(true)
             .build()
         manager.notify(NOTIFICATION_ID, notification)
+    }
+}
+
+/**
+ * La journee en cours du Temps libre, mesuree application fermee : pour le
+ * bilan du soir et le widget.
+ *
+ * Meme formule que ScreenTimeSettings.quotaFor, earnedOn et missedOn cote
+ * Dart : les deux doivent rester d'accord.
+ */
+object ScreenTimeToday {
+    class Day(
+        val seconds: Long,
+        val quota: Double,
+        /** Le gain si le quota tient, sinon l'economie loupee. */
+        val amount: Double,
+        /** Jours tenus d'affilee, aujourd'hui compris ; nul si inconnu ou rompu. */
+        val streak: Int?,
+    ) {
+        val minutes: Double get() = seconds / 60.0
+        val under: Boolean get() = seconds <= quota * 60
+    }
+
+    /** Jours depuis le 1er janvier 1970, sur la date calendaire locale. */
+    private fun epochDay(calendar: Calendar): Long {
+        val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+            clear()
+            set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
+        }
+        return utc.timeInMillis / 86_400_000L
+    }
+
+    fun measure(context: Context, config: JSONObject): Day {
+        val packages = mutableSetOf<String>()
+        val list = config.optJSONArray("packages")
+        for (i in 0 until (list?.length() ?: 0)) {
+            packages.add(list!!.getString(i))
+        }
+        val midnight = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val seconds = UsageSessions.secondsSince(context, midnight.timeInMillis, packages)
+        val minutes = seconds / 60.0
+
+        val baseline = config.optDouble("baseline", 0.0)
+        val today = epochDay(midnight)
+        val week = max(0L, (today - config.optLong("startEpochDay", today)) / 7)
+        val target = baseline * (1 - config.optDouble("decrease", 0.1)).pow((week + 1).toDouble())
+        val floor = min(config.optDouble("floor", 20.0), baseline)
+        val quota = Math.round(max(target, floor)).toDouble()
+        val rate = config.optDouble("rate", 2.0)
+        fun gainFor(spent: Double) = (max(0.0, baseline - spent) / 60 * rate * 100).roundToLong() / 100.0
+        val under = seconds <= quota * 60
+        // Sous le quota, le gain du jour ; au-dessus, rien dans la cagnotte,
+        // et ce que le quota aurait rapporte part en economies loupees.
+        val amount = if (under) gainFor(minutes) else gainFor(quota)
+        // La serie n'est connue que si l'onglet a ete ouvert depuis hier.
+        val streak = if (under && config.optLong("streakThroughEpochDay", -1) == today - 1) {
+            config.optInt("streak", 0) + 1
+        } else {
+            null
+        }
+        return Day(seconds, quota, amount, streak)
     }
 }
 

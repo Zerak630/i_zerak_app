@@ -88,12 +88,15 @@ class HomePageState extends State<HomePage> {
     if (!mounted) {
       return;
     }
-    if (imported > 0 || action == 'car') {
+    if (imported > 0 || action == 'car' || action == 'free_time') {
       setState(() {
         _generation++;
         if (action == 'car') {
           _current = AppTab.commute;
           _askCar = true;
+        } else if (action == 'free_time') {
+          // L'icone du widget Temps libre ouvre directement l'onglet.
+          _current = AppTab.freeTime;
         }
       });
     }
