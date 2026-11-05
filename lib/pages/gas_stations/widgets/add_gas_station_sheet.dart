@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/gas_station_dao.dart';
+import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
 import 'package:i_zerak_app/pages/gas_stations/widgets/fuel_label.dart';
 import 'package:i_zerak_app/services/gas_service.dart';
 
@@ -217,7 +218,7 @@ class _AddGasStationSheetState extends State<_AddGasStationSheet> {
                 ? l10n.gas_already_saved
                 : price == null
                     ? '—'
-                    : '${price.toStringAsFixed(3)} €',
+                    : CommuteFormat(context).perLitre(price),
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           onTap: saved ? null : () => Navigator.pop(context, station),

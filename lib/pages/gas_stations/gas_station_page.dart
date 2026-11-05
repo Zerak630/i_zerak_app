@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/gas_station_dao.dart';
+import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
 import 'package:i_zerak_app/pages/gas_stations/widgets/add_gas_station_sheet.dart';
 import 'package:i_zerak_app/pages/gas_stations/widgets/fuel_label.dart';
 import 'package:i_zerak_app/pages/gas_stations/widgets/rename_station_dialog.dart';
@@ -308,7 +309,7 @@ class _GasStationPageState extends State<GasStationPage> {
                 // souvent en un coup d'oeil, sans remonter jusqu'au selecteur.
                 Text(price == null
                     ? '${l10n.gas_price_unknown} — ${fuelLabel(l10n, _fuel)}'
-                    : '${price.toStringAsFixed(3)} € — ${fuelLabel(l10n, _fuel)}'),
+                    : '${CommuteFormat(context).perLitre(price)} — ${fuelLabel(l10n, _fuel)}'),
                 // Une station renommee garderait sinon un nom sans lieu, et
                 // « Intermarche » ne dit pas lequel.
                 if (renamed)

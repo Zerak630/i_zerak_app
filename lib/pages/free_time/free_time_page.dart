@@ -155,7 +155,7 @@ class _FreeTimePageState extends State<FreeTimePage> {
     }
     if (!ledger.settings.isConfigured) {
       return _Message(
-        icon: Icons.hourglass_bottom,
+        icon: Icons.hourglass_empty,
         title: l10n.free_intro_title,
         body: l10n.free_intro_body,
         action: FilledButton.icon(

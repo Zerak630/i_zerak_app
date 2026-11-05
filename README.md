@@ -48,6 +48,17 @@ flutter analyze   # doit rester sans avertissement
 flutter test      # 342 tests
 ```
 
+Les versions release se construisent **sans élagage des icônes** :
+
+```bash
+flutter build apk --release --no-tree-shake-icons
+flutter build windows --release --no-tree-shake-icons
+```
+
+Avec Flutter 3.47, l'élagage retire de la police Material des glyphes pourtant utilisés
+(`phone_android`, `hourglass_bottom`, `settings_outlined`…) : ils s'affichent comme une case vide.
+La police complète ajoute environ 1,5 Mo.
+
 ## Temps libre (Android)
 
 L'onglet **Temps libre** aide à décrocher des réseaux sociaux. Il lit les statistiques d'utilisation

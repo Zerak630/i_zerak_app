@@ -148,7 +148,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Quai Felix Faure, Angers'), findsOneWidget);
-    expect(find.textContaining('2.250'), findsOneWidget);
+    expect(find.textContaining('2,250'), findsOneWidget);
   });
 
   testWidgets('la moins chere passe en tete, celle sans prix en queue',
@@ -394,8 +394,8 @@ void main() {
           _FakeFavorites([(id: 1, label: 'Quai Felix Faure', customName: null)], FuelType.e85))));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('0.871'), findsOneWidget);
-      expect(find.textContaining('2.250'), findsNothing);
+      expect(find.textContaining('0,871'), findsOneWidget);
+      expect(find.textContaining('2,250'), findsNothing);
     });
 
     testWidgets('changer de carburant change le prix affiche, sans requete',
@@ -406,7 +406,7 @@ void main() {
       await tester
           .pumpWidget(wrap(page(_FakeFavorites([(id: 1, label: 'Quai Felix Faure', customName: null)]))));
       await tester.pumpAndSettle();
-      expect(find.textContaining('2.250'), findsOneWidget);
+      expect(find.textContaining('2,250'), findsOneWidget);
 
       clearInteractions(client);
       await tester.tap(find.byType(DropdownButton<FuelType>));
@@ -414,7 +414,7 @@ void main() {
       await tester.tap(find.text('SP98').last);
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('2.190'), findsOneWidget);
+      expect(find.textContaining('2,190'), findsOneWidget);
       verifyNever(client.get(any));
     });
 
@@ -440,7 +440,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Prix inconnu'), findsOneWidget);
-      expect(find.textContaining('0.000'), findsNothing);
+      expect(find.textContaining('0,000'), findsNothing);
     });
 
     testWidgets('le tri suit le carburant choisi', (tester) async {

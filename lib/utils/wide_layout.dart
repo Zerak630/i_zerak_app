@@ -17,5 +17,8 @@ abstract final class WideLayout {
   static const double twoColumns = 760;
   static const double threeColumns = 1180;
 
+  /// Au-dela, la page reste centree : assez pour trois colonnes de cartes.
+  static const double maxContentWidth = 1240;
+
   static bool hasRail(BuildContext context) => MediaQuery.sizeOf(context).width >= rail;
 }

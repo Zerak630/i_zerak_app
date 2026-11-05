@@ -341,7 +341,9 @@ class HomePageState extends State<HomePage> {
     final extended = MediaQuery.sizeOf(context).width >= WideLayout.extendedRail;
 
     final rail = NavigationRail(
-      backgroundColor: scheme.scrim,
+      // Un ton au-dessus du fond, et non le noir de la barre du bas : sur un
+      // grand ecran, une bande noire pleine hauteur ecrase la page.
+      backgroundColor: scheme.surfaceContainerLow,
       extended: extended,
       minExtendedWidth: 220,
       selectedIndex: AppTab.values.indexOf(_current),
@@ -362,11 +364,27 @@ class HomePageState extends State<HomePage> {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           _syncIndicator(context, extended: extended),
           const SizedBox(height: 8),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: l10n.settings_title,
-            onPressed: _openSettings,
-          ),
+          if (extended)
+            // Aligne sur les libelles du rail, plutot qu'une roue seule au
+            // milieu de la colonne.
+            SizedBox(
+              width: 190,
+              child: TextButton.icon(
+                style: TextButton.styleFrom(
+                  alignment: Alignment.centerLeft,
+                  foregroundColor: scheme.onSurfaceVariant,
+                ),
+                icon: const Icon(Icons.settings),
+                label: Text(l10n.settings_title),
+                onPressed: _openSettings,
+              ),
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.settings),
+              tooltip: l10n.settings_title,
+              onPressed: _openSettings,
+            ),
         ]),
       ),
       destinations: [
@@ -390,6 +408,29 @@ class HomePageState extends State<HomePage> {
                 child: IntrinsicHeight(child: rail),
               ),
             ),
+          ),
+          Expanded(child: _widePage(context)),
+        ]),
+      ),
+    );
+  }
+
+  /// La page ouverte, sous son titre, et bornee en largeur : sur un ecran de
+  /// bureau, une ligne qui court sur toute la fenetre eloigne trop le montant
+  /// de son libelle.
+  Widget _widePage(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: WideLayout.maxContentWidth),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Padding(
+            // La barre du haut du telephone n'a pas d'equivalent ici : le
+            // titre la remplace, et ecarte la premiere carte du bord.
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+            child: Text(tabLabel(l10n, _current),
+                style: Theme.of(context).textTheme.headlineSmall),
           ),
           Expanded(child: _currentPage()),
         ]),
