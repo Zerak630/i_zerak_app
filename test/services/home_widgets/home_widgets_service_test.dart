@@ -121,6 +121,26 @@ void main() {
     expect(goals.last['milestone'], isTrue);
   });
 
+  test('en voiture, l instantane dit dans quelle case le trajet est parti', () async {
+    final lazy = CarReason.defaults.firstWhere((r) => r.bucket == CarBucket.missed);
+    final day = CommuteDay.car(DateTime(2026, 9, 18), settings, const ResolvedPrice.fallback(), lazy);
+    commute.days['2026-09-18'] = day;
+
+    await service().refresh();
+
+    final today = bridge.snapshots.single['commute']! as Map;
+    expect(today['recorded'], 'car');
+    expect(today['bucket'], 'missed');
+    expect(today['amount'], day.amount);
+  });
+
+  test('a velo, pas de case de voiture', () async {
+    commute.days['2026-09-18'] =
+        CommuteDay.bike(DateTime(2026, 9, 18), settings, const ResolvedPrice.fallback());
+    await service().refresh();
+    expect((bridge.snapshots.single['commute']! as Map).containsKey('bucket'), isFalse);
+  });
+
   test('hors Android, rien n est envoye', () async {
     bridge.supported = false;
     await service().refresh();

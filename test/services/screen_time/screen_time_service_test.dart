@@ -88,6 +88,7 @@ void main() {
     await service().sync();
 
     final report = source.reports.last!;
+    expect(report['enabled'], isTrue);
     expect(report['hour'], 21);
     expect(report['minute'], 30);
     expect(report['packages'], [insta]);
@@ -96,8 +97,15 @@ void main() {
     expect(report['startEpochDay'], ScreenTimeService.epochDay(DateTime(2026, 11, 2)));
   });
 
-  test('bilan desactive : il est annule', () async {
+  test('bilan desactive : les reglages partent quand meme, pour le widget', () async {
     store.settings = configured.copyWith(reportEnabled: false);
+    await service().sync();
+    expect(source.reports.last!['enabled'], isFalse);
+    expect(source.reports.last!['packages'], [insta]);
+  });
+
+  test('non configure : rien n est transmis', () async {
+    store.settings = const ScreenTimeSettings();
     await service().sync();
     expect(source.reports.last, isNull);
   });
