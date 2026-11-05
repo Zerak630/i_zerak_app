@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Remesure toutes les 30 minutes (le plus court qu'Android autorise), en
+     plus des appuis et des passages d'iZerak en arriere-plan. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/widget_free_description"
+    android:initialLayout="@layout/widget_free_time"
+    android:minWidth="180dp"
+    android:minHeight="100dp"
+    android:minResizeWidth="130dp"
+    android:minResizeHeight="90dp"
+    android:previewLayout="@layout/widget_free_time"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="3"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="1800000"
+    android:widgetCategory="home_screen" />

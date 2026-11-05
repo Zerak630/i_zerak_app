@@ -11,4 +11,6 @@
     <color name="widget_on_primary">#00344F</color>
     <color name="widget_surface">#2E353C</color>
     <color name="widget_track">#3A424A</color>
+    <!-- Le temps au-dessus du quota, comme la couleur tertiaire de l'onglet. -->
+    <color name="widget_tertiary">#D7BDE4</color>
 </resources>

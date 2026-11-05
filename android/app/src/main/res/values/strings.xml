@@ -20,9 +20,6 @@
     <string name="widget_bike">By bike</string>
     <string name="widget_car">Car</string>
     <string name="widget_bike_gain">+%1$s</string>
-    <string name="widget_recorded_bike">✓ By bike today · +%1$s</string>
-    <string name="widget_recorded_bike_estimate">✓ By bike today · ≈ +%1$s</string>
-    <string name="widget_recorded_car">Car today</string>
     <string name="widget_setup">Set up your commute in iZerak</string>
     <string name="widget_pot_commute">Bike pot</string>
     <string name="widget_pot_free">Free time</string>
@@ -33,4 +30,21 @@
     <string name="widget_no_goal">No goal yet</string>
     <string name="widget_no_goal_hint">Tap to create one in iZerak</string>
     <string name="widget_open_app">Open iZerak</string>
+    <string name="widget_recorded_bike">✓ By bike today</string>
+    <string name="widget_recorded_car">✓ By car today</string>
+    <string name="widget_into_pot">+%1$s into bike savings</string>
+    <string name="widget_into_pot_estimate">≈ +%1$s into bike savings</string>
+    <string name="widget_into_essential">%1$s in essential costs</string>
+    <string name="widget_into_missed">%1$s in missed savings</string>
+    <string name="widget_free_name">Free time</string>
+    <string name="widget_free_description">Your time on social media today, against your limit</string>
+    <string name="widget_free_quota">of %1$s</string>
+    <string name="widget_free_gain">+%1$s</string>
+    <string name="widget_free_missed">%1$s missed</string>
+    <plurals name="widget_free_streak">
+        <item quantity="one">Streak: %d day</item>
+        <item quantity="other">Streak: %d days</item>
+    </plurals>
+    <string name="widget_free_setup">Set up Free time in iZerak</string>
+    <string name="widget_free_access">Allow usage access in iZerak</string>
 </resources>

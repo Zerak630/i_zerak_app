@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget « Temps libre ». Un appui sur le fond remesure ; l'icone en haut a
+     droite ouvre l'onglet (cf. FreeTimeWidgetProvider). -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:paddingLeft="16dp"
+    android:paddingTop="12dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="12dp">
+
+    <LinearLayout
+        android:id="@+id/widget_free_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="28dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:letterSpacing="0.08"
+                android:maxLines="1"
+                android:text="@string/widget_free_name"
+                android:textAllCaps="true"
+                android:textColor="@color/widget_muted"
+                android:textSize="11sp" />
+
+            <!-- L'heure de la mesure : le widget n'est pas en direct. -->
+            <TextView
+                android:id="@+id/widget_free_updated"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:textColor="@color/widget_muted"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:baselineAligned="true"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/widget_free_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="@color/widget_primary"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/widget_free_quota"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="@color/widget_muted"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/widget_free_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:layout_marginTop="8dp"
+            android:max="1000"
+            android:progressBackgroundTint="@color/widget_track"
+            android:progressTint="@color/widget_primary" />
+
+        <ProgressBar
+            android:id="@+id/widget_free_progress_over"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:layout_marginTop="8dp"
+            android:max="1000"
+            android:progressBackgroundTint="@color/widget_track"
+            android:progressTint="@color/widget_tertiary"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/widget_free_streak"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/widget_muted"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widget_free_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="@color/widget_primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/widget_free_message"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="20dp"
+        android:gravity="center"
+        android:textColor="@color/widget_text"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/widget_open"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_gravity="top|end"
+        android:contentDescription="@string/widget_open_app"
+        android:padding="4dp"
+        android:src="@drawable/ic_widget_open" />
+</FrameLayout>

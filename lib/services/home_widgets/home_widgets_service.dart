@@ -186,6 +186,9 @@ class HomeWidgetsService {
         // des deux boutons.
         if (recorded != null) 'recorded': recorded.mode.name,
         if (recorded != null) 'amount': recorded.amount,
+        // En voiture, la cagnotte que la raison alimente : « essential » ou
+        // « missed ».
+        if (recorded?.bucket != null) 'bucket': recorded!.bucket!.name,
       },
       'goals': [
         for (final g in commuteBook.activeGoals) goal(g, commuteBook, 'commute'),

@@ -34,6 +34,7 @@ object HomeWidgetStore {
 
     const val EXTRA_ACTION = "izerak_action"
     const val ACTION_CAR = "car"
+    const val ACTION_FREE_TIME = "free_time"
 
     private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
@@ -103,8 +104,10 @@ object HomeWidgetStore {
         )
     }
 
-    /** Redessine tous les widgets poses, des deux sortes. */
+    /** Redessine tous les widgets poses. */
     fun refreshAll(context: Context) {
+        // Celui-ci mesure le journal d'utilisation : hors du fil appelant.
+        FreeTimeWidgetProvider.refreshAll(context)
         val manager = AppWidgetManager.getInstance(context)
         for (id in manager.getAppWidgetIds(ComponentName(context, CommuteWidgetProvider::class.java))) {
             manager.updateAppWidget(id, CommuteWidgetProvider.views(context))
@@ -171,6 +174,39 @@ class CommuteWidgetProvider : AppWidgetProvider() {
             }
         }
 
+        /**
+         * Ce que la journee enregistree a donne, et ou c'est parti : la
+         * cagnotte velo, ou l'une des deux cases d'un trajet en voiture.
+         */
+        private fun status(
+            context: Context,
+            state: State,
+            commute: JSONObject?,
+            tripValue: Double,
+        ): Pair<String, String?> {
+            val amount = commute?.optDouble("amount", tripValue) ?: tripValue
+            val euros = HomeWidgetStore.euros(amount)
+            return when (state) {
+                State.SETUP -> context.getString(R.string.widget_setup) to null
+                State.CAR -> {
+                    val missed = commute?.optString("bucket") == "missed"
+                    context.getString(R.string.widget_recorded_car) to context.getString(
+                        if (missed) R.string.widget_into_missed else R.string.widget_into_essential,
+                        euros,
+                    )
+                }
+                else -> {
+                    // Enregistre depuis le widget : le montant exact sera
+                    // calcule par l'application au prix du jour, d'ou le « ≈ ».
+                    val fromApp = recordedToday(context) == "bike"
+                    context.getString(R.string.widget_recorded_bike) to context.getString(
+                        if (fromApp) R.string.widget_into_pot else R.string.widget_into_pot_estimate,
+                        HomeWidgetStore.euros(if (fromApp) amount else tripValue),
+                    )
+                }
+            }
+        }
+
         fun views(context: Context): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_commute)
             val commute = commute(context)
@@ -199,21 +235,10 @@ class CommuteWidgetProvider : AppWidgetProvider() {
                     HomeWidgetStore.openApp(context, 11, HomeWidgetStore.ACTION_CAR),
                 )
             } else {
-                val text = when (state) {
-                    State.SETUP -> context.getString(R.string.widget_setup)
-                    State.CAR -> context.getString(R.string.widget_recorded_car)
-                    else -> {
-                        // Enregistre depuis le widget : le montant exact sera
-                        // calcule par l'application, d'ou le « ≈ ».
-                        val fromApp = recordedToday(context) == "bike"
-                        val amount = if (fromApp) commute?.optDouble("amount", tripValue) ?: tripValue else tripValue
-                        context.getString(
-                            if (fromApp) R.string.widget_recorded_bike else R.string.widget_recorded_bike_estimate,
-                            HomeWidgetStore.euros(amount),
-                        )
-                    }
-                }
-                views.setTextViewText(R.id.widget_status, text)
+                val (title, detail) = status(context, state, commute, tripValue)
+                views.setTextViewText(R.id.widget_status_title, title)
+                views.setTextViewText(R.id.widget_status_detail, detail)
+                views.setViewVisibility(R.id.widget_status_detail, if (detail == null) View.GONE else View.VISIBLE)
                 views.setOnClickPendingIntent(R.id.widget_status, HomeWidgetStore.openApp(context, 10))
             }
             return views
@@ -335,6 +360,125 @@ class GoalWidgetProvider : AppWidgetProvider() {
                     context, widgetId, next,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
                 ),
+            )
+            return views
+        }
+    }
+}
+
+/**
+ * « Temps libre » : le temps passe aujourd'hui sur les reseaux, face au quota.
+ *
+ * Mesure par le natif a chaque mise a jour, sans l'application : toutes les
+ * 30 minutes, chaque fois qu'iZerak passe en arriere-plan, et a chaque appui
+ * sur le widget. Les reglages viennent de ceux du bilan du soir
+ * (cf. DailyReport.configure).
+ */
+class FreeTimeWidgetProvider : AppWidgetProvider() {
+    override fun onReceive(context: Context, intent: Intent) {
+        when (intent.action) {
+            // Lire le journal d'utilisation de la journee prend un moment :
+            // hors du fil principal, sans que le systeme coupe le recepteur.
+            AppWidgetManager.ACTION_APPWIDGET_UPDATE, ACTION_REFRESH -> {
+                val pending = goAsync()
+                Thread {
+                    try {
+                        render(context)
+                    } finally {
+                        pending.finish()
+                    }
+                }.start()
+            }
+            else -> super.onReceive(context, intent)
+        }
+    }
+
+    companion object {
+        const val ACTION_REFRESH = "com.example.i_zerak_app.WIDGET_FREE_TIME_REFRESH"
+
+        fun refreshAll(context: Context) {
+            val ids = AppWidgetManager.getInstance(context)
+                .getAppWidgetIds(ComponentName(context, FreeTimeWidgetProvider::class.java))
+            if (ids.isNotEmpty()) {
+                context.sendBroadcast(Intent(context, FreeTimeWidgetProvider::class.java).setAction(ACTION_REFRESH))
+            }
+        }
+
+        private fun render(context: Context) {
+            val manager = AppWidgetManager.getInstance(context)
+            val ids = manager.getAppWidgetIds(ComponentName(context, FreeTimeWidgetProvider::class.java))
+            if (ids.isEmpty()) {
+                return
+            }
+            val views = views(context)
+            for (id in ids) {
+                manager.updateAppWidget(id, views)
+            }
+        }
+
+        private fun message(context: Context, text: Int): RemoteViews {
+            val views = RemoteViews(context.packageName, R.layout.widget_free_time)
+            views.setViewVisibility(R.id.widget_free_content, View.GONE)
+            views.setViewVisibility(R.id.widget_free_message, View.VISIBLE)
+            views.setTextViewText(R.id.widget_free_message, context.getString(text))
+            val open = HomeWidgetStore.openApp(context, 31, HomeWidgetStore.ACTION_FREE_TIME)
+            views.setOnClickPendingIntent(R.id.widget_root, open)
+            views.setOnClickPendingIntent(R.id.widget_open, open)
+            return views
+        }
+
+        fun views(context: Context): RemoteViews {
+            val config = DailyReport.load(context) ?: return message(context, R.string.widget_free_setup)
+            if (!UsageSessions.hasAccess(context)) {
+                return message(context, R.string.widget_free_access)
+            }
+            val day = ScreenTimeToday.measure(context, config)
+            val views = RemoteViews(context.packageName, R.layout.widget_free_time)
+            val color = context.getColor(if (day.under) R.color.widget_primary else R.color.widget_tertiary)
+            val ratio = if (day.quota <= 0) 1.0 else (day.minutes / day.quota).coerceIn(0.0, 1.0)
+
+            views.setViewVisibility(R.id.widget_free_content, View.VISIBLE)
+            views.setViewVisibility(R.id.widget_free_message, View.GONE)
+            views.setTextViewText(
+                R.id.widget_free_updated,
+                java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT).format(Date()),
+            )
+            views.setTextViewText(R.id.widget_free_time, DailyReport.formatMinutes(context, day.minutes.toLong()))
+            views.setTextColor(R.id.widget_free_time, color)
+            views.setTextViewText(
+                R.id.widget_free_quota,
+                context.getString(R.string.widget_free_quota, DailyReport.formatMinutes(context, day.quota.toLong())),
+            )
+            // Deux barres plutot qu'une teinte changee : avant Android 12, un
+            // widget ne peut pas recolorer une barre de progression.
+            val bar = if (day.under) R.id.widget_free_progress else R.id.widget_free_progress_over
+            views.setViewVisibility(R.id.widget_free_progress, if (day.under) View.VISIBLE else View.GONE)
+            views.setViewVisibility(R.id.widget_free_progress_over, if (day.under) View.GONE else View.VISIBLE)
+            views.setProgressBar(bar, 1000, (ratio * 1000).roundToInt(), false)
+            views.setTextViewText(
+                R.id.widget_free_amount,
+                context.getString(
+                    if (day.under) R.string.widget_free_gain else R.string.widget_free_missed,
+                    HomeWidgetStore.euros(day.amount),
+                ),
+            )
+            views.setTextColor(R.id.widget_free_amount, color)
+            views.setTextViewText(
+                R.id.widget_free_streak,
+                day.streak?.let { context.resources.getQuantityString(R.plurals.widget_free_streak, it, it) } ?: "",
+            )
+
+            val refresh = Intent(context, FreeTimeWidgetProvider::class.java).setAction(ACTION_REFRESH)
+            views.setOnClickPendingIntent(
+                R.id.widget_root,
+                PendingIntent.getBroadcast(
+                    context, 30, refresh,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                ),
+            )
+            views.setOnClickPendingIntent(
+                R.id.widget_open,
+                HomeWidgetStore.openApp(context, 31, HomeWidgetStore.ACTION_FREE_TIME),
             )
             return views
         }
