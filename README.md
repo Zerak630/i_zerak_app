@@ -78,8 +78,9 @@ formule que `ScreenTimeSettings` (`quotaFor`, `earnedOn`, `missedOn`) : toute mo
 ## Widgets de l'écran d'accueil (Android)
 
 - **Vélo / Voiture ?** : « À vélo » enregistre la journée sans ouvrir l'application ; « Voiture »
-  l'ouvre sur la question de la raison. Une fois la journée saisie, le widget affiche le montant et
-  la case où il est parti : cagnotte vélo, coûts indispensables ou économies loupées.
+  l'ouvre sur la question « Est-ce que tu aurais pu prendre le vélo à la place ? ». Une fois la
+  journée saisie, le widget affiche le montant et la case où il est parti : cagnotte vélo, dépenses
+  obligatoires ou économies loupées — ou simplement « En télétravail ».
 - **Temps libre** : le temps passé aujourd'hui sur les réseaux, face au quota, avec le gain ou
   l'économie loupée du jour et la série. Il se mesure seul, côté natif (`ScreenTimeToday`), toutes
   les 30 minutes, à chaque appui et chaque fois qu'iZerak passe en arrière-plan.

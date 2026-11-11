@@ -32,9 +32,10 @@
     <string name="widget_open_app">Open iZerak</string>
     <string name="widget_recorded_bike">✓ By bike today</string>
     <string name="widget_recorded_car">✓ By car today</string>
+    <string name="widget_recorded_remote">✓ Remote work today</string>
     <string name="widget_into_pot">+%1$s into bike savings</string>
     <string name="widget_into_pot_estimate">≈ +%1$s into bike savings</string>
-    <string name="widget_into_essential">%1$s in essential costs</string>
+    <string name="widget_into_essential">%1$s in required expenses</string>
     <string name="widget_into_missed">%1$s in missed savings</string>
     <string name="widget_free_name">Free time</string>
     <string name="widget_free_description">Your time on social media today, against your limit</string>

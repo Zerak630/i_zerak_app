@@ -30,9 +30,10 @@
     <string name="widget_open_app">Ouvrir iZerak</string>
     <string name="widget_recorded_bike">✓ À vélo aujourd’hui</string>
     <string name="widget_recorded_car">✓ En voiture aujourd’hui</string>
+    <string name="widget_recorded_remote">✓ En télétravail aujourd’hui</string>
     <string name="widget_into_pot">+%1$s dans la cagnotte vélo</string>
     <string name="widget_into_pot_estimate">≈ +%1$s dans la cagnotte vélo</string>
-    <string name="widget_into_essential">%1$s en coûts indispensables</string>
+    <string name="widget_into_essential">%1$s en dépenses obligatoires</string>
     <string name="widget_into_missed">%1$s en économies loupées</string>
     <string name="widget_free_name">Temps libre</string>
     <string name="widget_free_description">Votre temps sur les réseaux aujourd’hui, face au quota</string>

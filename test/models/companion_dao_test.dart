@@ -22,6 +22,8 @@ CommuteDay car(DateTime date, {CarBucket bucket = CarBucket.essential}) => Commu
       bucket: bucket,
     );
 
+CommuteDay remote(DateTime date) => CommuteDay.remote(date);
+
 /// Les [count] premiers jours ouvres du mois, a velo.
 List<CommuteDay> bikeMonth(int year, int month, int count) {
   final days = <CommuteDay>[];
@@ -55,6 +57,24 @@ void main() {
       expect(daysOfMonth(DateTime(2026, 9)), 30);
       expect(workdaysIn(DateTime(2026, 9)), 22);
       expect(workdaysIn(DateTime(2026, 2)), 20);
+    });
+
+    test('les quatorze derniers jours ouvres sautent les week-ends', () {
+      // Vendredi 18 septembre : du lundi 31 aout au vendredi 18, sans samedi
+      // ni dimanche.
+      final days = lastWorkdays(DateTime(2026, 9, 18, 8, 30), 14);
+
+      expect(days.length, 14);
+      expect(days.first, DateTime(2026, 8, 31));
+      expect(days.last, DateTime(2026, 9, 18));
+      expect(days.where((day) => !isWorkday(day)), isEmpty);
+    });
+
+    test('un dimanche, la liste finit le vendredi', () {
+      final days = lastWorkdays(DateTime(2026, 9, 20), 14);
+
+      expect(days.last, DateTime(2026, 9, 18));
+      expect(days.first, DateTime(2026, 8, 31));
     });
 
     test('le lundi d une semaine se trouve depuis n importe quel jour', () {
@@ -179,6 +199,25 @@ void main() {
       expect(StreakInfo.of(broken).record, 4);
     });
 
+    test('le teletravail ne casse pas la serie, et ne la prolonge pas', () {
+      final days = [
+        bike(DateTime(2026, 9, 7)),
+        bike(DateTime(2026, 9, 8)),
+        remote(DateTime(2026, 9, 9)),
+        remote(DateTime(2026, 9, 10)),
+        bike(DateTime(2026, 9, 11)),
+      ];
+
+      expect(StreakInfo.of(days).current, 3);
+      expect(
+        StreakInfo.of([...days, remote(DateTime(2026, 9, 14)), remote(DateTime(2026, 9, 15))],
+                now: DateTime(2026, 9, 16))
+            .current,
+        3,
+        reason: 'deux jours de teletravail ne sont pas deux oublis',
+      );
+    });
+
     test('le record retient son dernier jour', () {
       final days = [
         for (var day = 1; day <= 4; day++) bike(DateTime(2026, 6, day)),
@@ -294,6 +333,18 @@ void main() {
       expect(tuesday.flawless, isFalse);
       expect(regularity.weekdays.map((s) => s.weekday),
           [DateTime.tuesday, DateTime.thursday]);
+    });
+
+    test('le teletravail n entre ni dans les jours de la semaine ni dans les mois', () {
+      final regularity = Regularity([
+        bike(DateTime(2026, 9, 1)),
+        remote(DateTime(2026, 9, 8)),
+        remote(DateTime(2026, 9, 3)),
+      ]);
+
+      expect(regularity.weekdays.map((s) => s.weekday), [DateTime.tuesday]);
+      expect(regularity.weekdays.single.recorded, 1);
+      expect(regularity.months.single.recorded, 1);
     });
 
     test('le point faible demande trois journees et moins de trois quarts', () {

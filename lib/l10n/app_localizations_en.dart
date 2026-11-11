@@ -637,7 +637,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get commute_last_14_days => 'Last 14 days';
+  String get commute_last_14_days => 'Last 14 working days';
 
   @override
   String commute_today(String date) {
@@ -691,7 +691,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get commute_essential => 'Essential costs';
+  String get commute_essential => 'Required expenses';
 
   @override
   String get commute_missed => 'Missed savings';
@@ -795,7 +795,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commute_section_reasons => 'Reasons for taking the car';
 
   @override
-  String get commute_bucket_essential => 'Essential cost';
+  String get commute_bucket_essential => 'Required expense';
 
   @override
   String get commute_bucket_missed => 'Missed saving';
@@ -863,7 +863,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commute_bucket_missed_hint => 'The bike was possible';
 
   @override
-  String get commute_chip_essential => 'Essential';
+  String get commute_chip_essential => 'Required';
 
   @override
   String get commute_chip_missed => 'Missed';
@@ -875,10 +875,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commute_legend_bike => 'Bike';
 
   @override
-  String get commute_legend_essential => 'Essential';
+  String get commute_legend_essential => 'Required';
 
   @override
   String get commute_legend_missed => 'Missed';
+
+  @override
+  String get commute_remote => 'Remote work';
+
+  @override
+  String get commute_recorded_remote => 'Remote work, today';
+
+  @override
+  String get commute_snack_remote => 'Remote work recorded';
+
+  @override
+  String get commute_could_bike => 'Could you have taken the bike instead?';
+
+  @override
+  String get commute_could_bike_yes => 'Yes';
+
+  @override
+  String get commute_could_bike_no => 'No';
 
   @override
   String get commute_history_hint => 'Tap a day to correct or clear it.';

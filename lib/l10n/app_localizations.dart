@@ -1235,7 +1235,7 @@ abstract class AppLocalizations {
   /// No description provided for @commute_last_14_days.
   ///
   /// In en, this message translates to:
-  /// **'Last 14 days'**
+  /// **'Last 14 working days'**
   String get commute_last_14_days;
 
   /// No description provided for @commute_today.
@@ -1319,7 +1319,7 @@ abstract class AppLocalizations {
   /// No description provided for @commute_essential.
   ///
   /// In en, this message translates to:
-  /// **'Essential costs'**
+  /// **'Required expenses'**
   String get commute_essential;
 
   /// No description provided for @commute_missed.
@@ -1487,7 +1487,7 @@ abstract class AppLocalizations {
   /// No description provided for @commute_bucket_essential.
   ///
   /// In en, this message translates to:
-  /// **'Essential cost'**
+  /// **'Required expense'**
   String get commute_bucket_essential;
 
   /// No description provided for @commute_bucket_missed.
@@ -1596,7 +1596,7 @@ abstract class AppLocalizations {
   /// No description provided for @commute_chip_essential.
   ///
   /// In en, this message translates to:
-  /// **'Essential'**
+  /// **'Required'**
   String get commute_chip_essential;
 
   /// No description provided for @commute_chip_missed.
@@ -1620,7 +1620,7 @@ abstract class AppLocalizations {
   /// No description provided for @commute_legend_essential.
   ///
   /// In en, this message translates to:
-  /// **'Essential'**
+  /// **'Required'**
   String get commute_legend_essential;
 
   /// No description provided for @commute_legend_missed.
@@ -1628,6 +1628,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Missed'**
   String get commute_legend_missed;
+
+  /// No description provided for @commute_remote.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote work'**
+  String get commute_remote;
+
+  /// No description provided for @commute_recorded_remote.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote work, today'**
+  String get commute_recorded_remote;
+
+  /// No description provided for @commute_snack_remote.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote work recorded'**
+  String get commute_snack_remote;
+
+  /// No description provided for @commute_could_bike.
+  ///
+  /// In en, this message translates to:
+  /// **'Could you have taken the bike instead?'**
+  String get commute_could_bike;
+
+  /// No description provided for @commute_could_bike_yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get commute_could_bike_yes;
+
+  /// No description provided for @commute_could_bike_no.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get commute_could_bike_no;
 
   /// No description provided for @commute_history_hint.
   ///

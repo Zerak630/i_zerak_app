@@ -6,9 +6,9 @@ import 'package:i_zerak_app/models/commute_dao.dart' as commute show dateOnly;
 import 'package:i_zerak_app/models/companion_dao.dart';
 import 'package:i_zerak_app/models/screen_time_dao.dart' show ScreenTimeLedger;
 import 'package:i_zerak_app/models/subscription_dao.dart';
-import 'package:i_zerak_app/pages/commute/widgets/car_reason_sheet.dart';
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart'
-    show carReasonLabel, showAddReasonDialog;
+    show bucketLabel, dayLabel, remoteColor;
+import 'package:i_zerak_app/pages/commute/widgets/could_bike_sheet.dart';
 import 'package:i_zerak_app/pages/gas_stations/widgets/fuel_label.dart';
 import 'package:i_zerak_app/pages/dashboard/budget_page.dart';
 import 'package:i_zerak_app/pages/dashboard/challenge_page.dart';
@@ -234,39 +234,31 @@ class _DashboardPageState extends State<DashboardPage> {
         if (!mounted) {
           return;
         }
-        final reason = await showCarReasonSheet(
+        final bucket = await showCouldBikeSheet(
           context,
-          reasons: _settings.reasons,
           subtitle: l10n.commute_why_car_detail(
             format.longDay(_today),
             format.euros(_settings.tripValue(price.pricePerLitre)),
           ),
-          onAddReason: _addReason,
         );
-        if (reason == null) {
+        if (bucket == null) {
           return;
         }
-        await widget.commuteService.saveDay(CommuteDay.car(_today, _settings, price, reason));
+        await widget.commuteService.saveDay(CommuteDay.car(_today, _settings, price, bucket));
         await _loadLocal();
         if (mounted) {
-          showConfirmation(context, l10n.commute_snack_car(carReasonLabel(l10n, reason)));
+          showConfirmation(context, l10n.commute_snack_car(bucketLabel(l10n, bucket)));
         }
       });
 
-  /// Une raison ajoutee depuis l'accueil rejoint les reglages du trajet : les
-  /// deux ecrans lisent la meme liste.
-  Future<CarReason?> _addReason() async {
-    final reason = await showAddReasonDialog(context);
-    if (reason == null) {
-      return null;
-    }
-    final settings = _settings.copyWith(reasons: [..._settings.reasons, reason]);
-    await widget.commuteService.saveSettings(settings);
-    if (mounted) {
-      setState(() => _settings = settings);
-    }
-    return reason;
-  }
+  Future<void> _recordRemote() => _guard(() async {
+        final l10n = AppLocalizations.of(context)!;
+        await widget.commuteService.saveDay(CommuteDay.remote(_today));
+        await _loadLocal();
+        if (mounted) {
+          showConfirmation(context, l10n.commute_snack_remote);
+        }
+      });
 
   Future<void> _openChallenge() async {
     await Navigator.push(
@@ -480,13 +472,23 @@ class _DashboardPageState extends State<DashboardPage> {
         margin: EdgeInsets.zero,
         child: ListTile(
           leading: Icon(
-            recorded.isBike ? Icons.pedal_bike : Icons.directions_car_outlined,
-            color: recorded.isBike ? scheme.primary : scheme.secondary,
+            switch (recorded.mode) {
+              CommuteMode.bike => Icons.pedal_bike,
+              CommuteMode.car => Icons.directions_car_outlined,
+              CommuteMode.remote => Icons.home_work_outlined,
+            },
+            color: switch (recorded.mode) {
+              CommuteMode.bike => scheme.primary,
+              CommuteMode.car => scheme.secondary,
+              CommuteMode.remote => remoteColor(scheme),
+            },
           ),
-          title: Text(recorded.isBike
-              ? l10n.commute_recorded_bike
-              : l10n.commute_recorded_car(dayLabelOf(l10n, recorded))),
-          trailing: Text(
+          title: Text(switch (recorded.mode) {
+            CommuteMode.bike => l10n.commute_recorded_bike,
+            CommuteMode.car => l10n.commute_recorded_car(dayLabel(l10n, recorded)),
+            CommuteMode.remote => l10n.commute_recorded_remote,
+          }),
+          trailing: recorded.isRemote ? null : Text(
             format.euros(recorded.amount),
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
@@ -541,18 +543,15 @@ class _DashboardPageState extends State<DashboardPage> {
             label: Text(l10n.commute_by_car),
           ),
         ),
+        const SizedBox(width: 8),
+        IconButton.outlined(
+          onPressed: _busy ? null : _recordRemote,
+          tooltip: l10n.commute_remote,
+          color: remoteColor(scheme),
+          icon: const Icon(Icons.home_work_outlined),
+        ),
       ]),
     );
-  }
-
-  /// Le nom de la raison retenue pour une journee en voiture.
-  String dayLabelOf(AppLocalizations l10n, CommuteDay day) {
-    for (final reason in _settings.reasons) {
-      if (reason.id == day.reasonId) {
-        return carReasonLabel(l10n, reason);
-      }
-    }
-    return day.reasonLabel ?? '';
   }
 
   /// L'argent du mois : ce qui reste a partir, et ce que le velo a mis de cote.

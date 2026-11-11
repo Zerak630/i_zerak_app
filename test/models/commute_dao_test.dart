@@ -55,12 +55,23 @@ void main() {
       expect(day.bucket, isNull);
     });
 
-    test('un jour en voiture retient la cagnotte de sa raison au moment du trajet', () {
-      const reason = CarReason(id: 'x', label: 'Rendez-vous', bucket: CarBucket.missed);
-      final day = CommuteDay.car(DateTime(2026, 9, 18), _settings, _price, reason);
+    test('un jour en voiture retient la cagnotte choisie au moment du trajet', () {
+      final day = CommuteDay.car(DateTime(2026, 9, 18), _settings, _price, CarBucket.missed);
 
+      expect(day.mode, CommuteMode.car);
       expect(day.bucket, CarBucket.missed);
-      expect(day.reasonLabel, 'Rendez-vous');
+      expect(day.amount, 1.09);
+      expect(day.reasonId, isNull);
+    });
+
+    test('un jour en teletravail ne vaut rien et se relit tel quel', () {
+      final day = CommuteDay.remote(DateTime(2026, 9, 18, 8, 30));
+      final read = CommuteDay.fromJson(day.toJson())!;
+
+      expect(read.date, DateTime(2026, 9, 18));
+      expect(read.isRemote, isTrue);
+      expect(read.amount, 0);
+      expect(read.bucket, isNull);
     });
   });
 
@@ -74,6 +85,17 @@ void main() {
       expect(ledger.totals.essential, 1.09);
       expect(ledger.totals.missed, 1.09);
       expect(ledger.totals.bikeDays, 2);
+    });
+
+    test('le teletravail ne compte ni dans la cagnotte ni dans la voiture', () {
+      final ledger = CommuteLedger(
+          [_bike(1), CommuteDay.remote(DateTime(2026, 9, 2)), _car(3, CarBucket.missed)], const []);
+
+      expect(ledger.totalSaved, 1.09);
+      expect(ledger.totals.essential, 0);
+      expect(ledger.totals.essentialDays, 0);
+      expect(ledger.totals.missedDays, 1);
+      expect(ledger.totals.remoteDays, 1);
     });
 
     test('les sommes ne derivent pas avec les arrondis', () {

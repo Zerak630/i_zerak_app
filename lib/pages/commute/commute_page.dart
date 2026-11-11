@@ -5,8 +5,8 @@ import 'package:i_zerak_app/models/companion_dao.dart';
 import 'package:i_zerak_app/pages/commute/commute_history_page.dart';
 import 'package:i_zerak_app/pages/commute/commute_settings_page.dart';
 import 'package:i_zerak_app/pages/commute/regularity_page.dart';
-import 'package:i_zerak_app/pages/commute/widgets/car_reason_sheet.dart';
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
+import 'package:i_zerak_app/pages/commute/widgets/could_bike_sheet.dart';
 import 'package:i_zerak_app/pages/commute/widgets/pot_card.dart';
 import 'package:i_zerak_app/pages/gas_stations/widgets/fuel_label.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
@@ -141,38 +141,30 @@ class _CommutePageState extends State<CommutePage> {
         if (!mounted) {
           return;
         }
-        final reason = await showCarReasonSheet(
+        final bucket = await showCouldBikeSheet(
           context,
-          reasons: _settings.reasons,
           subtitle: l10n.commute_why_car_detail(
             format.longDay(_today),
             format.euros(_settings.tripValue(price.pricePerLitre)),
           ),
-          onAddReason: _addReason,
         );
-        if (reason == null) {
+        if (bucket == null) {
           return;
         }
-        final day = CommuteDay.car(_today, _settings, price, reason);
+        final day = CommuteDay.car(_today, _settings, price, bucket);
         await widget.store.saveDay(day);
         await _reload();
         if (mounted) {
-          _confirm(l10n.commute_snack_car(carReasonLabel(l10n, reason)));
+          _confirm(l10n.commute_snack_car(bucketLabel(l10n, bucket)));
         }
       });
 
-  Future<CarReason?> _addReason() async {
-    final reason = await showAddReasonDialog(context);
-    if (reason == null) {
-      return null;
-    }
-    final settings = _settings.copyWith(reasons: [..._settings.reasons, reason]);
-    await widget.store.saveSettings(settings);
-    if (mounted) {
-      setState(() => _settings = settings);
-    }
-    return reason;
-  }
+  Future<void> _recordRemote() => _guard(() async {
+        final l10n = AppLocalizations.of(context)!;
+        await widget.store.saveDay(CommuteDay.remote(_today));
+        await _reload();
+        _confirm(l10n.commute_snack_remote);
+      });
 
   /// Simple accuse de reception : l'annulation se fait depuis la carte du jour,
   /// qui reste affichee.
@@ -250,7 +242,6 @@ class _CommutePageState extends State<CommutePage> {
               else if (recorded != null)
                 _RecordedCard(
                   day: recorded,
-                  reasons: _settings.reasons,
                   onUndo: () => _undo(recorded.date),
                 )
               else
@@ -260,6 +251,7 @@ class _CommutePageState extends State<CommutePage> {
                   busy: _busy,
                   onBike: _recordBike,
                   onCar: _recordCar,
+                  onRemote: _recordRemote,
                 ),
               const SizedBox(height: 12),
               _BucketTotals(totals: _ledger.totals),
@@ -279,7 +271,6 @@ class _CommutePageState extends State<CommutePage> {
               const SizedBox(height: 8),
               _RecentDays(
                 ledger: _ledger,
-                reasons: _settings.reasons,
                 today: today,
                 onSeeAll: _openHistory,
               ),
@@ -298,6 +289,7 @@ class _TodayActions extends StatelessWidget {
     required this.busy,
     required this.onBike,
     required this.onCar,
+    required this.onRemote,
   });
 
   final DateTime today;
@@ -308,6 +300,7 @@ class _TodayActions extends StatelessWidget {
   final bool busy;
   final VoidCallback onBike;
   final VoidCallback onCar;
+  final VoidCallback onRemote;
 
   @override
   Widget build(BuildContext context) {
@@ -358,21 +351,24 @@ class _TodayActions extends StatelessWidget {
               ]),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Expanded(
-            flex: 10,
-            child: OutlinedButton(
+            flex: 9,
+            child: _SideAction(
+              icon: Icons.directions_car_outlined,
+              label: l10n.commute_by_car,
+              color: scheme.onSurface,
               onPressed: busy ? null : onCar,
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                foregroundColor: scheme.onSurface,
-                side: BorderSide(color: scheme.outline),
-              ),
-              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                const Icon(Icons.directions_car_outlined),
-                const SizedBox(height: 4),
-                Text(l10n.commute_by_car, maxLines: 1, overflow: TextOverflow.ellipsis),
-              ]),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 9,
+            child: _SideAction(
+              icon: Icons.home_work_outlined,
+              label: l10n.commute_remote,
+              color: remoteColor(scheme),
+              onPressed: busy ? null : onRemote,
             ),
           ),
         ]),
@@ -381,11 +377,44 @@ class _TodayActions extends StatelessWidget {
   }
 }
 
+/// Un bouton secondaire de la journee : la voiture, ou le teletravail.
+class _SideAction extends StatelessWidget {
+  const _SideAction({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) => OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          foregroundColor: color,
+          side: BorderSide(color: Theme.of(context).colorScheme.outline),
+        ),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Icon(icon),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(label, maxLines: 1),
+          ),
+        ]),
+      );
+}
+
 class _RecordedCard extends StatelessWidget {
-  const _RecordedCard({required this.day, required this.reasons, required this.onUndo});
+  const _RecordedCard({required this.day, required this.onUndo});
 
   final CommuteDay day;
-  final List<CarReason> reasons;
   final VoidCallback onUndo;
 
   @override
@@ -396,6 +425,14 @@ class _RecordedCard extends StatelessWidget {
     final format = CommuteFormat(context);
     final colors = dayContainerColors(scheme, day);
     final amount = day.isBike ? '+ ${format.euros(day.amount)}' : format.euros(day.amount);
+    final (IconData icon, String title) = switch (day.mode) {
+      CommuteMode.bike => (Icons.check, l10n.commute_recorded_bike),
+      CommuteMode.remote => (Icons.home_work_outlined, l10n.commute_recorded_remote),
+      CommuteMode.car => (
+          Icons.directions_car_outlined,
+          l10n.commute_recorded_car(dayLabel(l10n, day)),
+        ),
+    };
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
@@ -405,17 +442,20 @@ class _RecordedCard extends StatelessWidget {
           radius: 17,
           backgroundColor: colors.foreground,
           foregroundColor: colors.background,
-          child: Icon(day.isBike ? Icons.check : Icons.directions_car_outlined, size: 20),
+          child: Icon(icon, size: 20),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(
-              day.isBike ? l10n.commute_recorded_bike : l10n.commute_recorded_car(dayLabel(l10n, day, reasons)),
+              title,
               style: theme.textTheme.titleSmall?.copyWith(color: colors.foreground),
             ),
             Text(
-              l10n.commute_recorded_detail(amount, format.longDay(day.date)),
+              // Le teletravail n'a pas de montant : seule la date reste.
+              day.isRemote
+                  ? _capitalize(format.longDay(day.date))
+                  : l10n.commute_recorded_detail(amount, format.longDay(day.date)),
               style: theme.textTheme.bodySmall?.copyWith(color: colors.foreground),
             ),
           ]),
@@ -432,6 +472,9 @@ class _RecordedCard extends StatelessWidget {
     );
   }
 }
+
+String _capitalize(String text) =>
+    text.isEmpty ? text : '${text[0].toUpperCase()}${text.substring(1)}';
 
 class _SetupCard extends StatelessWidget {
   const _SetupCard({required this.onSetup});
@@ -622,13 +665,11 @@ class _PriceCard extends StatelessWidget {
 class _RecentDays extends StatelessWidget {
   const _RecentDays({
     required this.ledger,
-    required this.reasons,
     required this.today,
     required this.onSeeAll,
   });
 
   final CommuteLedger ledger;
-  final List<CarReason> reasons;
   final DateTime today;
   final VoidCallback onSeeAll;
 
@@ -644,7 +685,7 @@ class _RecentDays extends StatelessWidget {
         TextButton(onPressed: onSeeAll, child: Text(l10n.commute_see_all)),
       ]),
       for (final day in days) ...[
-        CommuteDayRow(day: day, reasons: reasons, today: today),
+        CommuteDayRow(day: day, today: today),
         if (day != days.last) Divider(height: 1, color: theme.colorScheme.surfaceContainerHigh),
       ],
     ]);
@@ -656,13 +697,11 @@ class CommuteDayRow extends StatelessWidget {
   const CommuteDayRow({
     super.key,
     required this.day,
-    required this.reasons,
     required this.today,
     this.onTap,
   });
 
   final CommuteDay day;
-  final List<CarReason> reasons;
   final DateTime today;
   final VoidCallback? onTap;
 
@@ -689,11 +728,15 @@ class CommuteDayRow extends StatelessWidget {
                   ?.copyWith(fontWeight: isToday ? FontWeight.w500 : FontWeight.w400),
             ),
           ),
-          Text(dayLabel(l10n, day, reasons), style: theme.textTheme.bodySmall?.copyWith(color: scheme.outline)),
+          Text(dayLabel(l10n, day), style: theme.textTheme.bodySmall?.copyWith(color: scheme.outline)),
           SizedBox(
             width: 72,
             child: Text(
-              day.isBike ? '+ ${format.euros(day.amount)}' : format.euros(day.amount),
+              switch (day.mode) {
+                CommuteMode.bike => '+ ${format.euros(day.amount)}',
+                CommuteMode.car => format.euros(day.amount),
+                CommuteMode.remote => '—',
+              },
               textAlign: TextAlign.right,
               style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500, color: color),
             ),

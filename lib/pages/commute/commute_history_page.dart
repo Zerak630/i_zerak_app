@@ -18,8 +18,12 @@ class _Bike extends _DayChoice {
 }
 
 class _Car extends _DayChoice {
-  const _Car(this.reason);
-  final CarReason reason;
+  const _Car(this.bucket);
+  final CarBucket bucket;
+}
+
+class _Remote extends _DayChoice {
+  const _Remote();
 }
 
 class _Clear extends _DayChoice {
@@ -103,16 +107,22 @@ class _CommuteHistoryPageState extends State<CommuteHistoryPage> {
             selected: existing?.isBike ?? false,
             onTap: () => Navigator.pop(context, const _Bike()),
           ),
-          for (final reason in _settings.reasons)
+          // Voiture : le velo etait possible (economie loupee), ou non
+          // (depense obligatoire).
+          for (final bucket in const [CarBucket.missed, CarBucket.essential])
             ListTile(
-              leading: Icon(Icons.directions_car_outlined, color: bucketColor(scheme, reason.bucket)),
-              title: Text(carReasonLabel(l10n, reason)),
-              subtitle: Text(reason.bucket == CarBucket.missed
-                  ? l10n.commute_bucket_missed
-                  : l10n.commute_bucket_essential),
-              selected: existing?.reasonId == reason.id,
-              onTap: () => Navigator.pop(context, _Car(reason)),
+              leading: Icon(Icons.directions_car_outlined, color: bucketColor(scheme, bucket)),
+              title: Text(l10n.commute_by_car),
+              subtitle: Text(bucketLabel(l10n, bucket)),
+              selected: (existing?.isCar ?? false) && existing?.bucket == bucket,
+              onTap: () => Navigator.pop(context, _Car(bucket)),
             ),
+          ListTile(
+            leading: Icon(Icons.home_work_outlined, color: remoteColor(scheme)),
+            title: Text(l10n.commute_remote),
+            selected: existing?.isRemote ?? false,
+            onTap: () => Navigator.pop(context, const _Remote()),
+          ),
           if (existing != null)
             ListTile(
               leading: Icon(Icons.delete_outline, color: scheme.error),
@@ -132,9 +142,11 @@ class _CommuteHistoryPageState extends State<CommuteHistoryPage> {
       case _Bike():
         final price = await widget.prices.resolve(_settings.fuel, day: date);
         await widget.store.saveDay(CommuteDay.bike(date, _settings, price));
-      case _Car(:final reason):
+      case _Car(:final bucket):
         final price = await widget.prices.resolve(_settings.fuel, day: date);
-        await widget.store.saveDay(CommuteDay.car(date, _settings, price, reason));
+        await widget.store.saveDay(CommuteDay.car(date, _settings, price, bucket));
+      case _Remote():
+        await widget.store.saveDay(CommuteDay.remote(date));
     }
     await _reload();
   }
@@ -269,6 +281,7 @@ class _CommuteHistoryPageState extends State<CommuteHistoryPage> {
                   _Legend(color: scheme.primaryContainer, label: l10n.commute_legend_bike),
                   _Legend(color: scheme.secondaryContainer, label: l10n.commute_legend_essential),
                   _Legend(color: scheme.tertiaryContainer, label: l10n.commute_legend_missed),
+                  _Legend(color: remoteContainerColor(scheme), label: l10n.commute_remote),
                 ]),
                 const SizedBox(height: 8),
                 Text(l10n.commute_history_hint,
@@ -277,7 +290,6 @@ class _CommuteHistoryPageState extends State<CommuteHistoryPage> {
                 for (final day in monthDays) ...[
                   CommuteDayRow(
                     day: day,
-                    reasons: _settings.reasons,
                     today: today,
                     onTap: () => _editDay(day.date),
                   ),

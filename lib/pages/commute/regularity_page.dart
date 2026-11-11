@@ -416,6 +416,7 @@ class _Legend extends StatelessWidget {
       _LegendItem(color: scheme.primary, label: l10n.commute_legend_bike),
       _LegendItem(color: scheme.secondary, label: l10n.commute_legend_essential),
       _LegendItem(color: scheme.tertiary, label: l10n.commute_legend_missed),
+      _LegendItem(color: remoteColor(scheme), label: l10n.commute_remote),
       _LegendItem(color: scheme.surfaceContainerHighest, label: l10n.regularity_legend_none),
     ]);
   }

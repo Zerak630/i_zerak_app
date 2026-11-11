@@ -43,7 +43,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('ouvert depuis le bouton Voiture du widget, la raison est demandee',
+  testWidgets('ouvert depuis le bouton Voiture du widget, la question est posee',
       (tester) async {
     await tester.binding.setSurfaceSize(const Size(420, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -60,8 +60,9 @@ void main() {
     )));
     await tester.pumpAndSettle();
 
-    expect(find.text('Pourquoi la voiture ?'), findsOneWidget);
-    expect(find.text('Sport le soir'), findsOneWidget);
+    expect(find.text('Est-ce que tu aurais pu prendre le vélo à la place ?'), findsOneWidget);
+    expect(find.text('Oui'), findsOneWidget);
+    expect(find.text('Non'), findsOneWidget);
   });
 
   testWidgets('sans distance, l onglet demande de regler le trajet', (tester) async {
@@ -97,50 +98,48 @@ void main() {
     expect(find.text('À vélo'), findsOneWidget);
   });
 
-  testWidgets('la voiture demande une raison, qui choisit la cagnotte', (tester) async {
+  testWidgets('« oui, le velo etait possible » range la voiture en economie loupee',
+      (tester) async {
     await open(tester);
 
     await tester.tap(find.text('En voiture'));
     await tester.pumpAndSettle();
-    expect(find.text('Pourquoi la voiture ?'), findsOneWidget);
-
-    // Rien n'est coche d'avance : enregistrer est d'abord impossible.
-    final save = find.widgetWithText(FilledButton, 'Enregistrer');
-    expect(tester.widget<FilledButton>(save).onPressed, isNull);
-
-    await tester.tap(find.text('Flemme'));
-    await tester.pumpAndSettle();
-    await tester.tap(save);
+    await tester.tap(find.text('Oui'));
     await tester.pumpAndSettle();
 
     final day = store.days.values.single;
     expect(day.mode, CommuteMode.car);
     expect(day.bucket, CarBucket.missed);
-    expect(find.text('Voiture, aujourd’hui · Flemme'), findsOneWidget);
+    expect(find.text('Voiture, aujourd’hui · Économie loupée'), findsOneWidget);
   });
 
-  testWidgets('renommer une raison renomme les journees qui la citent', (tester) async {
-    store = MemoryCommute(
-      settings: CommuteSettings(
-        distanceKm: 12.4,
-        reasons: [CarReason.defaults.last.withLabel('Pas motivé')],
-      ),
-      days: [
-        CommuteDay(
-          date: DateTime(2026, 9, 18),
-          mode: CommuteMode.car,
-          amount: 1.09,
-          pricePerLitre: 1.689,
-          priceSource: PriceSource.live,
-          reasonId: CarReason.lazy,
-          bucket: CarBucket.missed,
-        ),
-      ],
-    );
+  testWidgets('« non » range la voiture en depense obligatoire', (tester) async {
     await open(tester);
 
-    expect(find.text('Voiture, aujourd’hui · Pas motivé'), findsOneWidget);
-    expect(find.text('Flemme'), findsNothing);
+    await tester.tap(find.text('En voiture'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Non'));
+    await tester.pumpAndSettle();
+
+    final day = store.days.values.single;
+    expect(day.bucket, CarBucket.essential);
+    expect(find.text('Voiture, aujourd’hui · Dépense obligatoire'), findsOneWidget);
+  });
+
+  testWidgets('le teletravail s enregistre sans rien rapporter, et s annule', (tester) async {
+    await open(tester);
+
+    await tester.tap(find.text('Télétravail'));
+    await tester.pumpAndSettle();
+
+    final day = store.days.values.single;
+    expect(day.isRemote, isTrue);
+    expect(day.amount, 0);
+    expect(find.text('Télétravail, aujourd’hui'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Annuler'));
+    await tester.pumpAndSettle();
+    expect(store.days, isEmpty);
   });
 
   testWidgets('la carte de cagnotte mene aux objectifs quand on peut y aller', (tester) async {

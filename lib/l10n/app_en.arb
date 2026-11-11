@@ -271,7 +271,7 @@
 			"spent": { "type": "String" }
 		}
 	},
-	"commute_last_14_days": "Last 14 days",
+	"commute_last_14_days": "Last 14 working days",
 	"commute_today": "Today · {date}",
 	"@commute_today": {
 		"placeholders": {
@@ -316,7 +316,7 @@
 			"reason": { "type": "String" }
 		}
 	},
-	"commute_essential": "Essential costs",
+	"commute_essential": "Required expenses",
 	"commute_missed": "Missed savings",
 	"commute_days": "{count, plural, =0{no day} =1{1 day} other{{count} days}}",
 	"@commute_days": {
@@ -370,7 +370,7 @@
 	"commute_price_unreachable_value": "last price seen",
 	"commute_price_never_rule": "No price ever seen",
 	"commute_section_reasons": "Reasons for taking the car",
-	"commute_bucket_essential": "Essential cost",
+	"commute_bucket_essential": "Required expense",
 	"commute_bucket_missed": "Missed saving",
 	"commute_add_reason": "Add a reason",
 	"commute_reason_name": "Reason",
@@ -406,12 +406,18 @@
 	},
 	"commute_bucket_essential_hint": "The car was needed",
 	"commute_bucket_missed_hint": "The bike was possible",
-	"commute_chip_essential": "Essential",
+	"commute_chip_essential": "Required",
 	"commute_chip_missed": "Missed",
 	"commute_history_title": "History",
 	"commute_legend_bike": "Bike",
-	"commute_legend_essential": "Essential",
+	"commute_legend_essential": "Required",
 	"commute_legend_missed": "Missed",
+	"commute_remote": "Remote work",
+	"commute_recorded_remote": "Remote work, today",
+	"commute_snack_remote": "Remote work recorded",
+	"commute_could_bike": "Could you have taken the bike instead?",
+	"commute_could_bike_yes": "Yes",
+	"commute_could_bike_no": "No",
 	"commute_history_hint": "Tap a day to correct or clear it.",
 	"commute_clear_day": "Clear this day",
 	"commute_import": "Import from Google Maps",
