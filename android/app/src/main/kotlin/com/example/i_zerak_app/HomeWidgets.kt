@@ -142,7 +142,7 @@ class CommuteWidgetProvider : AppWidgetProvider() {
         }
     }
 
-    private enum class State { SETUP, READY, BIKE, CAR }
+    private enum class State { SETUP, READY, BIKE, CAR, REMOTE }
 
     companion object {
         const val ACTION_BIKE = "com.example.i_zerak_app.WIDGET_BIKE"
@@ -170,6 +170,7 @@ class CommuteWidgetProvider : AppWidgetProvider() {
             return when (recordedToday(context)) {
                 "bike" -> State.BIKE
                 "car" -> State.CAR
+                "remote" -> State.REMOTE
                 else -> State.READY
             }
         }
@@ -188,6 +189,7 @@ class CommuteWidgetProvider : AppWidgetProvider() {
             val euros = HomeWidgetStore.euros(amount)
             return when (state) {
                 State.SETUP -> context.getString(R.string.widget_setup) to null
+                State.REMOTE -> context.getString(R.string.widget_recorded_remote) to null
                 State.CAR -> {
                     val missed = commute?.optString("bucket") == "missed"
                     context.getString(R.string.widget_recorded_car) to context.getString(

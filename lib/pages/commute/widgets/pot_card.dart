@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/commute_dao.dart';
+import 'package:i_zerak_app/models/companion_dao.dart';
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
 
 /// La carte de tete de l'onglet Velo : l'essence economisee, et ce qu'elle
@@ -8,7 +9,8 @@ import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
 ///
 /// Plus de cagnotte a depenser : le total economise ne baisse jamais, et
 /// l'onglet Objectifs le confronte aux abonnements et aux gros achats. Il ne
-/// reste ici que le total, les quatorze derniers jours, et une ligne vers eux.
+/// reste ici que le total, les quatorze derniers jours
+/// ouvres, et une ligne vers eux.
 class PotCard extends StatelessWidget {
   const PotCard({
     super.key,
@@ -84,12 +86,7 @@ class PotCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant)),
               const SizedBox(height: 16),
-              Row(children: [
-                for (var offset = 13; offset >= 0; offset--) ...[
-                  _DayDot(day: ledger.dayOn(today.subtract(Duration(days: offset)))),
-                  if (offset > 0) const SizedBox(width: 7),
-                ],
-              ]),
+              _WorkdayDots(ledger: ledger, today: today),
               const SizedBox(height: 8),
               Text(l10n.commute_last_14_days,
                   style: theme.textTheme.labelSmall?.copyWith(color: scheme.outline)),
@@ -99,6 +96,26 @@ class PotCard extends StatelessWidget {
         ]),
       ),
     );
+  }
+}
+
+/// Les quatorze derniers jours ouvres : le week-end n'est jamais saisi, et
+/// n'y laisserait que des cases vides.
+class _WorkdayDots extends StatelessWidget {
+  const _WorkdayDots({required this.ledger, required this.today});
+
+  final CommuteLedger ledger;
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context) {
+    final days = lastWorkdays(today, 14);
+    return Row(children: [
+      for (final day in days) ...[
+        _DayDot(day: ledger.dayOn(day)),
+        if (day != days.last) const SizedBox(width: 7),
+      ],
+    ]);
   }
 }
 

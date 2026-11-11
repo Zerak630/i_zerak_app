@@ -8,8 +8,10 @@ import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 
-/// Reglages du trajet domicile-travail : distance, consommation, carburant, et
-/// la cagnotte qu'alimente chaque raison de prendre la voiture.
+/// Reglages du trajet domicile-travail : distance, consommation et carburant.
+///
+/// La cagnotte d'un trajet en voiture ne se regle plus ici : elle se decide a
+/// chaque trajet, en repondant a « le velo etait-il possible ? ».
 ///
 /// Rien de ce qui change ici ne touche aux journees deja enregistrees : leur
 /// montant et leur cagnotte ont ete figes le jour meme.
@@ -31,9 +33,6 @@ class _CommuteSettingsPageState extends State<CommuteSettingsPage> {
   final _consumption = TextEditingController();
 
   CommuteSettings _settings = const CommuteSettings();
-
-  /// Journees enregistrees par raison : une raison utilisee ne se supprime pas.
-  Map<String, int> _uses = const {};
 
   ResolvedPrice? _price;
   bool _loading = true;
@@ -58,13 +57,11 @@ class _CommuteSettingsPageState extends State<CommuteSettingsPage> {
 
   Future<void> _load() async {
     final settings = await widget.store.readSettings();
-    final days = await widget.store.getDays();
     if (!mounted) {
       return;
     }
     setState(() {
       _settings = settings;
-      _uses = reasonUses(days);
       _distance.text = settings.distanceKm == null ? '' : _plain(settings.distanceKm!);
       _consumption.text = _plain(settings.consumption);
       _loading = false;
@@ -91,51 +88,6 @@ class _CommuteSettingsPageState extends State<CommuteSettingsPage> {
       _price = null;
     });
     await _resolvePrice();
-  }
-
-  void _setBucket(CarReason reason, CarBucket bucket) => setState(() {
-        _settings = _settings.copyWith(reasons: [
-          for (final r in _settings.reasons) r.id == reason.id ? r.withBucket(bucket) : r,
-        ]);
-      });
-
-  Future<void> _addReason() async {
-    final reason = await showAddReasonDialog(context);
-    if (reason != null) {
-      setState(() => _settings = _settings.copyWith(reasons: [..._settings.reasons, reason]));
-    }
-  }
-
-  Future<void> _renameReason(CarReason reason) async {
-    final l10n = AppLocalizations.of(context)!;
-    final name = await showRenameReasonDialog(
-      context,
-      current: carReasonLabel(l10n, reason),
-      builtIn: reason.isBuiltIn,
-    );
-    if (name == null) {
-      return;
-    }
-    setState(() {
-      _settings = _settings.copyWith(reasons: [
-        // Vide : une raison livree reprend son nom localise d'origine.
-        for (final r in _settings.reasons) r.id == reason.id ? r.withLabel(name.isEmpty ? null : name) : r,
-      ]);
-    });
-  }
-
-  void _removeReason(CarReason reason) {
-    // Le menu est deja desactive dans ce cas ; la verification reste ici pour
-    // que rien d'autre ne puisse retirer une raison dont dependent des jours.
-    if ((_uses[reason.id] ?? 0) > 0) {
-      return;
-    }
-    setState(() {
-      _settings = _settings.copyWith(reasons: [
-        for (final r in _settings.reasons)
-          if (r.id != reason.id) r,
-      ]);
-    });
   }
 
   Future<void> _save() async {
@@ -213,13 +165,6 @@ class _CommuteSettingsPageState extends State<CommuteSettingsPage> {
                   ),
                   _SectionTitle(l10n.commute_section_price),
                   _priceRules(context, l10n),
-                  _SectionTitle(l10n.commute_section_reasons),
-                  for (final reason in _settings.reasons) _reasonRow(context, l10n, reason),
-                  OutlinedButton.icon(
-                    onPressed: _addReason,
-                    icon: const Icon(Icons.add),
-                    label: Text(l10n.commute_add_reason),
-                  ),
                   const SizedBox(height: 24),
                   _tripValue(context, l10n),
                   const SizedBox(height: 24),
@@ -260,51 +205,6 @@ class _CommuteSettingsPageState extends State<CommuteSettingsPage> {
         ]),
         rule(l10n.commute_price_unreachable_rule, l10n.commute_price_unreachable_value),
         rule(l10n.commute_price_never_rule, format.perLitre(kFallbackFuelPrice)),
-      ]),
-    );
-  }
-
-  Widget _reasonRow(BuildContext context, AppLocalizations l10n, CarReason reason) {
-    final theme = Theme.of(context);
-    final uses = _uses[reason.id] ?? 0;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Row(children: [
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(carReasonLabel(l10n, reason), style: theme.textTheme.bodyLarge),
-              if (uses > 0)
-                Text(l10n.commute_reason_uses(uses),
-                    style: theme.textTheme.bodySmall
-                        ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-            ]),
-          ),
-          PopupMenuButton<String>(
-            tooltip: l10n.commute_reason_actions,
-            itemBuilder: (context) => [
-              PopupMenuItem(value: 'rename', child: Text(l10n.gas_rename)),
-              PopupMenuItem(
-                value: 'delete',
-                enabled: uses == 0,
-                child: Text(uses == 0 ? l10n.delete : l10n.commute_reason_in_use),
-              ),
-            ],
-            onSelected: (action) => switch (action) {
-              'rename' => _renameReason(reason),
-              _ => _removeReason(reason),
-            },
-          ),
-        ]),
-        const SizedBox(height: 6),
-        SegmentedButton<CarBucket>(
-          segments: [
-            ButtonSegment(value: CarBucket.essential, label: Text(l10n.commute_bucket_essential)),
-            ButtonSegment(value: CarBucket.missed, label: Text(l10n.commute_bucket_missed)),
-          ],
-          selected: {reason.bucket},
-          onSelectionChanged: (selection) => _setBucket(reason, selection.first),
-        ),
       ]),
     );
   }

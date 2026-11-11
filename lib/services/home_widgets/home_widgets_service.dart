@@ -182,11 +182,11 @@ class HomeWidgetsService {
       'commute': {
         'configured': commuteConfigured,
         'tripValue': tripValue,
-        // « bike », « car » ou absent : ce que le widget affiche a la place
+        // « bike », « car », « remote » ou absent : ce que le widget affiche a la place
         // des deux boutons.
         if (recorded != null) 'recorded': recorded.mode.name,
         if (recorded != null) 'amount': recorded.amount,
-        // En voiture, la cagnotte que la raison alimente : « essential » ou
+        // En voiture, la cagnotte alimentee : « essential » ou
         // « missed ».
         if (recorded?.bucket != null) 'bucket': recorded!.bucket!.name,
       },

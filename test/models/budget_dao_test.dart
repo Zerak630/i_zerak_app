@@ -12,7 +12,7 @@ CommuteDay _car(int day, {CarBucket bucket = CarBucket.essential}) => CommuteDay
       DateTime(2026, 9, day),
       _settings,
       _price,
-      CarReason(id: bucket == CarBucket.essential ? 'sport' : 'lazy', bucket: bucket),
+      bucket,
     );
 
 Subscription _sub(

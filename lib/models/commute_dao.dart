@@ -52,7 +52,11 @@ DateTime? parseDayKey(String raw) {
 
 enum CommuteMode {
   bike,
-  car;
+  car,
+
+  /// Teletravail : pas de trajet, donc rien a gagner ni a depenser. Le jour
+  /// est quand meme saisi, pour ne pas passer pour un oubli.
+  remote;
 
   static CommuteMode fromName(String? raw) =>
       values.firstWhere((mode) => mode.name == raw, orElse: () => bike);
@@ -298,11 +302,14 @@ class CommuteDay {
         imported: imported,
       );
 
+  /// En voiture. La cagnotte alimentee repond a une seule question : le velo
+  /// etait-il possible ? Oui, c'est une economie loupee ; non, une depense
+  /// obligatoire.
   factory CommuteDay.car(
     DateTime date,
     CommuteSettings settings,
     ResolvedPrice price,
-    CarReason reason,
+    CarBucket bucket,
   ) =>
       CommuteDay(
         date: dateOnly(date),
@@ -311,9 +318,16 @@ class CommuteDay {
         pricePerLitre: price.pricePerLitre,
         priceSource: price.source,
         stationLabel: price.stationLabel,
-        reasonId: reason.id,
-        reasonLabel: reason.label,
-        bucket: reason.bucket,
+        bucket: bucket,
+      );
+
+  /// En teletravail : aucun trajet, aucun montant.
+  factory CommuteDay.remote(DateTime date) => CommuteDay(
+        date: dateOnly(date),
+        mode: CommuteMode.remote,
+        amount: 0,
+        pricePerLitre: 0,
+        priceSource: PriceSource.fallback,
       );
 
   final DateTime date;
@@ -327,11 +341,11 @@ class CommuteDay {
   final PriceSource priceSource;
   final String? stationLabel;
 
-  /// Voiture uniquement.
+  /// Voiture uniquement, et seulement pour les journees saisies du temps ou
+  /// l'on choisissait une raison detaillee. Garde pour ne rien perdre.
   final String? reasonId;
 
-  /// Copie du libelle d'une raison ajoutee a la main : il reste lisible dans
-  /// l'historique meme apres la suppression de la raison.
+  /// Copie du libelle d'une raison ajoutee a la main, pour les memes journees.
   final String? reasonLabel;
 
   /// Voiture uniquement : la cagnotte alimentee, figee au jour du trajet.
@@ -342,6 +356,10 @@ class CommuteDay {
   final bool imported;
 
   bool get isBike => mode == CommuteMode.bike;
+
+  bool get isCar => mode == CommuteMode.car;
+
+  bool get isRemote => mode == CommuteMode.remote;
 
   Map<String, dynamic> toJson() => {
         'date': dayKey(date),
@@ -509,13 +527,16 @@ class CommuteTotals {
     required this.essentialDays,
     required this.missed,
     required this.missedDays,
+    this.remoteDays = 0,
   });
 
   factory CommuteTotals.of(Iterable<CommuteDay> days) {
     var bike = 0.0, essential = 0.0, missed = 0.0;
-    var bikeDays = 0, essentialDays = 0, missedDays = 0;
+    var bikeDays = 0, essentialDays = 0, missedDays = 0, remoteDays = 0;
     for (final day in days) {
-      if (day.isBike) {
+      if (day.isRemote) {
+        remoteDays++;
+      } else if (day.isBike) {
         bike += day.amount;
         bikeDays++;
       } else if (day.bucket == CarBucket.missed) {
@@ -533,6 +554,7 @@ class CommuteTotals {
       essentialDays: essentialDays,
       missed: roundCents(missed),
       missedDays: missedDays,
+      remoteDays: remoteDays,
     );
   }
 
@@ -542,6 +564,9 @@ class CommuteTotals {
   final int essentialDays;
   final double missed;
   final int missedDays;
+
+  /// Journees en teletravail : comptees, mais sans montant.
+  final int remoteDays;
 }
 
 /// Une somme economisee un jour donne.

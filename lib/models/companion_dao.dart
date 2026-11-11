@@ -76,6 +76,23 @@ int workdaysBetween(DateTime from, DateTime to) {
   return count;
 }
 
+/// Les [count] derniers jours ouvres, du plus ancien au plus recent, [today]
+/// compris s'il en est un.
+///
+/// Seuls les jours de travail sont saisis : un samedi ou un dimanche ne
+/// serait jamais qu'une case vide.
+List<DateTime> lastWorkdays(DateTime today, int count) {
+  final days = <DateTime>[];
+  var day = dateOnly(today);
+  while (days.length < count) {
+    if (isWorkday(day)) {
+      days.add(day);
+    }
+    day = DateTime(day.year, day.month, day.day - 1);
+  }
+  return days.reversed.toList();
+}
+
 /// Fenetre sur laquelle le rythme se mesure.
 enum RateWindow {
   /// Les huit dernieres semaines : ce que vaut l'habitude actuelle, conges
@@ -186,6 +203,9 @@ class SavingRate {
 /// saisi, ce n'est pas la meme chose que d'avoir pris la voiture. Un week-end,
 /// un jour de conge ou un oubli ne cassent donc pas une serie.
 ///
+/// Un jour de teletravail non plus : il n'y avait pas de trajet a faire. Il
+/// ne compte pas dans la suite, mais comble le trou qu'il laisserait.
+///
 /// Mais un trou, si. Sans ce garde-fou, trente trajets etales sur six mois sans
 /// une seule journee en voiture donnaient « 30 jours d'affilee », ce que
 /// personne ne lit comme autre chose que trente jours de suite.
@@ -208,7 +228,11 @@ class StreakInfo {
     DateTime? recordEnd;
     DateTime? previous;
     for (final day in sorted) {
-      if (day.isBike) {
+      if (day.isRemote) {
+        if (previous != null) {
+          previous = day.date;
+        }
+      } else if (day.isBike) {
         final missed = previous == null ? 0 : workdaysBetween(previous, day.date);
         run = missed > maxMissedWorkdays ? 1 : run + 1;
         previous = day.date;
@@ -313,6 +337,10 @@ class Regularity {
   List<WeekdayStat> get weekdays {
     final stats = <int, ({int bike, int essential, int missed})>{};
     for (final day in _byDay.values) {
+      // Le teletravail ne dit rien du choix entre velo et voiture.
+      if (day.isRemote) {
+        continue;
+      }
       final current = stats[day.date.weekday] ?? (bike: 0, essential: 0, missed: 0);
       stats[day.date.weekday] = (
         bike: current.bike + (day.isBike ? 1 : 0),
@@ -368,6 +396,9 @@ class Regularity {
   List<MonthTally> get months {
     final tallies = <String, ({DateTime month, int bike, int recorded})>{};
     for (final day in _byDay.values) {
+      if (day.isRemote) {
+        continue;
+      }
       final month = DateTime(day.date.year, day.date.month);
       final key = monthKey(month);
       final current = tallies[key] ?? (month: month, bike: 0, recorded: 0);

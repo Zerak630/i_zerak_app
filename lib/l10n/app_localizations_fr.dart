@@ -644,7 +644,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commute_no_bike_trip => 'Aucun trajet à vélo pour l’instant';
 
   @override
-  String get commute_last_14_days => 'Les 14 derniers jours';
+  String get commute_last_14_days => 'Les 14 derniers jours ouvrés';
 
   @override
   String commute_today(String date) {
@@ -698,7 +698,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get commute_essential => 'Coûts indispensables';
+  String get commute_essential => 'Dépenses obligatoires';
 
   @override
   String get commute_missed => 'Économies loupées';
@@ -804,7 +804,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commute_section_reasons => 'Raisons de prendre la voiture';
 
   @override
-  String get commute_bucket_essential => 'Coût indispensable';
+  String get commute_bucket_essential => 'Dépense obligatoire';
 
   @override
   String get commute_bucket_missed => 'Économie loupée';
@@ -872,7 +872,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commute_bucket_missed_hint => 'Le vélo était possible';
 
   @override
-  String get commute_chip_essential => 'Indispensable';
+  String get commute_chip_essential => 'Obligatoire';
 
   @override
   String get commute_chip_missed => 'Loupée';
@@ -884,10 +884,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commute_legend_bike => 'Vélo';
 
   @override
-  String get commute_legend_essential => 'Indispensable';
+  String get commute_legend_essential => 'Obligatoire';
 
   @override
   String get commute_legend_missed => 'Loupé';
+
+  @override
+  String get commute_remote => 'Télétravail';
+
+  @override
+  String get commute_recorded_remote => 'Télétravail, aujourd’hui';
+
+  @override
+  String get commute_snack_remote => 'Télétravail enregistré';
+
+  @override
+  String get commute_could_bike => 'Est-ce que tu aurais pu prendre le vélo à la place ?';
+
+  @override
+  String get commute_could_bike_yes => 'Oui';
+
+  @override
+  String get commute_could_bike_no => 'Non';
 
   @override
   String get commute_history_hint =>

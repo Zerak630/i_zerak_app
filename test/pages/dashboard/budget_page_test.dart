@@ -24,7 +24,7 @@ CommuteDay _car(int day) => CommuteDay.car(
       DateTime(2026, 9, day),
       _settings,
       _price,
-      const CarReason(id: CarReason.lazy, bucket: CarBucket.missed),
+      CarBucket.missed,
     );
 
 void main() {
