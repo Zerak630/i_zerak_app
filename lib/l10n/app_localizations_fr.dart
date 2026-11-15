@@ -619,7 +619,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get bb_commute => 'Vélo';
 
   @override
-  String get commute_pot => 'Cagnotte vélo';
+  String get commute_pot => 'Essence économisée';
 
   @override
   String commute_bike_trips(int count, String date) {
@@ -634,11 +634,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get commute_no_bike_trip => 'Aucun trajet à vélo pour l’instant';
-
-  @override
-  String commute_saved_and_spent(String total, String spent) {
-    return '$total économisés · $spent dépensés';
-  }
 
   @override
   String get commute_last_14_days => 'Les 14 derniers jours';
@@ -659,7 +654,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String commute_by_bike_gain(String amount) {
-    return '+ $amount en cagnotte';
+    return '+ $amount d’essence économisée';
   }
 
   @override
@@ -686,7 +681,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String commute_snack_bike(String amount) {
-    return 'Vélo enregistré — $amount en cagnotte';
+    return 'Vélo enregistré — $amount d’essence économisée';
   }
 
   @override
@@ -747,7 +742,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get commute_setup_hint =>
-      'Indiquez la distance aller-retour : chaque trajet à vélo alimentera la cagnotte.';
+      'Indiquez la distance aller-retour : chaque trajet à vélo comptera l’essence économisée.';
 
   @override
   String get commute_setup_action => 'Régler';
@@ -1029,41 +1024,19 @@ class AppLocalizationsFr extends AppLocalizations {
       'Mesuré sur le total économisé : rien à dépenser';
 
   @override
-  String goal_spend_validate(String amount) {
-    return 'Dépenser $amount et valider';
-  }
+  String get goal_validate_milestone => 'Marquer comme rentabilisé';
 
   @override
-  String get goal_validate_milestone => 'Valider le palier';
-
-  @override
-  String get goal_new => 'Nouvel objectif';
-
-  @override
-  String get goal_kind_purchase => 'Achat';
-
-  @override
-  String get goal_kind_purchase_hint => 'se paie avec la cagnotte';
-
-  @override
-  String get goal_kind_milestone => 'Palier';
-
-  @override
-  String get goal_kind_milestone_hint => 'se franchit, sans dépenser';
+  String get goal_new => 'Nouveau palier';
 
   @override
   String get goal_name => 'Nom';
 
   @override
-  String get goal_amount => 'Montant';
+  String get goal_amount => 'Prix d’achat';
 
   @override
   String get goal_icon => 'Icône';
-
-  @override
-  String goal_missing(String amount) {
-    return 'Il manque $amount';
-  }
 
   @override
   String goal_missing_trips(int trips, String amount) {
@@ -1087,30 +1060,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String goal_validate_title(String name) {
-    return 'Valider « $name » ?';
-  }
-
-  @override
-  String goal_validate_purchase_detail(String amount) {
-    return '$amount sortent de la cagnotte. L’objectif rejoint la liste des objectifs atteints.';
-  }
-
-  @override
-  String get goal_validate_milestone_detail =>
-      'Rien n’est dépensé : le palier rejoint la liste des objectifs atteints.';
-
-  @override
-  String get goal_row_pot => 'Cagnotte';
-
-  @override
-  String get goal_row_saved => 'Économisé au total';
-
-  @override
-  String get goal_unchanged => 'inchangé';
-
-  @override
-  String goal_spend(String amount) {
-    return 'Dépenser $amount';
+    return '« $name » est rentabilisé';
   }
 
   @override
@@ -1511,18 +1461,14 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get goals_shared_pot =>
-      'Les achats puisent tous dans la même cagnotte : en valider un repousse les autres.';
+  String get goals_reached_section => 'Déjà rentabilisés';
 
   @override
-  String get goals_reached_section => 'Déjà franchis';
-
-  @override
-  String get goals_empty => 'Aucun objectif pour l’instant';
+  String get goals_empty => 'Aucun palier pour l’instant';
 
   @override
   String get goals_empty_hint =>
-      'Un objectif donne une date à la cagnotte : « le casque, vers le 10 avril ».';
+      '« Le vélo, rentabilisé vers le 10 avril » : un palier donne une date à vos économies.';
 
   @override
   String goals_active(int count) {
@@ -1541,8 +1487,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count objectifs atteints',
-      one: '1 objectif atteint',
+      other: '$count paliers rentabilisés',
+      one: '1 palier rentabilisé',
     );
     return '$_temp0';
   }
@@ -1873,14 +1819,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String free_per_hour(String amount) {
-    return '$amount/h';
-  }
-
-  @override
-  String get free_per_hour_suffix => '€/h';
-
-  @override
   String get free_unsupported_title => 'Disponible sur Android';
 
   @override
@@ -1892,7 +1830,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get free_intro_body =>
-      'iZerak mesure le temps passé sur les réseaux, fixe un quota qui baisse chaque semaine, et transforme chaque heure gagnée en argent pour vos objectifs.';
+      'iZerak mesure le temps passé sur les réseaux, fixe un quota qui baisse chaque semaine, et compte le temps que vous leur reprenez.';
 
   @override
   String get free_intro_action => 'Commencer';
@@ -1994,36 +1932,14 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get free_pot => 'Cagnotte temps libre';
-
-  @override
-  String get free_pot_first_day =>
-      'Premier gain demain matin, une fois la journée close';
-
-  @override
-  String free_pot_hours(String hours, String date) {
-    return '$hours gagnées depuis le $date';
-  }
-
-  @override
   String get free_last_14_days => 'Les 14 derniers jours';
-
-  @override
-  String free_goal_remaining(String amount, String hours) {
-    return 'Encore $amount — environ $hours h loin des réseaux';
-  }
-
-  @override
-  String free_goal_missing_hours(String hours, String rate) {
-    return 'Environ $hours h loin des réseaux, à $rate l’heure.';
-  }
 
   @override
   String get free_access_lost => 'Accès aux données retiré';
 
   @override
   String get free_access_lost_hint =>
-      'Sans lui, iZerak ne peut plus mesurer votre temps : la cagnotte est en pause.';
+      'Sans lui, iZerak ne peut plus mesurer votre temps : le décompte est en pause.';
 
   @override
   String free_today_quota(String quota) {
@@ -2063,9 +1979,6 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get free_today_gain => 'si la journée s’arrêtait là';
 
   @override
   String get free_week_title => 'Cette semaine';
@@ -2142,7 +2055,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get free_settings_restart_confirm =>
-      'Le quota repartira de la première semaine. La cagnotte, les objectifs et l’historique sont conservés.';
+      'Le quota repartira de la première semaine. L’historique est conservé.';
 
   @override
   String get free_settings_restart_action => 'Recalculer';
@@ -2160,15 +2073,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get free_settings_floor_hint => 'Le quota ne descend pas plus bas';
 
   @override
-  String get free_settings_pot => 'Cagnotte';
-
-  @override
-  String get free_settings_rate => 'Tarif d’une heure gagnée';
-
-  @override
-  String get free_settings_rate_hint => 'Comparée à votre moyenne de départ';
-
-  @override
   String get free_settings_report => 'Bilan du soir';
 
   @override
@@ -2176,14 +2080,173 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get free_settings_report_hint =>
-      'Une notification avec le temps du jour, le gain et la série';
+      'Une notification avec le temps du jour, le temps repris et la série';
 
   @override
   String get free_settings_report_time => 'Heure du bilan';
 
   @override
-  String get free_today_missed => 'loupés si la journée s’arrêtait là';
+  String payback_title(String month) {
+    return 'Ce que le vélo rembourse · $month';
+  }
 
   @override
-  String get free_kept => 'Gagné les jours tenus';
+  String payback_saved(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'd’essence économisée en $days trajets à vélo',
+      one: 'd’essence économisée en 1 trajet à vélo',
+      zero: 'd’essence économisée — pas encore de trajet à vélo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String payback_count(int paid, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      paid,
+      locale: localeName,
+      other: '$paid abonnements remboursés sur $total',
+      one: '1 abonnement remboursé sur $total',
+      zero: 'Aucun abonnement remboursé sur $total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String payback_amount(String covered, String total) {
+    return '$covered sur $total';
+  }
+
+  @override
+  String payback_next_trips(int trips, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      trips,
+      locale: localeName,
+      other: 'Encore $trips trajets à vélo pour rembourser $name',
+      one: 'Encore 1 trajet à vélo pour rembourser $name',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String payback_next_amount(String amount, String name) {
+    return 'Encore $amount pour rembourser $name';
+  }
+
+  @override
+  String payback_surplus(String amount) {
+    return 'Tout est remboursé, et $amount de plus.';
+  }
+
+  @override
+  String get payback_no_subscription =>
+      'Ajoutez vos abonnements dans l’onglet Abonnements : chaque trajet à vélo en remboursera une part.';
+
+  @override
+  String get payback_all_excluded => 'Aucun abonnement choisi.';
+
+  @override
+  String get payback_choose => 'Choisir les abonnements';
+
+  @override
+  String get payback_choose_hint =>
+      'Décochez ce que le vélo ne doit pas rembourser, comme le loyer ou une assurance.';
+
+  @override
+  String payback_per_month(String amount) {
+    return '$amount par mois';
+  }
+
+  @override
+  String get payback_history => 'Les mois précédents';
+
+  @override
+  String payback_history_row(int paid, int total) {
+    return '$paid sur $total';
+  }
+
+  @override
+  String get goals_milestones => 'Gros achats à rentabiliser';
+
+  @override
+  String get goals_milestones_hint =>
+      'L’essence économisée, cumulée jusqu’à couvrir le prix : le vélo, un téléphone, du matériel de sport…';
+
+  @override
+  String get goal_new_short => 'Palier';
+
+  @override
+  String get goal_new_hint =>
+      'Un achat qui a coûté cher, et que vos économies finiront par rentabiliser.';
+
+  @override
+  String get goal_since => 'Compter les économies';
+
+  @override
+  String get goal_since_start => 'Depuis le début';
+
+  @override
+  String get goal_since_purchase => 'Depuis l’achat…';
+
+  @override
+  String get goal_since_hint =>
+      'Un vélo déjà là compte depuis le premier trajet ; un téléphone acheté hier, depuis hier.';
+
+  @override
+  String goal_preview(String current, String missing) {
+    return 'Déjà $current économisés, il manque $missing';
+  }
+
+  @override
+  String goal_counted_since(String date) {
+    return 'compté depuis le $date';
+  }
+
+  @override
+  String goal_validate_detail(String current, String target) {
+    return '$current économisés pour un achat de $target. Le palier rejoint ceux déjà franchis ; rien n’est dépensé.';
+  }
+
+  @override
+  String get payback_link => 'Ce que le vélo rembourse';
+
+  @override
+  String get home_bike_month => 'à vélo ce mois-ci';
+
+  @override
+  String get free_regained_title => 'Temps repris aux réseaux';
+
+  @override
+  String get free_regained_first_day =>
+      'Premier décompte demain matin, une fois la journée close';
+
+  @override
+  String free_regained_since(String date, String week) {
+    return 'depuis le $date · $week cette semaine';
+  }
+
+  @override
+  String get free_today_regained => 'repris si la journée s’arrêtait là';
+
+  @override
+  String get free_today_over_label => 'de trop si la journée s’arrêtait là';
+
+  @override
+  String get free_kept_days => 'Jours tenus';
+
+  @override
+  String free_kept_detail(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'sur $count jours mesurés',
+      one: 'sur 1 jour mesuré',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get free_over_total => 'Temps de trop';
 }

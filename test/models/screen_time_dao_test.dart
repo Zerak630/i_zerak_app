@@ -1,4 +1,3 @@
-import 'package:i_zerak_app/models/commute_dao.dart' show Goal, GoalIcon, GoalKind;
 import 'package:i_zerak_app/models/screen_time_dao.dart';
 import 'package:test/test.dart';
 
@@ -117,62 +116,56 @@ void main() {
       expect(settings.quotaFor(DateTime(2027, 6, 1)), 12);
     });
 
-    test('le gain se mesure sur la moyenne de depart, au centime', () {
-      final settings = configured(baseline: 120);
-      // Une heure gagnee a 2 €/h.
-      expect(settings.gainFor(60), 2.0);
-      expect(settings.gainFor(100), 0.67);
-      // Au-dessus de la moyenne : rien, mais rien de retire non plus.
-      expect(settings.gainFor(150), 0);
-    });
-
-    test('au-dessus du quota, rien dans la cagnotte : le gain du quota est loupe', () {
+    test('le temps repris se mesure sur la moyenne de depart, quota tenu ou non', () {
       final settings = configured(baseline: 120);
       // Semaine 0 : quota de 108 minutes.
+      final kept = closedDay(settings, DateTime(2026, 11, 2), 60);
+      expect(kept.underQuota, isTrue);
+      expect(kept.regainedMinutes, 60);
+      expect(kept.overMinutes, 0);
+
       final over = closedDay(settings, DateTime(2026, 11, 2), 110);
       expect(over.underQuota, isFalse);
-      expect(over.amount, 0);
-      // (120 - 108) minutes a 2 €/h.
-      expect(over.missed, 0.4);
-      expect(over.savedMinutes, 0);
+      // Dix minutes reprises sur la moyenne, deux de trop sur le quota.
+      expect(over.regainedMinutes, 10);
+      expect(over.overMinutes, 2);
 
-      // Le montant loupe ne grossit pas avec le depassement.
-      expect(closedDay(settings, DateTime(2026, 11, 2), 300).missed, 0.4);
-
-      final kept = closedDay(settings, DateTime(2026, 11, 2), 108);
-      expect(kept.amount, 0.4);
-      expect(kept.missed, 0);
+      // Au-dessus de la moyenne : rien de repris, et rien de negatif.
+      expect(closedDay(settings, DateTime(2026, 11, 2), 150).regainedMinutes, 0);
     });
 
-    test('l economie loupee se relit, et manque sans dommage aux anciennes journees', () {
+    test('les journees figees du temps de la cagnotte se relisent', () {
       final settings = configured(baseline: 120);
-      final over = closedDay(settings, DateTime(2026, 11, 2), 200);
-      expect(ScreenTimeDay.fromJson(over.toJson())!.missed, 0.4);
-
-      final legacy = {...closedDay(settings, DateTime(2026, 11, 2), 60).toJson()}..remove('missed');
-      expect(ScreenTimeDay.fromJson(legacy)!.missed, 0);
+      final legacy = {
+        ...closedDay(settings, DateTime(2026, 11, 2), 60).toJson(),
+        'amount': 2.0,
+        'missed': 0.4,
+      };
+      final day = ScreenTimeDay.fromJson(legacy)!;
+      expect(day.regainedMinutes, 60);
+      expect(closedDay(settings, DateTime(2026, 11, 2), 60).toJson().containsKey('amount'), isFalse);
     });
 
     test('relu tel qu\'ecrit, et tolerant', () {
-      final settings = configured().copyWith(ratePerHour: 3, reportHour: 22);
+      final settings = configured().copyWith(reportHour: 22);
       final copy = ScreenTimeSettings.fromJson(settings.toJson());
       expect(copy.isConfigured, isTrue);
-      expect(copy.ratePerHour, 3);
       expect(copy.reportHour, 22);
       expect(copy.startDate, DateTime(2026, 11, 2));
       expect(copy.apps.single.label, 'Instagram');
 
-      final broken = ScreenTimeSettings.fromJson({'rate': 'deux', 'apps': 'x'});
-      expect(broken.ratePerHour, 2.0);
+      final broken = ScreenTimeSettings.fromJson({'floor': 'vingt', 'apps': 'x'});
+      expect(broken.floorMinutes, 20);
       expect(broken.isConfigured, isFalse);
     });
 
-    test('un jour fige garde son quota et son gain', () {
+    test('un jour fige garde son quota et sa moyenne', () {
       final settings = configured(baseline: 120);
       final day = closedDay(settings, DateTime(2026, 11, 2), 90);
       final copy = ScreenTimeDay.fromJson(day.toJson())!;
       expect(copy.quotaMinutes, 108);
-      expect(copy.amount, 1.0);
+      expect(copy.baselineMinutes, 120);
+      expect(copy.regainedMinutes, 30);
       expect(copy.underQuota, isTrue);
     });
   });
@@ -190,7 +183,6 @@ void main() {
           closedDay(settings, DateTime(2026, 11, 7), 200),
           closedDay(settings, DateTime(2026, 11, 6), 10),
         ],
-        goals: const [],
         today: today,
       );
       expect(ledger.streak, 2);
@@ -203,66 +195,43 @@ void main() {
           closedDay(settings, DateTime(2026, 11, 9), 60),
           closedDay(settings, DateTime(2026, 11, 7), 60),
         ],
-        goals: const [],
         today: today,
       );
       expect(ledger.streak, 1);
     });
 
-    test('cagnotte, objectifs et heures gagnees', () {
+    test('temps repris, jours tenus et temps de trop', () {
       final ledger = ScreenTimeLedger(
         settings: settings,
         days: [
           closedDay(settings, DateTime(2026, 11, 9), 60),
           closedDay(settings, DateTime(2026, 11, 8), 180),
-        ],
-        goals: [
-          Goal(
-            id: 'g',
-            name: 'Livre',
-            target: 1.5,
-            kind: GoalKind.purchase,
-            icon: GoalIcon.gift,
-            createdAt: DateTime(2026, 11, 2),
-            validatedAt: DateTime(2026, 11, 9),
-          ),
+          closedDay(settings, DateTime(2026, 11, 7), 100),
         ],
         today: today,
       );
-      expect(ledger.totalSaved, 2.0);
-      expect(ledger.balance, 0.5);
-      expect(ledger.hoursSaved, 1.0);
+      // 60 + 0 + 20 minutes reprises sur une moyenne de 120.
+      expect(ledger.regainedMinutes, 80);
+      expect(ledger.regainedBetween(DateTime(2026, 11, 8), DateTime(2026, 11, 9)), 60);
+      expect(ledger.keptDays, 2);
+      expect(ledger.overDays, 1);
+      // Le 8, semaine 0 : quota de 108, 72 minutes de trop.
+      expect(ledger.overMinutes, 72);
+      expect(ledger.overBetween(DateTime(2026, 11, 9), DateTime(2026, 11, 9)), 0);
     });
 
-    test('la case economies loupees additionne les jours au-dessus du quota', () {
-      final ledger = ScreenTimeLedger(
-        settings: settings,
-        days: [
-          closedDay(settings, DateTime(2026, 11, 9), 60),
-          closedDay(settings, DateTime(2026, 11, 8), 180),
-          closedDay(settings, DateTime(2026, 11, 7), 150),
-        ],
-        goals: const [],
-        today: today,
-      );
-      expect(ledger.totalSaved, 2.0);
-      expect(ledger.earningDays, 1);
-      expect(ledger.totalMissed, 0.8);
-      expect(ledger.missedDays, 2);
-    });
-
-    test('aujourd hui, au-dessus du quota : rien a gagner, le quota a perdre', () {
+    test('aujourd hui, au-dessus du quota : du temps de trop, et du temps repris quand meme', () {
       final live = DailyUsage(
         date: today,
         apps: const {insta: AppUsage(seconds: 100 * 60)},
         hourly: List.filled(24, 0),
       );
       final ledger = ScreenTimeLedger(
-          settings: settings, days: const [], goals: const [], today: today, live: live);
+          settings: settings, days: const [], today: today, live: live);
       // Semaine 1 : quota de 97 minutes.
       expect(ledger.todayUnderQuota, isFalse);
-      expect(ledger.todayGain, 0);
-      expect(ledger.todayMissed, 0.77);
+      expect(ledger.todayOver, 3);
+      expect(ledger.todayRegained, 20);
     });
 
     test('moyenne de la semaine et tendance', () {
@@ -274,7 +243,6 @@ void main() {
           // Trop ancien pour la semaine.
           closedDay(settings, DateTime(2026, 10, 1), 600),
         ],
-        goals: const [],
         today: today,
       );
       expect(ledger.weekAverage, 90);
@@ -283,7 +251,7 @@ void main() {
 
     test('le quota de la semaine prochaine', () {
       final ledger = ScreenTimeLedger(
-          settings: settings, days: const [], goals: const [], today: today);
+          settings: settings, days: const [], today: today);
       expect(ledger.todayQuota, 97);
       expect(ledger.nextWeekQuota, 87);
     });
@@ -293,9 +261,9 @@ void main() {
         session(insta, DateTime(2026, 11, 10, 22, 10), const Duration(minutes: 30)),
       ], {insta});
       final ledger = ScreenTimeLedger(
-          settings: settings, days: const [], goals: const [], today: today, live: live);
+          settings: settings, days: const [], today: today, live: live);
       expect(ledger.peakHour, 22);
-      expect(ledger.todayGain, 3.0);
+      expect(ledger.todayRegained, 90);
       expect(ledger.todayUnderQuota, isTrue);
     });
   });

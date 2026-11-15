@@ -4,8 +4,8 @@
     <string name="report_title">Bilan du jour</string>
     <string name="report_minutes">%1$d min</string>
     <string name="report_hours">%1$d h %2$02d</string>
-    <string name="report_under">%1$s aujourd’hui, sous le quota de %2$s · +%3$s</string>
-    <string name="report_over">%1$s aujourd’hui, au-dessus du quota de %2$s · %3$s d’économies loupées</string>
+    <string name="report_under">%1$s aujourd’hui, sous le quota de %2$s · %3$s reprises aux réseaux</string>
+    <string name="report_over">%1$s aujourd’hui, %3$s au-dessus du quota de %2$s</string>
     <plurals name="report_streak">
         <item quantity="one">" · série : %d jour"</item>
         <item quantity="other">" · série : %d jours"</item>
@@ -14,14 +14,12 @@
     <string name="widget_commute_name">Vélo / Voiture ?</string>
     <string name="widget_commute_description">Enregistrez le trajet du jour en un appui</string>
     <string name="widget_goal_name">Objectif</string>
-    <string name="widget_goal_description">Un objectif de vos cagnottes ; touchez pour passer au suivant</string>
+    <string name="widget_goal_description">Ce que le vélo rembourse, et vos paliers ; touchez pour passer au suivant</string>
     <string name="widget_bike">À vélo</string>
     <string name="widget_car">Voiture</string>
     <string name="widget_bike_gain">+%1$s</string>
     <string name="widget_setup">Réglez votre trajet dans iZerak</string>
-    <string name="widget_pot_commute">Cagnotte vélo</string>
-    <string name="widget_pot_free">Temps libre</string>
-    <string name="widget_milestone">Palier</string>
+    <string name="widget_pot_commute">Palier</string>
     <string name="widget_goal_progress">%1$s sur %2$s</string>
     <string name="widget_goal_reached">Atteint</string>
     <string name="widget_goal_position">%1$d/%2$d</string>
@@ -30,19 +28,24 @@
     <string name="widget_open_app">Ouvrir iZerak</string>
     <string name="widget_recorded_bike">✓ À vélo aujourd’hui</string>
     <string name="widget_recorded_car">✓ En voiture aujourd’hui</string>
-    <string name="widget_into_pot">+%1$s dans la cagnotte vélo</string>
-    <string name="widget_into_pot_estimate">≈ +%1$s dans la cagnotte vélo</string>
+    <string name="widget_into_pot">+%1$s d’essence économisée</string>
+    <string name="widget_into_pot_estimate">≈ +%1$s d’essence économisée</string>
     <string name="widget_into_essential">%1$s en coûts indispensables</string>
     <string name="widget_into_missed">%1$s en économies loupées</string>
     <string name="widget_free_name">Temps libre</string>
     <string name="widget_free_description">Votre temps sur les réseaux aujourd’hui, face au quota</string>
     <string name="widget_free_quota">sur %1$s</string>
-    <string name="widget_free_gain">+%1$s</string>
-    <string name="widget_free_missed">%1$s loupés</string>
+    <string name="widget_free_gain">+%1$s reprises</string>
+    <string name="widget_free_missed">%1$s de trop</string>
     <plurals name="widget_free_streak">
         <item quantity="one">Série : %d jour</item>
         <item quantity="other">Série : %d jours</item>
     </plurals>
     <string name="widget_free_setup">Configurez le Temps libre dans iZerak</string>
     <string name="widget_free_access">Autorisez l’accès aux données d’utilisation dans iZerak</string>
+    <string name="widget_pot_payback">Le vélo rembourse</string>
+    <plurals name="widget_payback_name">
+        <item quantity="one">%1$d abonnement sur %2$d</item>
+        <item quantity="other">%1$d abonnements sur %2$d</item>
+    </plurals>
 </resources>

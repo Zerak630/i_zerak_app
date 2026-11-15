@@ -603,8 +603,8 @@ class _DashboardPageState extends State<DashboardPage> {
               Expanded(
                 child: _figure(
                   context,
-                  amount: format.euros(_commute.balance),
-                  label: l10n.commute_pot,
+                  amount: format.euros(_commute.monthTotals(_today.year, _today.month).bike),
+                  label: l10n.home_bike_month,
                   color: scheme.primary,
                 ),
               ),
@@ -645,7 +645,6 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _freeTimeCard(BuildContext context, AppLocalizations l10n, ScreenTimeLedger ledger) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final format = SubscriptionFormat(context);
     final quota = ledger.todayQuota;
     final minutes = ledger.live.minutes;
     final color = ledger.todayUnderQuota ? scheme.primary : scheme.tertiary;
@@ -669,7 +668,7 @@ class _DashboardPageState extends State<DashboardPage> {
               child: Text(l10n.free_today_quota(formatMinutes(l10n, quota)),
                   style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
             ),
-            Text(format.euros(ledger.balance),
+            Text('+ ${formatMinutes(l10n, ledger.regainedMinutes)}',
                 style: theme.textTheme.labelLarge?.copyWith(color: scheme.primary)),
           ]),
           const SizedBox(height: 8),

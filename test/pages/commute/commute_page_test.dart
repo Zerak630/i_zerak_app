@@ -143,7 +143,7 @@ void main() {
     expect(find.text('Flemme'), findsNothing);
   });
 
-  testWidgets('la carte de cagnotte mene aux objectifs quand on peut y aller', (tester) async {
+  testWidgets('la carte des economies mene aux objectifs quand on peut y aller', (tester) async {
     store = MemoryCommute(
       settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2),
       goals: [
@@ -173,7 +173,7 @@ void main() {
     )));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('1 objectif en cours'));
+    await tester.tap(find.text('Ce que le vélo rembourse'));
     await tester.pumpAndSettle();
 
     expect(opened, 1);
@@ -182,7 +182,7 @@ void main() {
   testWidgets('sans moyen d y aller, la ligne des objectifs disparait', (tester) async {
     await open(tester);
 
-    expect(find.textContaining('objectif'), findsNothing);
+    expect(find.text('Ce que le vélo rembourse'), findsNothing);
   });
 
   testWidgets('la serie en cours mene a la regularite', (tester) async {

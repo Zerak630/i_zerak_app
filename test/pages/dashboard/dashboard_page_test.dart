@@ -114,7 +114,7 @@ void main() {
     expect(find.textContaining('vendredi 18 septembre'), findsOneWidget);
     expect(find.text('À vélo'), findsOneWidget);
     expect(find.text('En voiture'), findsOneWidget);
-    expect(find.text('Cagnotte vélo'), findsOneWidget);
+    expect(find.text('à vélo ce mois-ci'), findsOneWidget);
     expect(find.text('izerak'), findsOneWidget);
     expect(find.textContaining('47 °C'), findsOneWidget);
     expect(find.textContaining('61 %'), findsOneWidget);
@@ -130,7 +130,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
     final day = tester.getTopLeft(find.text('À vélo'));
-    final money = tester.getTopLeft(find.text('Cagnotte vélo'));
+    final money = tester.getTopLeft(find.text('à vélo ce mois-ci'));
     final pi = tester.getTopLeft(find.textContaining('47 °C'));
     // Cote a cote, de gauche a droite, dans l'ordre du telephone.
     expect(day.dx, lessThan(money.dx));
@@ -146,7 +146,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
     final day = tester.getTopLeft(find.text('À vélo'));
-    final money = tester.getTopLeft(find.text('Cagnotte vélo'));
+    final money = tester.getTopLeft(find.text('à vélo ce mois-ci'));
     final pi = tester.getTopLeft(find.textContaining('47 °C'));
     // La journee et l'argent a gauche, l'un sous l'autre ; le Pi a droite.
     expect(day.dx, lessThan(450));
@@ -180,7 +180,6 @@ void main() {
     final ledger = ScreenTimeLedger(
       settings: settings,
       days: const [],
-      goals: const [],
       today: now,
       live: DailyUsage(
         date: now,
@@ -200,7 +199,7 @@ void main() {
 
     expect(find.text('Raspberry Pi injoignable'), findsOneWidget);
     // Les sources locales et les transferts restent affiches.
-    expect(find.text('Cagnotte vélo'), findsOneWidget);
+    expect(find.text('à vélo ce mois-ci'), findsOneWidget);
     expect(find.text('Le Comte de Monte-Cristo'), findsOneWidget);
   });
 

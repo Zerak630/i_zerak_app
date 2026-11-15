@@ -23,13 +23,14 @@ CommuteDay _car(int day, CarBucket bucket, {double amount = 1.09}) => CommuteDay
       bucket: bucket,
     );
 
-Goal _goal(String id, double target, GoalKind kind, {DateTime? validatedAt}) => Goal(
+Goal _goal(String id, double target, GoalKind kind, {DateTime? validatedAt, DateTime? since}) => Goal(
       id: id,
       name: id,
       target: target,
       kind: kind,
       icon: GoalIcon.star,
       createdAt: DateTime(2026, 9, 1),
+      since: since,
       validatedAt: validatedAt,
     );
 
@@ -64,60 +65,57 @@ void main() {
     });
   });
 
-  group('cagnotte', () {
-    test('seuls les jours a velo l alimentent', () {
+  group('economies', () {
+    test('seuls les jours a velo les alimentent', () {
       final ledger = CommuteLedger(
           [_bike(1), _bike(2), _car(3, CarBucket.essential), _car(4, CarBucket.missed)], const []);
 
       expect(ledger.totalSaved, 2.18);
-      expect(ledger.balance, 2.18);
       expect(ledger.totals.essential, 1.09);
       expect(ledger.totals.missed, 1.09);
       expect(ledger.totals.bikeDays, 2);
     });
 
     test('les sommes ne derivent pas avec les arrondis', () {
-      // Cent additions de 0,1 en double donnent 9,99999… : la cagnotte doit
+      // Cent additions de 0,1 en double donnent 9,99999… : le total doit
       // afficher 10,00 €.
       final ledger = CommuteLedger([for (var i = 1; i <= 100; i++) _bike(1 + i % 28, amount: 0.1)], const []);
       expect(ledger.totalSaved, 10.0);
     });
 
-    test('un achat valide sort du solde, pas du total economise', () {
+    test('valider un objectif ne retire rien : il n y a plus de cagnotte a depenser', () {
       final ledger = CommuteLedger(
         [for (var d = 1; d <= 10; d++) _bike(d, amount: 5)],
-        [_goal('sacoche', 35, GoalKind.purchase, validatedAt: DateTime(2026, 9, 15))],
+        [
+          _goal('sacoche', 35, GoalKind.purchase, validatedAt: DateTime(2026, 9, 15)),
+          _goal('velo', 450, GoalKind.milestone),
+        ],
       );
 
       expect(ledger.totalSaved, 50);
-      expect(ledger.spent, 35);
-      expect(ledger.balance, 15);
-    });
-
-    test('un palier valide ne coute rien', () {
-      final ledger = CommuteLedger(
-        [for (var d = 1; d <= 10; d++) _bike(d, amount: 5)],
-        [_goal('palier', 40, GoalKind.milestone, validatedAt: DateTime(2026, 9, 15))],
-      );
-
-      expect(ledger.spent, 0);
-      expect(ledger.balance, 50);
+      expect(ledger.progressOf(ledger.activeGoals.single).current, 50);
     });
   });
 
   group('objectifs', () {
     final days = [for (var d = 1; d <= 10; d++) _bike(d, amount: 4)]; // 40 €
 
-    test('un achat avance avec le solde, un palier avec le total', () {
-      final bought = _goal('casque', 30, GoalKind.purchase, validatedAt: DateTime(2026, 9, 12));
-      final bag = _goal('sacoche', 35, GoalKind.purchase);
+    test('un palier compte depuis le debut, ou depuis sa date d achat', () {
       final bike = _goal('velo', 450, GoalKind.milestone);
-      final ledger = CommuteLedger(days, [bought, bag, bike]);
+      final phone = _goal('telephone', 300, GoalKind.milestone, since: DateTime(2026, 9, 7));
+      final ledger = CommuteLedger(days, [bike, phone]);
 
-      // Le casque paye, il reste 10 € : la sacoche recule, le palier non.
-      expect(ledger.progressOf(bag).current, 10);
-      expect(ledger.progressOf(bag).reached, isFalse);
       expect(ledger.progressOf(bike).current, 40);
+      // Du 7 au 10 inclus : quatre trajets.
+      expect(ledger.progressOf(phone).current, 16);
+    });
+
+    test('un ancien achat encore en cours se lit comme un palier', () {
+      final bag = _goal('sacoche', 35, GoalKind.purchase);
+      final ledger = CommuteLedger(days, [bag]);
+
+      expect(ledger.progressOf(bag).current, 40);
+      expect(ledger.progressOf(bag).reached, isTrue);
     });
 
     test('atteint au centime pres, et le reste ne passe jamais sous zero', () {
@@ -197,8 +195,10 @@ void main() {
     });
 
     test('un objectif se relit a l identique', () {
-      final goal = _goal('velo', 450, GoalKind.milestone, validatedAt: DateTime(2026, 9, 20, 18));
+      final goal = _goal('velo', 450, GoalKind.milestone,
+          validatedAt: DateTime(2026, 9, 20, 18), since: DateTime(2026, 3, 2));
       final read = Goal.fromJson(goal.toJson())!;
+      expect(read.since, DateTime(2026, 3, 2));
 
       expect(read.kind, GoalKind.milestone);
       expect(read.target, 450);

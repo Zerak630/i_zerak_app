@@ -39,14 +39,14 @@ void main() {
     final ledger = await service().sync();
 
     expect(store.days.keys, unorderedEquals(['2026-11-08', '2026-11-09']));
-    expect(ledger.dayOn(DateTime(2026, 11, 9))!.amount, 2.0);
-    expect(ledger.dayOn(DateTime(2026, 11, 8))!.amount, 0);
-    expect(ledger.dayOn(DateTime(2026, 11, 8))!.missed, 0.4,
-        reason: '150 min au-dessus du quota de 108 : le gain du quota est loupe');
+    expect(ledger.dayOn(DateTime(2026, 11, 9))!.regainedMinutes, 60);
+    expect(ledger.dayOn(DateTime(2026, 11, 8))!.regainedMinutes, 0);
+    expect(ledger.dayOn(DateTime(2026, 11, 8))!.overMinutes, 42,
+        reason: '150 min pour un quota de 108');
     expect(ledger.live.minutes, 20);
     // Les jours sans trace ne sont pas comptes comme des journees parfaites.
     expect(ledger.dayOn(DateTime(2026, 11, 7)), isNull);
-    expect(ledger.totalSaved, 2.0);
+    expect(ledger.regainedMinutes, 60);
   });
 
   test('une journee deja figee n\'est plus relue', () async {
@@ -128,14 +128,14 @@ void main() {
   });
 
   test('la mise en route fige la moyenne et le premier jour', () async {
-    store.settings = const ScreenTimeSettings(ratePerHour: 3);
+    store.settings = const ScreenTimeSettings(reportHour: 22);
     final settings = await service().start(
         const [TrackedApp(package: insta, label: 'Instagram')], (minutes: 95.5, days: 7));
 
     expect(settings.isConfigured, isTrue);
     expect(settings.baselineMinutes, 95.5);
     expect(settings.startDate, DateTime(2026, 11, 10));
-    expect(settings.ratePerHour, 3, reason: 'les reglages deja choisis sont gardes');
+    expect(settings.reportHour, 22, reason: 'les reglages deja choisis sont gardes');
     expect(store.settings.isConfigured, isTrue);
   });
 

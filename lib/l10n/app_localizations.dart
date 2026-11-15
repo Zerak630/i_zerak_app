@@ -1211,7 +1211,7 @@ abstract class AppLocalizations {
   /// No description provided for @commute_pot.
   ///
   /// In en, this message translates to:
-  /// **'Bike savings'**
+  /// **'Fuel saved'**
   String get commute_pot;
 
   /// No description provided for @commute_bike_trips.
@@ -1225,12 +1225,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No bike trip yet'**
   String get commute_no_bike_trip;
-
-  /// No description provided for @commute_saved_and_spent.
-  ///
-  /// In en, this message translates to:
-  /// **'{total} saved · {spent} spent'**
-  String commute_saved_and_spent(String total, String spent);
 
   /// No description provided for @commute_last_14_days.
   ///
@@ -1265,7 +1259,7 @@ abstract class AppLocalizations {
   /// No description provided for @commute_by_bike_gain.
   ///
   /// In en, this message translates to:
-  /// **'+ {amount} saved'**
+  /// **'+ {amount} of fuel saved'**
   String commute_by_bike_gain(String amount);
 
   /// No description provided for @commute_by_car.
@@ -1307,7 +1301,7 @@ abstract class AppLocalizations {
   /// No description provided for @commute_snack_bike.
   ///
   /// In en, this message translates to:
-  /// **'Bike recorded — {amount} saved'**
+  /// **'Bike trip saved — {amount} of fuel saved'**
   String commute_snack_bike(String amount);
 
   /// No description provided for @commute_snack_car.
@@ -1385,7 +1379,7 @@ abstract class AppLocalizations {
   /// No description provided for @commute_setup_hint.
   ///
   /// In en, this message translates to:
-  /// **'Enter the round-trip distance: every bike trip will then feed the savings.'**
+  /// **'Enter the round-trip distance: every bike trip will count the fuel saved.'**
   String get commute_setup_hint;
 
   /// No description provided for @commute_setup_action.
@@ -1809,47 +1803,17 @@ abstract class AppLocalizations {
   /// **'Measured on total savings: nothing to spend'**
   String get goal_milestone_hint;
 
-  /// No description provided for @goal_spend_validate.
-  ///
-  /// In en, this message translates to:
-  /// **'Spend {amount} and validate'**
-  String goal_spend_validate(String amount);
-
   /// No description provided for @goal_validate_milestone.
   ///
   /// In en, this message translates to:
-  /// **'Validate the milestone'**
+  /// **'Mark as paid off'**
   String get goal_validate_milestone;
 
   /// No description provided for @goal_new.
   ///
   /// In en, this message translates to:
-  /// **'New goal'**
+  /// **'New milestone'**
   String get goal_new;
-
-  /// No description provided for @goal_kind_purchase.
-  ///
-  /// In en, this message translates to:
-  /// **'Purchase'**
-  String get goal_kind_purchase;
-
-  /// No description provided for @goal_kind_purchase_hint.
-  ///
-  /// In en, this message translates to:
-  /// **'paid with the savings'**
-  String get goal_kind_purchase_hint;
-
-  /// No description provided for @goal_kind_milestone.
-  ///
-  /// In en, this message translates to:
-  /// **'Milestone'**
-  String get goal_kind_milestone;
-
-  /// No description provided for @goal_kind_milestone_hint.
-  ///
-  /// In en, this message translates to:
-  /// **'reached, nothing spent'**
-  String get goal_kind_milestone_hint;
 
   /// No description provided for @goal_name.
   ///
@@ -1860,7 +1824,7 @@ abstract class AppLocalizations {
   /// No description provided for @goal_amount.
   ///
   /// In en, this message translates to:
-  /// **'Amount'**
+  /// **'Purchase price'**
   String get goal_amount;
 
   /// No description provided for @goal_icon.
@@ -1868,12 +1832,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Icon'**
   String get goal_icon;
-
-  /// No description provided for @goal_missing.
-  ///
-  /// In en, this message translates to:
-  /// **'{amount} to go'**
-  String goal_missing(String amount);
 
   /// No description provided for @goal_missing_trips.
   ///
@@ -1896,44 +1854,8 @@ abstract class AppLocalizations {
   /// No description provided for @goal_validate_title.
   ///
   /// In en, this message translates to:
-  /// **'Validate “{name}”?'**
+  /// **'“{name}” has paid off'**
   String goal_validate_title(String name);
-
-  /// No description provided for @goal_validate_purchase_detail.
-  ///
-  /// In en, this message translates to:
-  /// **'{amount} leave the savings. The goal moves to the goals reached.'**
-  String goal_validate_purchase_detail(String amount);
-
-  /// No description provided for @goal_validate_milestone_detail.
-  ///
-  /// In en, this message translates to:
-  /// **'Nothing is spent: the milestone moves to the goals reached.'**
-  String get goal_validate_milestone_detail;
-
-  /// No description provided for @goal_row_pot.
-  ///
-  /// In en, this message translates to:
-  /// **'Savings'**
-  String get goal_row_pot;
-
-  /// No description provided for @goal_row_saved.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved in total'**
-  String get goal_row_saved;
-
-  /// No description provided for @goal_unchanged.
-  ///
-  /// In en, this message translates to:
-  /// **'unchanged'**
-  String get goal_unchanged;
-
-  /// No description provided for @goal_spend.
-  ///
-  /// In en, this message translates to:
-  /// **'Spend {amount}'**
-  String goal_spend(String amount);
 
   /// No description provided for @goal_delete.
   ///
@@ -2541,28 +2463,22 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 trip} other{{count} trips}}'**
   String goals_forecast_trips(int count);
 
-  /// No description provided for @goals_shared_pot.
-  ///
-  /// In en, this message translates to:
-  /// **'Purchases all draw on the same savings: validating one pushes the others back.'**
-  String get goals_shared_pot;
-
   /// No description provided for @goals_reached_section.
   ///
   /// In en, this message translates to:
-  /// **'Already reached'**
+  /// **'Already paid off'**
   String get goals_reached_section;
 
   /// No description provided for @goals_empty.
   ///
   /// In en, this message translates to:
-  /// **'No goal yet'**
+  /// **'No milestone yet'**
   String get goals_empty;
 
   /// No description provided for @goals_empty_hint.
   ///
   /// In en, this message translates to:
-  /// **'A goal turns the savings into a date: “the helmet, around 10 April”.'**
+  /// **'“The bike, paid off around 10 April”: a milestone puts a date on your savings.'**
   String get goals_empty_hint;
 
   /// No description provided for @goals_active.
@@ -2574,7 +2490,7 @@ abstract class AppLocalizations {
   /// No description provided for @goals_reached_count.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 goal reached} other{{count} goals reached}}'**
+  /// **'{count, plural, =1{1 milestone paid off} other{{count} milestones paid off}}'**
   String goals_reached_count(int count);
 
   /// No description provided for @regularity_title.
@@ -2979,18 +2895,6 @@ abstract class AppLocalizations {
   /// **'{hours} h {minutes}'**
   String free_hours(int hours, String minutes);
 
-  /// No description provided for @free_per_hour.
-  ///
-  /// In en, this message translates to:
-  /// **'{amount}/h'**
-  String free_per_hour(String amount);
-
-  /// No description provided for @free_per_hour_suffix.
-  ///
-  /// In en, this message translates to:
-  /// **'€/h'**
-  String get free_per_hour_suffix;
-
   /// No description provided for @free_unsupported_title.
   ///
   /// In en, this message translates to:
@@ -3012,7 +2916,7 @@ abstract class AppLocalizations {
   /// No description provided for @free_intro_body.
   ///
   /// In en, this message translates to:
-  /// **'iZerak measures the time you spend on social media, sets a limit that drops every week, and turns every hour won back into money for your goals.'**
+  /// **'iZerak measures time spent on social media, sets a limit that drops every week, and counts the time you take back.'**
   String get free_intro_body;
 
   /// No description provided for @free_intro_action.
@@ -3153,41 +3057,11 @@ abstract class AppLocalizations {
   /// **'{first} and {count, plural, =1{1 other} other{{count} others}}'**
   String free_apps_summary(String first, int count);
 
-  /// No description provided for @free_pot.
-  ///
-  /// In en, this message translates to:
-  /// **'Free time pot'**
-  String get free_pot;
-
-  /// No description provided for @free_pot_first_day.
-  ///
-  /// In en, this message translates to:
-  /// **'First gain tomorrow morning, once the day is over'**
-  String get free_pot_first_day;
-
-  /// No description provided for @free_pot_hours.
-  ///
-  /// In en, this message translates to:
-  /// **'{hours} won back since {date}'**
-  String free_pot_hours(String hours, String date);
-
   /// No description provided for @free_last_14_days.
   ///
   /// In en, this message translates to:
   /// **'Last 14 days'**
   String get free_last_14_days;
-
-  /// No description provided for @free_goal_remaining.
-  ///
-  /// In en, this message translates to:
-  /// **'{amount} to go — about {hours} h away from social media'**
-  String free_goal_remaining(String amount, String hours);
-
-  /// No description provided for @free_goal_missing_hours.
-  ///
-  /// In en, this message translates to:
-  /// **'About {hours} h away from social media, at {rate} an hour.'**
-  String free_goal_missing_hours(String hours, String rate);
 
   /// No description provided for @free_access_lost.
   ///
@@ -3198,7 +3072,7 @@ abstract class AppLocalizations {
   /// No description provided for @free_access_lost_hint.
   ///
   /// In en, this message translates to:
-  /// **'Without it, iZerak can no longer measure your time: the pot is on hold.'**
+  /// **'Without it, iZerak can no longer measure your time: the count is paused.'**
   String get free_access_lost_hint;
 
   /// No description provided for @free_today_quota.
@@ -3230,12 +3104,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =0{} =1{1 open} other{{count} opens}}'**
   String free_opens_short(int count);
-
-  /// No description provided for @free_today_gain.
-  ///
-  /// In en, this message translates to:
-  /// **'if the day ended now'**
-  String get free_today_gain;
 
   /// No description provided for @free_week_title.
   ///
@@ -3342,7 +3210,7 @@ abstract class AppLocalizations {
   /// No description provided for @free_settings_restart_confirm.
   ///
   /// In en, this message translates to:
-  /// **'The limit will start again from week one. The pot, goals and history are kept.'**
+  /// **'The limit will restart from week one. History is kept.'**
   String get free_settings_restart_confirm;
 
   /// No description provided for @free_settings_restart_action.
@@ -3375,24 +3243,6 @@ abstract class AppLocalizations {
   /// **'The limit never goes below this'**
   String get free_settings_floor_hint;
 
-  /// No description provided for @free_settings_pot.
-  ///
-  /// In en, this message translates to:
-  /// **'Pot'**
-  String get free_settings_pot;
-
-  /// No description provided for @free_settings_rate.
-  ///
-  /// In en, this message translates to:
-  /// **'Value of an hour won back'**
-  String get free_settings_rate;
-
-  /// No description provided for @free_settings_rate_hint.
-  ///
-  /// In en, this message translates to:
-  /// **'Compared with your starting average'**
-  String get free_settings_rate_hint;
-
   /// No description provided for @free_settings_report.
   ///
   /// In en, this message translates to:
@@ -3408,7 +3258,7 @@ abstract class AppLocalizations {
   /// No description provided for @free_settings_report_hint.
   ///
   /// In en, this message translates to:
-  /// **'A notification with today\'s time, the gain and your streak'**
+  /// **'A notification with today’s time, the time taken back and your streak'**
   String get free_settings_report_hint;
 
   /// No description provided for @free_settings_report_time.
@@ -3417,17 +3267,215 @@ abstract class AppLocalizations {
   /// **'Summary time'**
   String get free_settings_report_time;
 
-  /// No description provided for @free_today_missed.
+  /// No description provided for @payback_title.
   ///
   /// In en, this message translates to:
-  /// **'missed if the day ended now'**
-  String get free_today_missed;
+  /// **'What the bike pays back · {month}'**
+  String payback_title(String month);
 
-  /// No description provided for @free_kept.
+  /// No description provided for @payback_saved.
   ///
   /// In en, this message translates to:
-  /// **'Earned on days kept'**
-  String get free_kept;
+  /// **'{days, plural, =0{of fuel saved — no bike trip yet} =1{of fuel saved in 1 bike trip} other{of fuel saved in {days} bike trips}}'**
+  String payback_saved(int days);
+
+  /// No description provided for @payback_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{paid, plural, =0{No subscription paid back out of {total}} =1{1 subscription paid back out of {total}} other{{paid} subscriptions paid back out of {total}}}'**
+  String payback_count(int paid, int total);
+
+  /// No description provided for @payback_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'{covered} of {total}'**
+  String payback_amount(String covered, String total);
+
+  /// No description provided for @payback_next_trips.
+  ///
+  /// In en, this message translates to:
+  /// **'{trips, plural, =1{1 more bike trip to pay back {name}} other{{trips} more bike trips to pay back {name}}}'**
+  String payback_next_trips(int trips, String name);
+
+  /// No description provided for @payback_next_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} more to pay back {name}'**
+  String payback_next_amount(String amount, String name);
+
+  /// No description provided for @payback_surplus.
+  ///
+  /// In en, this message translates to:
+  /// **'All paid back, plus {amount} on top.'**
+  String payback_surplus(String amount);
+
+  /// No description provided for @payback_no_subscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your subscriptions in the Subscriptions tab: every bike trip will pay part of them back.'**
+  String get payback_no_subscription;
+
+  /// No description provided for @payback_all_excluded.
+  ///
+  /// In en, this message translates to:
+  /// **'No subscription chosen.'**
+  String get payback_all_excluded;
+
+  /// No description provided for @payback_choose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose subscriptions'**
+  String get payback_choose;
+
+  /// No description provided for @payback_choose_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Untick what the bike shouldn’t pay back, such as rent or insurance.'**
+  String get payback_choose_hint;
+
+  /// No description provided for @payback_per_month.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} a month'**
+  String payback_per_month(String amount);
+
+  /// No description provided for @payback_history.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous months'**
+  String get payback_history;
+
+  /// No description provided for @payback_history_row.
+  ///
+  /// In en, this message translates to:
+  /// **'{paid} of {total}'**
+  String payback_history_row(int paid, int total);
+
+  /// No description provided for @goals_milestones.
+  ///
+  /// In en, this message translates to:
+  /// **'Big purchases to pay off'**
+  String get goals_milestones;
+
+  /// No description provided for @goals_milestones_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel savings add up until they cover the price: the bike, a phone, sports gear…'**
+  String get goals_milestones_hint;
+
+  /// No description provided for @goal_new_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Milestone'**
+  String get goal_new_short;
+
+  /// No description provided for @goal_new_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'A purchase that cost a lot, which your savings will eventually pay off.'**
+  String get goal_new_hint;
+
+  /// No description provided for @goal_since.
+  ///
+  /// In en, this message translates to:
+  /// **'Count savings'**
+  String get goal_since;
+
+  /// No description provided for @goal_since_start.
+  ///
+  /// In en, this message translates to:
+  /// **'From the start'**
+  String get goal_since_start;
+
+  /// No description provided for @goal_since_purchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Since purchase…'**
+  String get goal_since_purchase;
+
+  /// No description provided for @goal_since_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'A bike you already had counts from the first trip; a phone bought yesterday, from yesterday.'**
+  String get goal_since_hint;
+
+  /// No description provided for @goal_preview.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} already saved, {missing} to go'**
+  String goal_preview(String current, String missing);
+
+  /// No description provided for @goal_counted_since.
+  ///
+  /// In en, this message translates to:
+  /// **'counted since {date}'**
+  String goal_counted_since(String date);
+
+  /// No description provided for @goal_validate_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} saved for a {target} purchase. The milestone joins those already reached; nothing is spent.'**
+  String goal_validate_detail(String current, String target);
+
+  /// No description provided for @payback_link.
+  ///
+  /// In en, this message translates to:
+  /// **'What the bike pays back'**
+  String get payback_link;
+
+  /// No description provided for @home_bike_month.
+  ///
+  /// In en, this message translates to:
+  /// **'by bike this month'**
+  String get home_bike_month;
+
+  /// No description provided for @free_regained_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Time taken back from social media'**
+  String get free_regained_title;
+
+  /// No description provided for @free_regained_first_day.
+  ///
+  /// In en, this message translates to:
+  /// **'First count tomorrow morning, once the day is over'**
+  String get free_regained_first_day;
+
+  /// No description provided for @free_regained_since.
+  ///
+  /// In en, this message translates to:
+  /// **'since {date} · {week} this week'**
+  String free_regained_since(String date, String week);
+
+  /// No description provided for @free_today_regained.
+  ///
+  /// In en, this message translates to:
+  /// **'taken back if the day ended now'**
+  String get free_today_regained;
+
+  /// No description provided for @free_today_over_label.
+  ///
+  /// In en, this message translates to:
+  /// **'over if the day ended now'**
+  String get free_today_over_label;
+
+  /// No description provided for @free_kept_days.
+  ///
+  /// In en, this message translates to:
+  /// **'Days kept'**
+  String get free_kept_days;
+
+  /// No description provided for @free_kept_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{out of 1 measured day} other{out of {count} measured days}}'**
+  String free_kept_detail(int count);
+
+  /// No description provided for @free_over_total.
+  ///
+  /// In en, this message translates to:
+  /// **'Time over the limit'**
+  String get free_over_total;
 }
 
 class _AppLocalizationsDelegate

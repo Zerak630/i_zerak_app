@@ -7,6 +7,7 @@ import 'package:i_zerak_app/pages/goals/goals_page.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
 
 import '../../__mocks__/commute_fakes.dart';
+import '../../__mocks__/subscription_fakes.dart';
 
 Widget wrap(Widget child) => MaterialApp(
       locale: const Locale('fr'),
@@ -19,6 +20,7 @@ void main() {
   final now = DateTime(2026, 9, 18, 8, 30);
   late MemoryCommute store;
   late FakeGasService gas;
+  late MemorySubscriptions subscriptions;
 
   CommuteDay bike(DateTime date, double amount) => CommuteDay(
         date: date,
@@ -34,17 +36,19 @@ void main() {
           bike(DateTime(2026, 9, 18).subtract(Duration(days: back)), amount),
       ];
 
-  Goal purchase(String id, String name, double target) => Goal(
+  Goal milestone(String id, String name, double target, {DateTime? since}) => Goal(
         id: id,
         name: name,
         target: target,
-        kind: GoalKind.purchase,
-        icon: GoalIcon.bag,
+        kind: GoalKind.milestone,
+        icon: GoalIcon.bike,
         createdAt: DateTime(2026, 9, 1),
+        since: since,
       );
 
   GoalsPage page() => GoalsPage(
         store: store,
+        subscriptions: subscriptions,
         prices: CommutePriceService(
           gas: gas,
           favorites: StaticFavorites([(id: 1, label: 'Rue A, Saumur', customName: 'Leclerc')]),
@@ -57,6 +61,7 @@ void main() {
   setUp(() {
     store = MemoryCommute(settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2));
     gas = FakeGasService(stations: [station(1, {FuelType.gazole: 1.689})]);
+    subscriptions = MemorySubscriptions();
   });
 
   Future<void> open(WidgetTester tester) async {
@@ -66,17 +71,62 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('sans objectif, la page dit a quoi ils servent', (tester) async {
+  testWidgets('sans palier ni abonnement, la page dit a quoi ils servent', (tester) async {
     await open(tester);
 
-    expect(find.text('Aucun objectif en cours'), findsOneWidget);
-    expect(find.textContaining('donne une date à la cagnotte'), findsOneWidget);
+    expect(find.text('Aucun palier pour l’instant'), findsOneWidget);
+    expect(find.textContaining('donne une date à vos économies'), findsOneWidget);
+    expect(find.textContaining('Ajoutez vos abonnements'), findsOneWidget);
+  });
+
+  testWidgets('le mois en cours rembourse les abonnements, du moins cher au plus cher',
+      (tester) async {
+    subscriptions = MemorySubscriptions([sub('Netflix', 13.49), sub('Spotify', 10.99), sub('Forfait', 20)]);
+    store = MemoryCommute(
+      settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2),
+      // 1er au 18 septembre : 18 trajets a 1,50 €, 27 €. Aout ne compte pas.
+      days: [
+        for (var d = 1; d <= 18; d++) bike(DateTime(2026, 9, d), 1.5),
+        bike(DateTime(2026, 8, 30), 40),
+      ],
+    );
+    await open(tester);
+
+    expect(find.textContaining('CE QUE LE VÉLO REMBOURSE · SEPTEMBRE 2026'), findsOneWidget);
+    expect(find.textContaining('27,00'), findsWidgets);
+    expect(find.text('2 abonnements remboursés sur 3'), findsOneWidget);
+    // 27 - 10,99 - 13,49 = 2,52 sur le forfait : encore 17,48 €, soit 17
+    // trajets a 1,09 €.
+    expect(find.text('Encore 17 trajets à vélo pour rembourser Forfait'), findsOneWidget);
+    // Aout a son propre resume, plus bas.
+    expect(find.text('LES MOIS PRÉCÉDENTS'), findsOneWidget);
+  });
+
+  testWidgets('un abonnement decoche n est plus rembourse', (tester) async {
+    subscriptions = MemorySubscriptions([sub('Spotify', 10.99), sub('Loyer', 700)]);
+    store = MemoryCommute(
+      settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2),
+      days: history(3, amount: 5),
+    );
+    await open(tester);
+    expect(find.text('1 abonnement remboursé sur 2'), findsOneWidget);
+
+    await tester.tap(find.text('Choisir les abonnements'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(CheckboxListTile, 'Loyer'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Enregistrer'));
+    await tester.pumpAndSettle();
+
+    expect(store.settings.paybackExcluded, {'Loyer'});
+    expect(find.text('1 abonnement remboursé sur 1'), findsOneWidget);
   });
 
   testWidgets('le rythme se mesure et s affiche par mois', (tester) async {
     store = MemoryCommute(
       settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2),
       days: history(30),
+      goals: [milestone('velo', 'Vélo', 450)],
     );
     await open(tester);
 
@@ -95,20 +145,21 @@ void main() {
         for (var back = 56; back >= 0; back -= 7)
           bike(DateTime(2026, 9, 18).subtract(Duration(days: back)), 1),
       ],
+      goals: [milestone('velo', 'Vélo', 450)],
     );
     await open(tester);
 
     // Un peu plus d'un trajet par semaine : le nom reste au singulier, comme
     // le veut le francais en dessous de deux.
     expect(find.textContaining('trajet à vélo par semaine'), findsOneWidget);
-    expect(find.textContaining('trajets à vélo'), findsNothing);
+    expect(find.textContaining('trajets à vélo par semaine'), findsNothing);
   });
 
   testWidgets('un objectif en cours annonce une date', (tester) async {
     store = MemoryCommute(
       settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2),
       days: history(30),
-      goals: [purchase('casque', 'Casque', 89)],
+      goals: [milestone('casque', 'Casque', 89)],
     );
     await open(tester);
 
@@ -142,7 +193,7 @@ void main() {
     store = MemoryCommute(
       settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2),
       days: history(5, amount: 10),
-      goals: [purchase('casque', 'Casque', 89)],
+      goals: [milestone('casque', 'Casque', 89)],
     );
     await open(tester);
 
@@ -163,7 +214,7 @@ void main() {
         for (var back = 55; back >= 0; back -= 7)
           bike(DateTime(2026, 9, 18).subtract(Duration(days: back)), 1),
       ],
-      goals: [purchase('casque', 'Casque', 200)],
+      goals: [milestone('casque', 'Casque', 200)],
     );
     await open(tester);
 
@@ -177,52 +228,64 @@ void main() {
     expect(recent, isNot(all));
   });
 
-  testWidgets('un achat atteint se valide en depensant son montant', (tester) async {
+  testWidgets('un palier compte depuis sa date d achat', (tester) async {
     store = MemoryCommute(
       settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2),
-      days: [for (var d = 1; d <= 5; d++) bike(DateTime(2026, 9, d), 10)],
-      goals: [purchase('sacoche', 'Sacoche', 35)],
+      days: history(30),
+      goals: [milestone('tel', 'Téléphone', 300, since: DateTime(2026, 9, 9))],
     );
     await open(tester);
 
-    await tester.tap(find.textContaining('et valider'));
+    // Du 9 au 18 inclus : dix euros.
+    expect(find.textContaining(RegExp('10,00.*sur.*300,00')), findsOneWidget);
+    expect(find.textContaining('compté depuis le'), findsOneWidget);
+  });
+
+  testWidgets('un palier atteint se marque comme rentabilise, sans rien depenser', (tester) async {
+    store = MemoryCommute(
+      settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2),
+      days: [for (var d = 1; d <= 5; d++) bike(DateTime(2026, 9, d), 10)],
+      goals: [milestone('sacoche', 'Sacoche', 35)],
+    );
+    await open(tester);
+
+    await tester.tap(find.text('Marquer comme rentabilisé'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Valider « Sacoche » ?'), findsOneWidget);
-    // Deux boutons portent ce montant : celui de la carte, et celui de la
-    // feuille ouverte par-dessus. Le dernier de l'arbre est le second.
+    expect(find.text('« Sacoche » est rentabilisé'), findsOneWidget);
     await tester.tap(find
         .ancestor(
-          of: find.textContaining('Dépenser 35,00'),
+          of: find.text('Marquer comme rentabilisé'),
           matching: find.byType(FilledButton),
         )
         .last);
     await tester.pumpAndSettle();
 
     expect(store.goals['sacoche']!.isValidated, isTrue);
+    expect(find.text('DÉJÀ RENTABILISÉS'), findsOneWidget);
   });
 
-  testWidgets('deux achats se partagent la cagnotte, et la page le dit', (tester) async {
+  testWidgets('un nouveau palier se cree depuis la page', (tester) async {
     store = MemoryCommute(
       settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2),
-      days: history(30),
-      goals: [purchase('casque', 'Casque', 89), purchase('sacoche', 'Sacoche', 35)],
+      days: history(10),
     );
     await open(tester);
 
-    expect(find.text('2 objectifs en cours'), findsOneWidget);
-    expect(find.textContaining('la même cagnotte'), findsOneWidget);
-  });
+    await tester.tap(find.text('Nouveau palier'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextFormField, 'Nom'), 'Vélo');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Prix d’achat'), '450');
+    await tester.pumpAndSettle();
+    expect(find.textContaining('il manque'), findsOneWidget);
+    await tester.tap(find.text('Créer l’objectif'));
+    await tester.pumpAndSettle();
 
-  testWidgets('un seul achat ne declenche pas l avertissement', (tester) async {
-    store = MemoryCommute(
-      settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2),
-      days: history(30),
-      goals: [purchase('casque', 'Casque', 89)],
-    );
-    await open(tester);
-
-    expect(find.textContaining('la même cagnotte'), findsNothing);
+    final goal = store.goals.values.single;
+    expect(goal.kind, GoalKind.milestone);
+    expect(goal.target, 450);
+    expect(goal.since, isNull);
+    expect(find.text('Vélo'), findsOneWidget);
   });
 
   testWidgets('les objectifs valides ont leur section', (tester) async {
@@ -243,8 +306,8 @@ void main() {
     );
     await open(tester);
 
-    expect(find.text('DÉJÀ FRANCHIS'), findsOneWidget);
+    expect(find.text('DÉJÀ RENTABILISÉS'), findsOneWidget);
     expect(find.text('Antivol pliant'), findsOneWidget);
-    expect(find.text('Aucun objectif en cours'), findsOneWidget);
+    expect(find.text('Aucun palier pour l’instant'), findsOneWidget);
   });
 }

@@ -109,12 +109,12 @@ Future<void> setupServiceLocator() async {
         store: getIt<ICommute>(),
       ));
 
-  // Widgets de l'ecran d'accueil : ils lisent les trajets et les deux
-  // cagnottes, et enregistrent au prix du jour ce qui a ete fait sans
-  // l'application.
+  // Widgets de l'ecran d'accueil : ils lisent les trajets, les abonnements
+  // que le velo rembourse et les paliers, et enregistrent au prix du jour ce
+  // qui a ete fait sans l'application.
   getIt.registerLazySingleton<HomeWidgetsService>(() => HomeWidgetsService(
         commute: getIt<ICommute>(),
-        screenTime: getIt<IScreenTime>(),
+        subscriptions: getIt<ISubscriptions>(),
         prices: getIt<CommutePriceService>(),
         bridge: AndroidHomeWidgetBridge(),
       ));
