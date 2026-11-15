@@ -525,7 +525,7 @@ class _BySportCard extends StatelessWidget {
           segments: [
             ButtonSegment(value: _Period.week, label: Text(l10n.sport_period_week)),
             ButtonSegment(value: _Period.month, label: Text(l10n.sport_period_month)),
-            ButtonSegment(value: _Period.all, label: Text(l10n.goals_rate_window_all)),
+            ButtonSegment(value: _Period.all, label: Text(l10n.sport_period_all)),
           ],
           selected: {period},
           onSelectionChanged: (selection) => onPeriod(selection.first),

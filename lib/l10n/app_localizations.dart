@@ -3956,6 +3956,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'See the recap'**
   String get recap_open;
+
+  /// No description provided for @sport_period_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get sport_period_all;
 }
 
 class _AppLocalizationsDelegate

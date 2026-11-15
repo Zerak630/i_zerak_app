@@ -189,7 +189,9 @@ class _GoalsPageState extends State<GoalsPage> {
           ),
           if (history.skip(1).any((month) => month.saved > 0)) ...[
             const SizedBox(height: 10),
-            _PaybackHistory(months: history.skip(1).toList()),
+            // Les mois sans un seul trajet, avant les debuts du velo, ne
+            // diraient que « 0 sur 4 ».
+            _PaybackHistory(months: [for (final month in history.skip(1)) if (month.saved > 0) month]),
           ],
           const SizedBox(height: 22),
           Row(children: [
@@ -334,6 +336,7 @@ class _PaybackCard extends StatelessWidget {
                 style: theme.textTheme.titleSmall,
               ),
             ),
+            const SizedBox(width: 12),
             Text(
               l10n.payback_amount(format.euros(payback.covered), format.euros(payback.total)),
               style: theme.textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
@@ -824,7 +827,9 @@ class _Forecast extends StatelessWidget {
         child: Text(
           distant
               ? l10n.goals_forecast_year('${date.year}')
-              : l10n.goals_forecast(format.dayMonth(date)),
+              : l10n.goals_forecast(date.year == today.year
+                  ? format.dayMonth(date)
+                  : '${format.dayMonth(date)} ${date.year}'),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: theme.textTheme.bodySmall?.copyWith(color: color, fontWeight: FontWeight.w500),

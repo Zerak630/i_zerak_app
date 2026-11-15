@@ -622,7 +622,7 @@
 	"recap_title_month": "Bilan de {month}",
 	"recap_bike": "{days, plural, =0{{amount} d’essence économisée — pas de trajet à vélo} =1{{amount} d’essence économisée en 1 trajet} other{{amount} d’essence économisée en {days} trajets}}",
 	"recap_payback": "{paid, plural, =0{aucun abonnement remboursé sur {total}} =1{1 abonnement remboursé sur {total}} other{{paid} abonnements remboursés sur {total}}}",
-	"recap_free": "{minutes} reprises aux réseaux · {kept} jours tenus sur {measured}",
+	"recap_free": "{minutes} reprises aux réseaux · jours tenus : {kept} sur {measured}",
 	"recap_sport": "{minutes} de sport en {count, plural, =1{1 séance} other{{count} séances}}",
 	"recap_sport_none": "Pas de séance de sport",
 	"recap_page_title": "Bilan",
@@ -633,7 +633,7 @@
 	"recap_week_range": "Du {from} au {to}",
 	"recap_before": "avant : {value}",
 	"recap_bike_title": "Vélo",
-	"recap_free_detail": "{kept} jours tenus sur {measured} · {over} de trop",
+	"recap_free_detail": "Jours tenus : {kept} sur {measured} · {over} de trop",
 	"recap_sport_share": "Sur les {regained} reprises aux réseaux, {sport} sont allées au sport.",
 	"recap_notifications": "Notifications",
 	"recap_notify_weekly": "Bilan de la semaine",
@@ -642,5 +642,6 @@
 	"recap_notify_monthly_hint": "Le dernier jour du mois",
 	"recap_notify_hint": "La notification reprend ce qui a été saisi jusqu’à la dernière ouverture d’iZerak.",
 	"recap_home_title": "Bilan de la semaine",
-	"recap_open": "Voir le bilan"
+	"recap_open": "Voir le bilan",
+	"sport_period_all": "Tout"
 }

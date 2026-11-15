@@ -401,7 +401,9 @@ class _SportCard extends StatelessWidget {
               ),
             ]),
           ),
-        if (share != null && recap.sportMinutes > 0) ...[
+        // Seulement quand le sport tient dans le temps repris : « 1 h 15 des
+        // 51 min reprises » ne voudrait rien dire.
+        if (share != null && recap.sportMinutes > 0 && share < 1) ...[
           const SizedBox(height: 10),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),

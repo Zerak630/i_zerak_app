@@ -114,7 +114,7 @@ void main() {
     expect(find.text('50 min · 1 séance'), findsOneWidget);
     expect(find.text('30 min · 1 séance'), findsOneWidget);
 
-    await tester.tap(find.text('Depuis le début'));
+    await tester.tap(find.text('Tout'));
     await tester.pumpAndSettle();
     expect(find.text('1 h 30 · 2 séances'), findsOneWidget);
 

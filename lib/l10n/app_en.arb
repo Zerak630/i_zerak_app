@@ -1336,5 +1336,6 @@
 	"recap_notify_monthly_hint": "On the last day of the month",
 	"recap_notify_hint": "The notification covers what was entered up to the last time iZerak was opened.",
 	"recap_home_title": "This week",
-	"recap_open": "See the recap"
+	"recap_open": "See the recap",
+	"sport_period_all": "All"
 }

@@ -2546,4 +2546,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recap_open => 'See the recap';
+
+  @override
+  String get sport_period_all => 'All';
 }

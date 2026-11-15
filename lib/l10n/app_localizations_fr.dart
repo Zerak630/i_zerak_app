@@ -2495,7 +2495,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String recap_free(String minutes, int kept, int measured) {
-    return '$minutes reprises aux réseaux · $kept jours tenus sur $measured';
+    return '$minutes reprises aux réseaux · jours tenus : $kept sur $measured';
   }
 
   @override
@@ -2543,7 +2543,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String recap_free_detail(int kept, int measured, String over) {
-    return '$kept jours tenus sur $measured · $over de trop';
+    return 'Jours tenus : $kept sur $measured · $over de trop';
   }
 
   @override
@@ -2575,4 +2575,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get recap_open => 'Voir le bilan';
+
+  @override
+  String get sport_period_all => 'Tout';
 }
