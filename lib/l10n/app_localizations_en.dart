@@ -2228,4 +2228,214 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get free_over_total => 'Time over the limit';
+
+  @override
+  String get bb_sport => 'Sport';
+
+  @override
+  String get sport_unknown => 'Deleted sport';
+
+  @override
+  String get sport_strength => 'Strength';
+
+  @override
+  String get sport_cardio => 'Cardio';
+
+  @override
+  String get sport_yoga => 'Yoga';
+
+  @override
+  String get sport_stretching => 'Stretching';
+
+  @override
+  String get sport_running => 'Running';
+
+  @override
+  String get sport_minutes_custom => 'Other duration';
+
+  @override
+  String get sport_new_session => 'Add a session';
+
+  @override
+  String get sport_which => 'Which sport?';
+
+  @override
+  String get sport_when => 'When?';
+
+  @override
+  String get sport_today => 'Today';
+
+  @override
+  String get sport_yesterday => 'Yesterday';
+
+  @override
+  String get sport_other_day => 'Another day';
+
+  @override
+  String get sport_duration => 'Duration';
+
+  @override
+  String get sport_save_session => 'Save session';
+
+  @override
+  String sport_slot_planned(String day, String minutes) {
+    return 'Planned $day · $minutes';
+  }
+
+  @override
+  String get sport_slot_how_long => 'How long?';
+
+  @override
+  String sport_slot_done(String minutes) {
+    return 'Done — $minutes';
+  }
+
+  @override
+  String get sport_slot_skip => 'Not done';
+
+  @override
+  String get sport_slot_clear => 'Clear entry';
+
+  @override
+  String get sport_slot_status_skipped => 'Not done';
+
+  @override
+  String get sport_slot_status_pending => 'To fill in';
+
+  @override
+  String get sport_slot_status_upcoming => 'Upcoming';
+
+  @override
+  String get sport_plan => 'Plan';
+
+  @override
+  String get sport_plan_title => 'Weekly plan';
+
+  @override
+  String get sport_plan_hint =>
+      'The sessions planned each week. Nothing ticks itself: each slot waits for you to say whether it was done, and for how long.';
+
+  @override
+  String get sport_plan_add => 'Add a slot';
+
+  @override
+  String get sport_plan_edit => 'Edit slot';
+
+  @override
+  String get sport_plan_day => 'Which day?';
+
+  @override
+  String get sport_plan_delete => 'Remove this slot?';
+
+  @override
+  String get sport_plan_delete_hint =>
+      'Sessions already entered for this slot stay counted.';
+
+  @override
+  String sport_plan_total(int count, String minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count slots a week, $minutes in total',
+      one: '1 slot a week, $minutes in total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sport_plan_empty => 'No plan yet';
+
+  @override
+  String get sport_plan_empty_hint =>
+      'Plan your weekly sessions — yoga on Monday, strength on Thursday — then say each week what you did.';
+
+  @override
+  String get sport_plan_prepare => 'Set up my plan';
+
+  @override
+  String get sport_my_sports => 'My sports';
+
+  @override
+  String get sport_add_sport => 'Add a sport';
+
+  @override
+  String get sport_this_week => 'This week';
+
+  @override
+  String sport_week_of(String date) {
+    return 'Week of $date';
+  }
+
+  @override
+  String get sport_previous_week => 'Previous week';
+
+  @override
+  String get sport_next_week => 'Next week';
+
+  @override
+  String sport_sessions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sessions',
+      one: '1 session',
+      zero: 'No session',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sport_sessions_short(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sessions',
+      one: '1 session',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sport_plan_progress(int done, int total) {
+    return 'plan $done of $total';
+  }
+
+  @override
+  String sport_streak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks kept in a row',
+      one: '1 week kept',
+      zero: 'No week kept in a row yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sport_pending_last_week => 'Still to fill in from last week';
+
+  @override
+  String get sport_planned_section => 'Planned';
+
+  @override
+  String get sport_extras_section => 'On top of the plan';
+
+  @override
+  String get sport_by_sport => 'Time per sport';
+
+  @override
+  String get sport_by_sport_empty => 'No session in this period.';
+
+  @override
+  String get sport_period_week => 'Week';
+
+  @override
+  String get sport_period_month => 'This month';
+
+  @override
+  String get sport_delete_session => 'Delete session';
+
+  @override
+  String get sport_delete_hint => 'Long-press an extra session to delete it.';
 }

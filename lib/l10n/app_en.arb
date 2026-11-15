@@ -1159,5 +1159,103 @@
 			"count": { "type": "int" }
 		}
 	},
-	"free_over_total": "Time over the limit"
+	"free_over_total": "Time over the limit",
+	"bb_sport": "Sport",
+	"sport_unknown": "Deleted sport",
+	"sport_strength": "Strength",
+	"sport_cardio": "Cardio",
+	"sport_yoga": "Yoga",
+	"sport_stretching": "Stretching",
+	"sport_running": "Running",
+	"sport_minutes_custom": "Other duration",
+	"sport_new_session": "Add a session",
+	"sport_which": "Which sport?",
+	"sport_when": "When?",
+	"sport_today": "Today",
+	"sport_yesterday": "Yesterday",
+	"sport_other_day": "Another day",
+	"sport_duration": "Duration",
+	"sport_save_session": "Save session",
+	"sport_slot_planned": "Planned {day} · {minutes}",
+	"@sport_slot_planned": {
+		"placeholders": {
+			"day": { "type": "String" },
+			"minutes": { "type": "String" }
+		}
+	},
+	"sport_slot_how_long": "How long?",
+	"sport_slot_done": "Done — {minutes}",
+	"@sport_slot_done": {
+		"placeholders": {
+			"minutes": { "type": "String" }
+		}
+	},
+	"sport_slot_skip": "Not done",
+	"sport_slot_clear": "Clear entry",
+	"sport_slot_status_skipped": "Not done",
+	"sport_slot_status_pending": "To fill in",
+	"sport_slot_status_upcoming": "Upcoming",
+	"sport_plan": "Plan",
+	"sport_plan_title": "Weekly plan",
+	"sport_plan_hint": "The sessions planned each week. Nothing ticks itself: each slot waits for you to say whether it was done, and for how long.",
+	"sport_plan_add": "Add a slot",
+	"sport_plan_edit": "Edit slot",
+	"sport_plan_day": "Which day?",
+	"sport_plan_delete": "Remove this slot?",
+	"sport_plan_delete_hint": "Sessions already entered for this slot stay counted.",
+	"sport_plan_total": "{count, plural, =1{1 slot a week, {minutes} in total} other{{count} slots a week, {minutes} in total}}",
+	"@sport_plan_total": {
+		"placeholders": {
+			"count": { "type": "int" },
+			"minutes": { "type": "String" }
+		}
+	},
+	"sport_plan_empty": "No plan yet",
+	"sport_plan_empty_hint": "Plan your weekly sessions — yoga on Monday, strength on Thursday — then say each week what you did.",
+	"sport_plan_prepare": "Set up my plan",
+	"sport_my_sports": "My sports",
+	"sport_add_sport": "Add a sport",
+	"sport_this_week": "This week",
+	"sport_week_of": "Week of {date}",
+	"@sport_week_of": {
+		"placeholders": {
+			"date": { "type": "String" }
+		}
+	},
+	"sport_previous_week": "Previous week",
+	"sport_next_week": "Next week",
+	"sport_sessions": "{count, plural, =0{No session} =1{1 session} other{{count} sessions}}",
+	"@sport_sessions": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"sport_sessions_short": "{count, plural, =1{1 session} other{{count} sessions}}",
+	"@sport_sessions_short": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"sport_plan_progress": "plan {done} of {total}",
+	"@sport_plan_progress": {
+		"placeholders": {
+			"done": { "type": "int" },
+			"total": { "type": "int" }
+		}
+	},
+	"sport_streak": "{count, plural, =0{No week kept in a row yet} =1{1 week kept} other{{count} weeks kept in a row}}",
+	"@sport_streak": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
+	"sport_pending_last_week": "Still to fill in from last week",
+	"sport_planned_section": "Planned",
+	"sport_extras_section": "On top of the plan",
+	"sport_by_sport": "Time per sport",
+	"sport_by_sport_empty": "No session in this period.",
+	"sport_period_week": "Week",
+	"sport_period_month": "This month",
+	"sport_delete_session": "Delete session",
+	"sport_delete_hint": "Long-press an extra session to delete it."
 }

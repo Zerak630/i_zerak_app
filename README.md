@@ -2,9 +2,9 @@
 
 Application Flutter personnelle qui pilote un serveur auto-hébergé depuis le téléphone :
 téléchargements qBittorrent, supervision d'un Raspberry Pi, suivi d'abonnements et prix des
-carburants. Deux onglets aident aussi au quotidien : le **Vélo**, dont l'essence économisée
-rembourse les abonnements et rentabilise les gros achats, et le **Temps libre** pour décrocher des
-réseaux sociaux.
+carburants. Trois onglets aident aussi au quotidien : le **Vélo**, dont l'essence économisée
+rembourse les abonnements et rentabilise les gros achats, le **Temps libre** pour décrocher des
+réseaux sociaux, et le **Sport** à la maison.
 
 ## Architecture
 
@@ -46,7 +46,7 @@ doit l'être dans les deux langues.
 
 ```bash
 flutter analyze   # doit rester sans avertissement
-flutter test      # 447 tests
+flutter test      # 468 tests
 ```
 
 Les versions release se construisent **sans élagage des icônes** :
@@ -88,6 +88,18 @@ Tout reste sur l'appareil : les journées sont figées dans Hive à minuit, et r
 part. Le bilan du soir est calculé côté natif, application fermée (`DailyReport.kt`), avec la même
 formule que `ScreenTimeSettings.quotaFor` et `ScreenTimeDay.regainedMinutes` : toute modification
 du calcul doit être faite des deux côtés.
+
+## Sport
+
+L'onglet **Sport** compte du temps, jamais d'argent. On y décrit ses sports (cinq livrés, d'autres
+s'ajoutent), un **programme de la semaine** (yoga le lundi, renforcement le jeudi…), et on saisit à
+la main chaque séance : un créneau du programme se dit « fait », avec sa durée, ou « pas fait » ; une
+séance en plus s'ajoute en trois choix. Les semaines passées se remplissent après coup, et les
+créneaux oubliés de la semaine précédente sont rappelés.
+
+L'onglet montre la semaine jour par jour, les semaines tenues d'affilée (tout le programme, ou au
+moins une séance sans programme) et le temps passé sur chaque sport. Les données vivent dans la
+boîte Hive `sport`, une entrée par séance, synchronisée comme les trajets.
 
 ## Widgets de l'écran d'accueil (Android)
 

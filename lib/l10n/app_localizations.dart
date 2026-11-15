@@ -3476,6 +3476,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Time over the limit'**
   String get free_over_total;
+
+  /// No description provided for @bb_sport.
+  ///
+  /// In en, this message translates to:
+  /// **'Sport'**
+  String get bb_sport;
+
+  /// No description provided for @sport_unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted sport'**
+  String get sport_unknown;
+
+  /// No description provided for @sport_strength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get sport_strength;
+
+  /// No description provided for @sport_cardio.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardio'**
+  String get sport_cardio;
+
+  /// No description provided for @sport_yoga.
+  ///
+  /// In en, this message translates to:
+  /// **'Yoga'**
+  String get sport_yoga;
+
+  /// No description provided for @sport_stretching.
+  ///
+  /// In en, this message translates to:
+  /// **'Stretching'**
+  String get sport_stretching;
+
+  /// No description provided for @sport_running.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get sport_running;
+
+  /// No description provided for @sport_minutes_custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Other duration'**
+  String get sport_minutes_custom;
+
+  /// No description provided for @sport_new_session.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a session'**
+  String get sport_new_session;
+
+  /// No description provided for @sport_which.
+  ///
+  /// In en, this message translates to:
+  /// **'Which sport?'**
+  String get sport_which;
+
+  /// No description provided for @sport_when.
+  ///
+  /// In en, this message translates to:
+  /// **'When?'**
+  String get sport_when;
+
+  /// No description provided for @sport_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get sport_today;
+
+  /// No description provided for @sport_yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get sport_yesterday;
+
+  /// No description provided for @sport_other_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Another day'**
+  String get sport_other_day;
+
+  /// No description provided for @sport_duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get sport_duration;
+
+  /// No description provided for @sport_save_session.
+  ///
+  /// In en, this message translates to:
+  /// **'Save session'**
+  String get sport_save_session;
+
+  /// No description provided for @sport_slot_planned.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned {day} · {minutes}'**
+  String sport_slot_planned(String day, String minutes);
+
+  /// No description provided for @sport_slot_how_long.
+  ///
+  /// In en, this message translates to:
+  /// **'How long?'**
+  String get sport_slot_how_long;
+
+  /// No description provided for @sport_slot_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done — {minutes}'**
+  String sport_slot_done(String minutes);
+
+  /// No description provided for @sport_slot_skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Not done'**
+  String get sport_slot_skip;
+
+  /// No description provided for @sport_slot_clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear entry'**
+  String get sport_slot_clear;
+
+  /// No description provided for @sport_slot_status_skipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Not done'**
+  String get sport_slot_status_skipped;
+
+  /// No description provided for @sport_slot_status_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'To fill in'**
+  String get sport_slot_status_pending;
+
+  /// No description provided for @sport_slot_status_upcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get sport_slot_status_upcoming;
+
+  /// No description provided for @sport_plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get sport_plan;
+
+  /// No description provided for @sport_plan_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly plan'**
+  String get sport_plan_title;
+
+  /// No description provided for @sport_plan_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'The sessions planned each week. Nothing ticks itself: each slot waits for you to say whether it was done, and for how long.'**
+  String get sport_plan_hint;
+
+  /// No description provided for @sport_plan_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a slot'**
+  String get sport_plan_add;
+
+  /// No description provided for @sport_plan_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit slot'**
+  String get sport_plan_edit;
+
+  /// No description provided for @sport_plan_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Which day?'**
+  String get sport_plan_day;
+
+  /// No description provided for @sport_plan_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this slot?'**
+  String get sport_plan_delete;
+
+  /// No description provided for @sport_plan_delete_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions already entered for this slot stay counted.'**
+  String get sport_plan_delete_hint;
+
+  /// No description provided for @sport_plan_total.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 slot a week, {minutes} in total} other{{count} slots a week, {minutes} in total}}'**
+  String sport_plan_total(int count, String minutes);
+
+  /// No description provided for @sport_plan_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No plan yet'**
+  String get sport_plan_empty;
+
+  /// No description provided for @sport_plan_empty_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan your weekly sessions — yoga on Monday, strength on Thursday — then say each week what you did.'**
+  String get sport_plan_empty_hint;
+
+  /// No description provided for @sport_plan_prepare.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up my plan'**
+  String get sport_plan_prepare;
+
+  /// No description provided for @sport_my_sports.
+  ///
+  /// In en, this message translates to:
+  /// **'My sports'**
+  String get sport_my_sports;
+
+  /// No description provided for @sport_add_sport.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a sport'**
+  String get sport_add_sport;
+
+  /// No description provided for @sport_this_week.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get sport_this_week;
+
+  /// No description provided for @sport_week_of.
+  ///
+  /// In en, this message translates to:
+  /// **'Week of {date}'**
+  String sport_week_of(String date);
+
+  /// No description provided for @sport_previous_week.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous week'**
+  String get sport_previous_week;
+
+  /// No description provided for @sport_next_week.
+  ///
+  /// In en, this message translates to:
+  /// **'Next week'**
+  String get sport_next_week;
+
+  /// No description provided for @sport_sessions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No session} =1{1 session} other{{count} sessions}}'**
+  String sport_sessions(int count);
+
+  /// No description provided for @sport_sessions_short.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 session} other{{count} sessions}}'**
+  String sport_sessions_short(int count);
+
+  /// No description provided for @sport_plan_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'plan {done} of {total}'**
+  String sport_plan_progress(int done, int total);
+
+  /// No description provided for @sport_streak.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No week kept in a row yet} =1{1 week kept} other{{count} weeks kept in a row}}'**
+  String sport_streak(int count);
+
+  /// No description provided for @sport_pending_last_week.
+  ///
+  /// In en, this message translates to:
+  /// **'Still to fill in from last week'**
+  String get sport_pending_last_week;
+
+  /// No description provided for @sport_planned_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned'**
+  String get sport_planned_section;
+
+  /// No description provided for @sport_extras_section.
+  ///
+  /// In en, this message translates to:
+  /// **'On top of the plan'**
+  String get sport_extras_section;
+
+  /// No description provided for @sport_by_sport.
+  ///
+  /// In en, this message translates to:
+  /// **'Time per sport'**
+  String get sport_by_sport;
+
+  /// No description provided for @sport_by_sport_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No session in this period.'**
+  String get sport_by_sport_empty;
+
+  /// No description provided for @sport_period_week.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get sport_period_week;
+
+  /// No description provided for @sport_period_month.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get sport_period_month;
+
+  /// No description provided for @sport_delete_session.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete session'**
+  String get sport_delete_session;
+
+  /// No description provided for @sport_delete_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-press an extra session to delete it.'**
+  String get sport_delete_hint;
 }
 
 class _AppLocalizationsDelegate

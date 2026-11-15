@@ -14,6 +14,7 @@ import 'package:i_zerak_app/services/repositories/hive/hive_commute_repository.d
 import 'package:i_zerak_app/services/repositories/hive/hive_gas_station_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_screen_time_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_server_config_repository.dart';
+import 'package:i_zerak_app/services/repositories/hive/hive_sport_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_subscription_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/type_adapters.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
@@ -22,6 +23,7 @@ import 'package:i_zerak_app/services/repositories/interfaces/i_credentials.dart'
 import 'package:i_zerak_app/services/repositories/interfaces/i_gas_stations.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_screen_time.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_server_config.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_sport.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
 import 'package:i_zerak_app/services/repositories/secure/secure_credentials_store.dart';
 import 'package:i_zerak_app/services/sync/storage_access.dart';
@@ -73,6 +75,9 @@ Future<void> setupServiceLocator() async {
   getIt.registerSingleton<ICommute>(
       HiveCommuteRepository(await Hive.openBox<String>('commute')));
 
+  // Sport : meme format, une entree par seance (cf. HiveSportRepository).
+  getIt.registerSingleton<ISport>(HiveSportRepository(await Hive.openBox<String>('sport')));
+
   // La synchro ne couvre que ce que l'utilisateur saisit et qui vaut sur tous
   // ses appareils. Restent a part : app_prefs (la barre du bas depend de
   // l'ecran), server_config (le certificat se valide appareil par appareil) et,
@@ -87,6 +92,7 @@ Future<void> setupServiceLocator() async {
           SyncedBox.strings('subscription_prefs', Hive.box<String>('subscription_prefs')),
           SyncedBox.strings('gas_stations', Hive.box<String>('gas_stations')),
           SyncedBox.strings('commute', Hive.box<String>('commute')),
+          SyncedBox.strings('sport', Hive.box<String>('sport')),
         ],
         supported: !kIsWeb,
       ));

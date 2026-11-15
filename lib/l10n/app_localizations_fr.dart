@@ -2249,4 +2249,215 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get free_over_total => 'Temps de trop';
+
+  @override
+  String get bb_sport => 'Sport';
+
+  @override
+  String get sport_unknown => 'Sport supprimé';
+
+  @override
+  String get sport_strength => 'Renforcement';
+
+  @override
+  String get sport_cardio => 'Cardio';
+
+  @override
+  String get sport_yoga => 'Yoga';
+
+  @override
+  String get sport_stretching => 'Étirements';
+
+  @override
+  String get sport_running => 'Course à pied';
+
+  @override
+  String get sport_minutes_custom => 'Autre durée';
+
+  @override
+  String get sport_new_session => 'Ajouter une séance';
+
+  @override
+  String get sport_which => 'Quel sport ?';
+
+  @override
+  String get sport_when => 'Quand ?';
+
+  @override
+  String get sport_today => 'Aujourd’hui';
+
+  @override
+  String get sport_yesterday => 'Hier';
+
+  @override
+  String get sport_other_day => 'Autre jour';
+
+  @override
+  String get sport_duration => 'Durée';
+
+  @override
+  String get sport_save_session => 'Enregistrer la séance';
+
+  @override
+  String sport_slot_planned(String day, String minutes) {
+    return 'Prévu $day · $minutes';
+  }
+
+  @override
+  String get sport_slot_how_long => 'Combien de temps ?';
+
+  @override
+  String sport_slot_done(String minutes) {
+    return 'Fait — $minutes';
+  }
+
+  @override
+  String get sport_slot_skip => 'Pas fait';
+
+  @override
+  String get sport_slot_clear => 'Effacer la saisie';
+
+  @override
+  String get sport_slot_status_skipped => 'Pas fait';
+
+  @override
+  String get sport_slot_status_pending => 'À saisir';
+
+  @override
+  String get sport_slot_status_upcoming => 'À venir';
+
+  @override
+  String get sport_plan => 'Programme';
+
+  @override
+  String get sport_plan_title => 'Programme de la semaine';
+
+  @override
+  String get sport_plan_hint =>
+      'Les séances prévues chaque semaine. Rien ne se coche tout seul : chaque créneau attend que vous disiez s’il a été fait, et combien de temps.';
+
+  @override
+  String get sport_plan_add => 'Ajouter un créneau';
+
+  @override
+  String get sport_plan_edit => 'Modifier le créneau';
+
+  @override
+  String get sport_plan_day => 'Quel jour ?';
+
+  @override
+  String get sport_plan_delete => 'Retirer ce créneau ?';
+
+  @override
+  String get sport_plan_delete_hint =>
+      'Les séances déjà saisies pour ce créneau restent comptées.';
+
+  @override
+  String sport_plan_total(int count, String minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count créneaux par semaine, $minutes au total',
+      one: '1 créneau par semaine, $minutes au total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sport_plan_empty => 'Pas encore de programme';
+
+  @override
+  String get sport_plan_empty_hint =>
+      'Prévoyez vos séances de la semaine — yoga le lundi, renforcement le jeudi — puis dites chaque semaine ce que vous avez fait.';
+
+  @override
+  String get sport_plan_prepare => 'Préparer mon programme';
+
+  @override
+  String get sport_my_sports => 'Mes sports';
+
+  @override
+  String get sport_add_sport => 'Ajouter un sport';
+
+  @override
+  String get sport_this_week => 'Cette semaine';
+
+  @override
+  String sport_week_of(String date) {
+    return 'Semaine du $date';
+  }
+
+  @override
+  String get sport_previous_week => 'Semaine précédente';
+
+  @override
+  String get sport_next_week => 'Semaine suivante';
+
+  @override
+  String sport_sessions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count séances',
+      one: '1 séance',
+      zero: 'Aucune séance',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sport_sessions_short(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count séances',
+      one: '1 séance',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sport_plan_progress(int done, int total) {
+    return 'programme $done sur $total';
+  }
+
+  @override
+  String sport_streak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count semaines tenues d’affilée',
+      one: '1 semaine tenue',
+      zero: 'Pas encore de semaine tenue d’affilée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sport_pending_last_week => 'À saisir de la semaine dernière';
+
+  @override
+  String get sport_planned_section => 'Au programme';
+
+  @override
+  String get sport_extras_section => 'En plus du programme';
+
+  @override
+  String get sport_by_sport => 'Temps par sport';
+
+  @override
+  String get sport_by_sport_empty => 'Aucune séance sur cette période.';
+
+  @override
+  String get sport_period_week => 'Semaine';
+
+  @override
+  String get sport_period_month => 'Ce mois';
+
+  @override
+  String get sport_delete_session => 'Supprimer la séance';
+
+  @override
+  String get sport_delete_hint =>
+      'Appui long sur une séance en plus pour la supprimer.';
 }
