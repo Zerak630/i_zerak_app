@@ -9,6 +9,7 @@ import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/gas_service.dart';
 import 'package:i_zerak_app/services/home_widgets/home_widgets_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
+import 'package:i_zerak_app/services/recap/recap_service.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_app_preferences.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_commute_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_gas_station_repository.dart';
@@ -123,6 +124,17 @@ Future<void> setupServiceLocator() async {
         subscriptions: getIt<ISubscriptions>(),
         prices: getIt<CommutePriceService>(),
         bridge: AndroidHomeWidgetBridge(),
+      ));
+
+  // Le bilan de la semaine et du mois, et ses notifications : il lit tous les
+  // depots, et ne stocke que ses reglages, propres a l'appareil.
+  getIt.registerLazySingleton<RecapService>(() => RecapService(
+        commute: getIt<ICommute>(),
+        subscriptions: getIt<ISubscriptions>(),
+        sport: getIt<ISport>(),
+        preferences: getIt<IAppPreferences>(),
+        screenTime: getIt<IScreenTime>(),
+        bridge: AndroidRecapBridge(),
       ));
 
   getIt.registerLazySingleton<ICredentials>(() => const SecureCredentialsStore());

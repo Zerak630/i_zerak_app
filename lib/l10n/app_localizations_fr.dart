@@ -2460,4 +2460,119 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get sport_delete_hint =>
       'Appui long sur une séance en plus pour la supprimer.';
+
+  @override
+  String get recap_title_week => 'Bilan de la semaine';
+
+  @override
+  String recap_title_month(String month) {
+    return 'Bilan de $month';
+  }
+
+  @override
+  String recap_bike(String amount, int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$amount d’essence économisée en $days trajets',
+      one: '$amount d’essence économisée en 1 trajet',
+      zero: '$amount d’essence économisée — pas de trajet à vélo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recap_payback(int paid, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      paid,
+      locale: localeName,
+      other: '$paid abonnements remboursés sur $total',
+      one: '1 abonnement remboursé sur $total',
+      zero: 'aucun abonnement remboursé sur $total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recap_free(String minutes, int kept, int measured) {
+    return '$minutes reprises aux réseaux · $kept jours tenus sur $measured';
+  }
+
+  @override
+  String recap_sport(String minutes, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count séances',
+      one: '1 séance',
+    );
+    return '$minutes de sport en $_temp0';
+  }
+
+  @override
+  String get recap_sport_none => 'Pas de séance de sport';
+
+  @override
+  String get recap_page_title => 'Bilan';
+
+  @override
+  String get recap_month => 'Mois';
+
+  @override
+  String get recap_previous => 'Période précédente';
+
+  @override
+  String get recap_next => 'Période suivante';
+
+  @override
+  String get recap_in_progress =>
+      'En cours : le bilan se complète au fil des jours.';
+
+  @override
+  String recap_week_range(String from, String to) {
+    return 'Du $from au $to';
+  }
+
+  @override
+  String recap_before(String value) {
+    return 'avant : $value';
+  }
+
+  @override
+  String get recap_bike_title => 'Vélo';
+
+  @override
+  String recap_free_detail(int kept, int measured, String over) {
+    return '$kept jours tenus sur $measured · $over de trop';
+  }
+
+  @override
+  String recap_sport_share(String regained, String sport) {
+    return 'Sur les $regained reprises aux réseaux, $sport sont allées au sport.';
+  }
+
+  @override
+  String get recap_notifications => 'Notifications';
+
+  @override
+  String get recap_notify_weekly => 'Bilan de la semaine';
+
+  @override
+  String get recap_notify_weekly_hint => 'Chaque dimanche soir';
+
+  @override
+  String get recap_notify_monthly => 'Bilan du mois';
+
+  @override
+  String get recap_notify_monthly_hint => 'Le dernier jour du mois';
+
+  @override
+  String get recap_notify_hint =>
+      'La notification reprend ce qui a été saisi jusqu’à la dernière ouverture d’iZerak.';
+
+  @override
+  String get recap_home_title => 'Bilan de la semaine';
+
+  @override
+  String get recap_open => 'Voir le bilan';
 }

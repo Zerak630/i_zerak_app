@@ -18,6 +18,10 @@ import 'package:i_zerak_app/services/agent/agent_service.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_exceptions.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
+import 'package:i_zerak_app/services/recap/recap_service.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_sport.dart';
+import 'package:i_zerak_app/models/recap_dao.dart';
+import 'package:i_zerak_app/pages/recap/recap_page.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_gas_stations.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
@@ -47,8 +51,12 @@ class DashboardPage extends StatefulWidget {
     Future<SystemSnapshot> Function()? systemLoader,
     Future<TorrentsSnapshot> Function()? torrentsLoader,
     Future<ScreenTimeLedger?> Function()? freeTimeLoader,
+    RecapService? recap,
+    ISport? sport,
     DateTime Function()? clock,
-  })  : subscriptionService = subscriptionService ?? getIt<ISubscriptions>(),
+  })  : recap = recap ?? (getIt.isRegistered<RecapService>() ? getIt<RecapService>() : null),
+        sport = sport ?? (getIt.isRegistered<ISport>() ? getIt<ISport>() : null),
+        subscriptionService = subscriptionService ?? getIt<ISubscriptions>(),
         commuteService = commuteService ?? getIt<ICommute>(),
         prices = prices ?? getIt<CommutePriceService>(),
         stations = stations ?? getIt<IGasStations>(),
@@ -58,6 +66,11 @@ class DashboardPage extends StatefulWidget {
         clock = clock ?? DateTime.now;
 
   final ISubscriptions subscriptionService;
+
+  /// Le bilan de la semaine. Nul dans les tests qui ne s'en servent pas : la
+  /// carte disparait alors.
+  final RecapService? recap;
+  final ISport? sport;
   final ICommute commuteService;
   final CommutePriceService prices;
   final IGasStations stations;
@@ -98,6 +111,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Object? _systemError;
   TorrentsSnapshot? _torrents;
   ScreenTimeLedger? _freeTime;
+  Recap? _recap;
   Object? _torrentsError;
 
   bool _loading = true;
@@ -120,6 +134,8 @@ class _DashboardPageState extends State<DashboardPage> {
       setState(() => _loading = false);
     }
     await Future.wait([_loadPrice(), _loadSystem(), _loadTorrents(), _loadFreeTime()]);
+    // Apres le temps libre : sa synchro fige les journees que le bilan lit.
+    await _loadRecap();
   }
 
   Future<void> _loadLocal() async {
@@ -152,6 +168,75 @@ class _DashboardPageState extends State<DashboardPage> {
       // depend pas.
       debugPrint('Temps libre indisponible : $error');
     }
+  }
+
+  Future<void> _loadRecap() async {
+    final service = widget.recap;
+    if (service == null) {
+      return;
+    }
+    try {
+      final recap = await service.recapOf(RecapRange.weekOf(_today));
+      if (mounted) {
+        setState(() => _recap = recap);
+      }
+    } catch (error) {
+      debugPrint('Bilan indisponible : $error');
+    }
+  }
+
+  Future<void> _openRecap() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RecapPage(service: widget.recap!, sport: widget.sport!, clock: widget.clock),
+      ),
+    );
+  }
+
+  /// La semaine en trois lignes, chacune dans son unite.
+  Widget _recapCard(BuildContext context, AppLocalizations l10n, Recap recap) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final writer = RecapWriter(l10n, Localizations.localeOf(context).toLanguageTag());
+    final lines = [
+      if (writer.bikeLine(recap) case final String line) (Icons.pedal_bike, line),
+      if (writer.freeLine(recap) case final String line) (Icons.hourglass_bottom, line),
+      (Icons.fitness_center, writer.sportLine(recap)),
+    ];
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: InkWell(
+        onTap: widget.sport == null ? null : _openRecap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Row(children: [
+              Expanded(
+                child: Text(
+                  l10n.recap_home_title.toUpperCase(),
+                  style: theme.textTheme.labelSmall
+                      ?.copyWith(color: scheme.onSurfaceVariant, letterSpacing: 0.8),
+                ),
+              ),
+              Icon(Icons.chevron_right, size: 20, color: scheme.outline),
+            ]),
+            const SizedBox(height: 8),
+            for (final (icon, text) in lines)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Icon(icon, size: 16, color: scheme.primary),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(text, style: theme.textTheme.bodySmall)),
+                ]),
+              ),
+          ]),
+        ),
+      ),
+    );
   }
 
   Future<void> _loadPrice() async {
@@ -403,6 +488,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final money = [
       _money(context, l10n),
       if (_freeTime?.settings.isConfigured ?? false) _freeTimeCard(context, l10n, _freeTime!),
+      if (_recap != null) _recapCard(context, l10n, _recap!),
     ];
     final machine = [_pi(context, l10n), _downloads(context, l10n), _fuel(context, l10n)];
 

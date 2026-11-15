@@ -48,4 +48,5 @@
         <item quantity="one">%1$d abonnement sur %2$d</item>
         <item quantity="other">%1$d abonnements sur %2$d</item>
     </plurals>
+    <string name="recap_channel">Bilans de la semaine et du mois</string>
 </resources>

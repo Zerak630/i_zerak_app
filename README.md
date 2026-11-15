@@ -46,7 +46,7 @@ doit l'être dans les deux langues.
 
 ```bash
 flutter analyze   # doit rester sans avertissement
-flutter test      # 468 tests
+flutter test      # 484 tests
 ```
 
 Les versions release se construisent **sans élagage des icônes** :
@@ -100,6 +100,19 @@ créneaux oubliés de la semaine précédente sont rappelés.
 L'onglet montre la semaine jour par jour, les semaines tenues d'affilée (tout le programme, ou au
 moins une séance sans programme) et le temps passé sur chaque sport. Les données vivent dans la
 boîte Hive `sport`, une entrée par séance, synchronisée comme les trajets.
+
+## Bilan de la semaine et du mois
+
+Le **bilan** met côte à côte, sans les additionner, l'essence économisée à vélo (et, au mois, les
+abonnements remboursés), le temps repris aux réseaux et le temps de sport, avec la période
+précédente pour comparer. Il s'ouvre depuis l'accueil (carte « Bilan de la semaine ») et depuis
+l'onglet Sport.
+
+Une notification le résume chaque dimanche soir et le dernier jour du mois (19 h 30 par défaut,
+réglable dans le bilan). Comme les widgets, le natif ne lit pas Hive : `RecapService` lui transmet
+les textes déjà rédigés chaque fois que l'application passe en arrière-plan, et `RecapReport.kt`
+notifie celui dont la période se termine ce jour-là. Le bilan reprend donc ce qui a été saisi
+jusqu'à la dernière ouverture d'iZerak.
 
 ## Widgets de l'écran d'accueil (Android)
 

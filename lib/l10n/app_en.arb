@@ -1257,5 +1257,84 @@
 	"sport_period_week": "Week",
 	"sport_period_month": "This month",
 	"sport_delete_session": "Delete session",
-	"sport_delete_hint": "Long-press an extra session to delete it."
+	"sport_delete_hint": "Long-press an extra session to delete it.",
+	"recap_title_week": "Your week",
+	"recap_title_month": "Your {month}",
+	"@recap_title_month": {
+		"placeholders": {
+			"month": { "type": "String" }
+		}
+	},
+	"recap_bike": "{days, plural, =0{{amount} of fuel saved — no bike trip} =1{{amount} of fuel saved in 1 trip} other{{amount} of fuel saved in {days} trips}}",
+	"@recap_bike": {
+		"placeholders": {
+			"amount": { "type": "String" },
+			"days": { "type": "int" }
+		}
+	},
+	"recap_payback": "{paid} of {total} subscriptions paid back",
+	"@recap_payback": {
+		"placeholders": {
+			"paid": { "type": "int" },
+			"total": { "type": "int" }
+		}
+	},
+	"recap_free": "{minutes} taken back from social media · {kept} of {measured} days kept",
+	"@recap_free": {
+		"placeholders": {
+			"minutes": { "type": "String" },
+			"kept": { "type": "int" },
+			"measured": { "type": "int" }
+		}
+	},
+	"recap_sport": "{minutes} of sport in {count, plural, =1{1 session} other{{count} sessions}}",
+	"@recap_sport": {
+		"placeholders": {
+			"minutes": { "type": "String" },
+			"count": { "type": "int" }
+		}
+	},
+	"recap_sport_none": "No sport session",
+	"recap_page_title": "Recap",
+	"recap_month": "Month",
+	"recap_previous": "Previous period",
+	"recap_next": "Next period",
+	"recap_in_progress": "In progress: the recap fills in as the days go by.",
+	"recap_week_range": "{from} – {to}",
+	"@recap_week_range": {
+		"placeholders": {
+			"from": { "type": "String" },
+			"to": { "type": "String" }
+		}
+	},
+	"recap_before": "before: {value}",
+	"@recap_before": {
+		"placeholders": {
+			"value": { "type": "String" }
+		}
+	},
+	"recap_bike_title": "Bike",
+	"recap_free_detail": "{kept} of {measured} days kept · {over} over",
+	"@recap_free_detail": {
+		"placeholders": {
+			"kept": { "type": "int" },
+			"measured": { "type": "int" },
+			"over": { "type": "String" }
+		}
+	},
+	"recap_sport_share": "Of the {regained} taken back from social media, {sport} went into sport.",
+	"@recap_sport_share": {
+		"placeholders": {
+			"regained": { "type": "String" },
+			"sport": { "type": "String" }
+		}
+	},
+	"recap_notifications": "Notifications",
+	"recap_notify_weekly": "Weekly recap",
+	"recap_notify_weekly_hint": "Every Sunday evening",
+	"recap_notify_monthly": "Monthly recap",
+	"recap_notify_monthly_hint": "On the last day of the month",
+	"recap_notify_hint": "The notification covers what was entered up to the last time iZerak was opened.",
+	"recap_home_title": "This week",
+	"recap_open": "See the recap"
 }

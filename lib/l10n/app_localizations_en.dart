@@ -2438,4 +2438,112 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sport_delete_hint => 'Long-press an extra session to delete it.';
+
+  @override
+  String get recap_title_week => 'Your week';
+
+  @override
+  String recap_title_month(String month) {
+    return 'Your $month';
+  }
+
+  @override
+  String recap_bike(String amount, int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$amount of fuel saved in $days trips',
+      one: '$amount of fuel saved in 1 trip',
+      zero: '$amount of fuel saved — no bike trip',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recap_payback(int paid, int total) {
+    return '$paid of $total subscriptions paid back';
+  }
+
+  @override
+  String recap_free(String minutes, int kept, int measured) {
+    return '$minutes taken back from social media · $kept of $measured days kept';
+  }
+
+  @override
+  String recap_sport(String minutes, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sessions',
+      one: '1 session',
+    );
+    return '$minutes of sport in $_temp0';
+  }
+
+  @override
+  String get recap_sport_none => 'No sport session';
+
+  @override
+  String get recap_page_title => 'Recap';
+
+  @override
+  String get recap_month => 'Month';
+
+  @override
+  String get recap_previous => 'Previous period';
+
+  @override
+  String get recap_next => 'Next period';
+
+  @override
+  String get recap_in_progress =>
+      'In progress: the recap fills in as the days go by.';
+
+  @override
+  String recap_week_range(String from, String to) {
+    return '$from – $to';
+  }
+
+  @override
+  String recap_before(String value) {
+    return 'before: $value';
+  }
+
+  @override
+  String get recap_bike_title => 'Bike';
+
+  @override
+  String recap_free_detail(int kept, int measured, String over) {
+    return '$kept of $measured days kept · $over over';
+  }
+
+  @override
+  String recap_sport_share(String regained, String sport) {
+    return 'Of the $regained taken back from social media, $sport went into sport.';
+  }
+
+  @override
+  String get recap_notifications => 'Notifications';
+
+  @override
+  String get recap_notify_weekly => 'Weekly recap';
+
+  @override
+  String get recap_notify_weekly_hint => 'Every Sunday evening';
+
+  @override
+  String get recap_notify_monthly => 'Monthly recap';
+
+  @override
+  String get recap_notify_monthly_hint => 'On the last day of the month';
+
+  @override
+  String get recap_notify_hint =>
+      'The notification covers what was entered up to the last time iZerak was opened.';
+
+  @override
+  String get recap_home_title => 'This week';
+
+  @override
+  String get recap_open => 'See the recap';
 }

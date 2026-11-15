@@ -3806,6 +3806,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Long-press an extra session to delete it.'**
   String get sport_delete_hint;
+
+  /// No description provided for @recap_title_week.
+  ///
+  /// In en, this message translates to:
+  /// **'Your week'**
+  String get recap_title_week;
+
+  /// No description provided for @recap_title_month.
+  ///
+  /// In en, this message translates to:
+  /// **'Your {month}'**
+  String recap_title_month(String month);
+
+  /// No description provided for @recap_bike.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =0{{amount} of fuel saved — no bike trip} =1{{amount} of fuel saved in 1 trip} other{{amount} of fuel saved in {days} trips}}'**
+  String recap_bike(String amount, int days);
+
+  /// No description provided for @recap_payback.
+  ///
+  /// In en, this message translates to:
+  /// **'{paid} of {total} subscriptions paid back'**
+  String recap_payback(int paid, int total);
+
+  /// No description provided for @recap_free.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} taken back from social media · {kept} of {measured} days kept'**
+  String recap_free(String minutes, int kept, int measured);
+
+  /// No description provided for @recap_sport.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} of sport in {count, plural, =1{1 session} other{{count} sessions}}'**
+  String recap_sport(String minutes, int count);
+
+  /// No description provided for @recap_sport_none.
+  ///
+  /// In en, this message translates to:
+  /// **'No sport session'**
+  String get recap_sport_none;
+
+  /// No description provided for @recap_page_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Recap'**
+  String get recap_page_title;
+
+  /// No description provided for @recap_month.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get recap_month;
+
+  /// No description provided for @recap_previous.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous period'**
+  String get recap_previous;
+
+  /// No description provided for @recap_next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next period'**
+  String get recap_next;
+
+  /// No description provided for @recap_in_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress: the recap fills in as the days go by.'**
+  String get recap_in_progress;
+
+  /// No description provided for @recap_week_range.
+  ///
+  /// In en, this message translates to:
+  /// **'{from} – {to}'**
+  String recap_week_range(String from, String to);
+
+  /// No description provided for @recap_before.
+  ///
+  /// In en, this message translates to:
+  /// **'before: {value}'**
+  String recap_before(String value);
+
+  /// No description provided for @recap_bike_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Bike'**
+  String get recap_bike_title;
+
+  /// No description provided for @recap_free_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'{kept} of {measured} days kept · {over} over'**
+  String recap_free_detail(int kept, int measured, String over);
+
+  /// No description provided for @recap_sport_share.
+  ///
+  /// In en, this message translates to:
+  /// **'Of the {regained} taken back from social media, {sport} went into sport.'**
+  String recap_sport_share(String regained, String sport);
+
+  /// No description provided for @recap_notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get recap_notifications;
+
+  /// No description provided for @recap_notify_weekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly recap'**
+  String get recap_notify_weekly;
+
+  /// No description provided for @recap_notify_weekly_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Every Sunday evening'**
+  String get recap_notify_weekly_hint;
+
+  /// No description provided for @recap_notify_monthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly recap'**
+  String get recap_notify_monthly;
+
+  /// No description provided for @recap_notify_monthly_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'On the last day of the month'**
+  String get recap_notify_monthly_hint;
+
+  /// No description provided for @recap_notify_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'The notification covers what was entered up to the last time iZerak was opened.'**
+  String get recap_notify_hint;
+
+  /// No description provided for @recap_home_title.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get recap_home_title;
+
+  /// No description provided for @recap_open.
+  ///
+  /// In en, this message translates to:
+  /// **'See the recap'**
+  String get recap_open;
 }
 
 class _AppLocalizationsDelegate

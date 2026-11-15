@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/commute_dao.dart' show dateOnly;
 import 'package:i_zerak_app/models/sport_dao.dart';
+import 'package:i_zerak_app/pages/recap/recap_page.dart';
 import 'package:i_zerak_app/pages/sport/sport_plan_page.dart';
 import 'package:i_zerak_app/pages/sport/widgets/sport_sheets.dart';
 import 'package:i_zerak_app/pages/sport/widgets/sport_ui.dart';
+import 'package:i_zerak_app/services/recap/recap_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_sport.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 
@@ -14,11 +16,16 @@ import 'package:i_zerak_app/services/service_locator.dart';
 /// Tout se saisit a la main, et c'est voulu : dire chaque semaine ce qui a ete
 /// fait — ou pas — est ce qui fait tenir l'habitude.
 class SportPage extends StatefulWidget {
-  SportPage({super.key, ISport? store, DateTime Function()? clock})
+  SportPage({super.key, ISport? store, RecapService? recap, DateTime Function()? clock})
       : store = store ?? getIt<ISport>(),
+        recap = recap ?? (getIt.isRegistered<RecapService>() ? getIt<RecapService>() : null),
         clock = clock ?? DateTime.now;
 
   final ISport store;
+
+  /// Le bilan, qui met le sport a cote du velo et des reseaux. Nul dans les
+  /// tests qui ne s'en servent pas : le bouton disparait.
+  final RecapService? recap;
   final DateTime Function() clock;
 
   @override
@@ -111,6 +118,13 @@ class _SportPageState extends State<SportPage> {
     await _reload();
   }
 
+  Future<void> _openRecap() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => RecapPage(service: widget.recap!, sport: widget.store, clock: widget.clock),
+        ),
+      );
+
   void _shiftWeek(int weeks) => setState(
         () => _monday = DateTime(_monday.year, _monday.month, _monday.day + 7 * weeks),
       );
@@ -152,6 +166,14 @@ class _SportPageState extends State<SportPage> {
               icon: const Icon(Icons.event_note_outlined),
               label: Text(l10n.sport_plan),
             ),
+            if (widget.recap != null) ...[
+              const SizedBox(width: 4),
+              IconButton.filledTonal(
+                onPressed: _openRecap,
+                tooltip: l10n.recap_open,
+                icon: const Icon(Icons.insights),
+              ),
+            ],
           ]),
           const SizedBox(height: 12),
           _WeekCard(

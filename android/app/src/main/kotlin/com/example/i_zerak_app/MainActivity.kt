@@ -120,6 +120,10 @@ class MainActivity : FlutterActivity() {
                 DailyReport.configure(this, call.arguments as? Map<*, *>)
                 result.success(null)
             }
+            "configureRecap" -> {
+                RecapReport.configure(this, call.arguments as? Map<*, *>)
+                result.success(null)
+            }
             "requestNotifications" -> requestNotifications(result)
             else -> result.notImplemented()
         }
