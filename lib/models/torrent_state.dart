@@ -74,4 +74,26 @@ enum TorrentState {
 
   bool get isChecking =>
       this == checkingDl || this == checkingUp || this == checkingResumeData || this == moving;
+
+  /// Ce que fait le torrent, en trois familles, pour les compteurs de
+  /// l'accueil. [progress] departage les etats transitoires (verification,
+  /// deplacement) qui ne disent pas si le contenu est complet.
+  TorrentActivity activity(double progress) {
+    if (isError ||
+        isPaused ||
+        this == stalledDl ||
+        this == queuedDl ||
+        this == queuedUp ||
+        this == unknown) {
+      return TorrentActivity.idle;
+    }
+    if (isCompleted || progress >= 1) {
+      return TorrentActivity.seeding;
+    }
+    return TorrentActivity.downloading;
+  }
 }
+
+/// Famille d'activite d'un torrent : en partage, en cours de telechargement,
+/// ou a l'arret (pause, file d'attente, sans source, erreur).
+enum TorrentActivity { seeding, downloading, idle }

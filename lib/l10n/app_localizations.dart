@@ -980,6 +980,18 @@ abstract class AppLocalizations {
   /// **'Stalled'**
   String get state_stalled;
 
+  /// No description provided for @state_seeding_idle.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeding (no peer)'**
+  String get state_seeding_idle;
+
+  /// No description provided for @torrent_ratio.
+  ///
+  /// In en, this message translates to:
+  /// **'Ratio {ratio}'**
+  String torrent_ratio(String ratio);
+
   /// No description provided for @state_checking.
   ///
   /// In en, this message translates to:
@@ -2456,6 +2468,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No download running'**
   String get home_downloads_none;
+
+  /// No description provided for @home_torrents_seeding.
+  ///
+  /// In en, this message translates to:
+  /// **'seeding'**
+  String get home_torrents_seeding;
+
+  /// No description provided for @home_torrents_downloading.
+  ///
+  /// In en, this message translates to:
+  /// **'downloading'**
+  String get home_torrents_downloading;
+
+  /// No description provided for @home_torrents_idle.
+  ///
+  /// In en, this message translates to:
+  /// **'paused / stalled'**
+  String get home_torrents_idle;
 
   /// No description provided for @home_fuel_station.
   ///

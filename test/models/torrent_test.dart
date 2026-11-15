@@ -36,6 +36,19 @@ void main() {
       expect(TorrentState.moving.isChecking, isTrue);
       expect(TorrentState.unknown.isActive, isFalse);
     });
+
+    test('activite : un torrent complet sans pair reste en seed', () {
+      expect(TorrentState.stalledUp.activity(1), TorrentActivity.seeding);
+      expect(TorrentState.uploading.activity(1), TorrentActivity.seeding);
+      expect(TorrentState.downloading.activity(0.4), TorrentActivity.downloading);
+      expect(TorrentState.metaDl.activity(0), TorrentActivity.downloading);
+      expect(TorrentState.stalledDl.activity(0.4), TorrentActivity.idle);
+      expect(TorrentState.pausedUp.activity(1), TorrentActivity.idle);
+      expect(TorrentState.error.activity(0.4), TorrentActivity.idle);
+      // Les etats transitoires se departagent a l'avancement.
+      expect(TorrentState.moving.activity(1), TorrentActivity.seeding);
+      expect(TorrentState.checkingResumeData.activity(0.5), TorrentActivity.downloading);
+    });
   });
 
   group('TorrentDao.fromJson', () {

@@ -118,6 +118,7 @@ class TorrentCard extends StatelessWidget {
     if (torrent.upspeed > 0) {
       parts.add('↑ ${formatSpeed(torrent.upspeed)}');
     }
+    parts.add(AppLocalizations.of(context)!.torrent_ratio(formatRatio(torrent.ratio)));
     // Le temps restant n'a de sens que pendant un telechargement actif.
     if (torrent.state.isDownloading && torrent.eta < kInfiniteEta && torrent.eta >= 0) {
       parts.add(formatEta(torrent.eta));

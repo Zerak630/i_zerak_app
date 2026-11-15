@@ -83,6 +83,8 @@ class TorrentDao {
         .toList(growable: false);
   }
 
+  TorrentActivity get activity => state.activity(progress);
+
   @override
   String toString() => 'TorrentDao($hash, $name, ${state.name})';
 }

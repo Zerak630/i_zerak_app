@@ -485,6 +485,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get state_stalled => 'Stalled';
 
   @override
+  String get state_seeding_idle => 'Seeding (no peer)';
+
+  @override
+  String torrent_ratio(String ratio) {
+    return 'Ratio $ratio';
+  }
+
+  @override
   String get state_checking => 'Checking';
 
   @override
@@ -1424,6 +1432,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get home_downloads_none => 'No download running';
+
+  @override
+  String get home_torrents_seeding => 'seeding';
+
+  @override
+  String get home_torrents_downloading => 'downloading';
+
+  @override
+  String get home_torrents_idle => 'paused / stalled';
 
   @override
   String home_fuel_station(String station, int count) {

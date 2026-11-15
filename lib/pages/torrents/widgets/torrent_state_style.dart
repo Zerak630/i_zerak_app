@@ -11,9 +11,12 @@ extension TorrentStateStyle on TorrentState {
         TorrentState.downloading || TorrentState.forcedDl => Icons.download,
         TorrentState.metaDl || TorrentState.forcedMetaDl => Icons.hourglass_top,
         TorrentState.uploading || TorrentState.forcedUp => Icons.upload,
+        // Complet, en partage, mais personne ne demande de donnees : ce
+        // n'est pas un blocage.
+        TorrentState.stalledUp => Icons.cloud_done,
         TorrentState.pausedDl || TorrentState.pausedUp => Icons.pause_circle,
         TorrentState.queuedDl || TorrentState.queuedUp => Icons.schedule,
-        TorrentState.stalledDl || TorrentState.stalledUp => Icons.pending,
+        TorrentState.stalledDl => Icons.pending,
         TorrentState.checkingDl ||
         TorrentState.checkingUp ||
         TorrentState.checkingResumeData =>
@@ -49,7 +52,8 @@ extension TorrentStateStyle on TorrentState {
       TorrentState.uploading || TorrentState.forcedUp => l10n.state_uploading,
       TorrentState.pausedDl || TorrentState.pausedUp => l10n.state_paused,
       TorrentState.queuedDl || TorrentState.queuedUp => l10n.state_queued,
-      TorrentState.stalledDl || TorrentState.stalledUp => l10n.state_stalled,
+      TorrentState.stalledDl => l10n.state_stalled,
+      TorrentState.stalledUp => l10n.state_seeding_idle,
       TorrentState.checkingDl ||
       TorrentState.checkingUp ||
       TorrentState.checkingResumeData =>
