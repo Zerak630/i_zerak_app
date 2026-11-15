@@ -15,8 +15,13 @@ import 'package:i_zerak_app/pages/dashboard/dashboard_page.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_exceptions.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
+import 'package:i_zerak_app/models/sport_dao.dart';
+import 'package:i_zerak_app/services/recap/recap_service.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_sport.dart';
 
 import '../../__mocks__/commute_fakes.dart';
+import '../../__mocks__/recap_fakes.dart';
+import '../../__mocks__/sport_fakes.dart';
 import '../../__mocks__/subscription_fakes.dart';
 
 Widget wrap(Widget child) => MaterialApp(
@@ -107,6 +112,8 @@ void main() {
     Future<TorrentsSnapshot> Function()? torrents,
     Future<ScreenTimeLedger?> Function()? freeTime,
     void Function(AppTab tab)? onOpenTab,
+    RecapService? recap,
+    ISport? sport,
   }) {
     final favorites = StaticFavorites([(id: 1, label: 'Rue A, Saumur', customName: 'Leclerc')]);
     return DashboardPage(
@@ -122,6 +129,8 @@ void main() {
       systemLoader: system ?? _system,
       torrentsLoader: torrents ?? _torrents,
       freeTimeLoader: freeTime,
+      recap: recap,
+      sport: sport,
       clock: () => now,
       onOpenTab: onOpenTab,
     );
@@ -147,7 +156,7 @@ void main() {
     expect(find.textContaining('vendredi 18 septembre'), findsOneWidget);
     expect(find.text('À vélo'), findsOneWidget);
     expect(find.text('En voiture'), findsOneWidget);
-    expect(find.text('Cagnotte vélo'), findsOneWidget);
+    expect(find.text('à vélo ce mois-ci'), findsOneWidget);
     expect(find.text('izerak'), findsOneWidget);
     expect(find.textContaining('47 °C'), findsOneWidget);
     expect(find.textContaining('61 %'), findsOneWidget);
@@ -167,7 +176,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
     final day = tester.getTopLeft(find.text('À vélo'));
-    final money = tester.getTopLeft(find.text('Cagnotte vélo'));
+    final money = tester.getTopLeft(find.text('à vélo ce mois-ci'));
     final pi = tester.getTopLeft(find.textContaining('47 °C'));
     // Cote a cote, de gauche a droite, dans l'ordre du telephone.
     expect(day.dx, lessThan(money.dx));
@@ -183,7 +192,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
     final day = tester.getTopLeft(find.text('À vélo'));
-    final money = tester.getTopLeft(find.text('Cagnotte vélo'));
+    final money = tester.getTopLeft(find.text('à vélo ce mois-ci'));
     final pi = tester.getTopLeft(find.textContaining('47 °C'));
     // La journee et l'argent a gauche, l'un sous l'autre ; le Pi a droite.
     expect(day.dx, lessThan(450));
@@ -217,7 +226,6 @@ void main() {
     final ledger = ScreenTimeLedger(
       settings: settings,
       days: const [],
-      goals: const [],
       today: now,
       live: DailyUsage(
         date: now,
@@ -237,7 +245,7 @@ void main() {
 
     expect(find.text('Raspberry Pi injoignable'), findsOneWidget);
     // Les sources locales et les transferts restent affiches.
-    expect(find.text('Cagnotte vélo'), findsOneWidget);
+    expect(find.text('à vélo ce mois-ci'), findsOneWidget);
     // Deux torrents complets en seed, dont un sans pair, et un en cours.
     expect(find.text('en seed'), findsOneWidget);
     expect(find.text('2'), findsWidgets);
@@ -340,5 +348,29 @@ testWidgets('le defi du mois tient sur une ligne et ouvre sa page', (tester) asy
     await open(tester);
 
     expect(find.text('Défi du mois'), findsNothing);
+  });
+
+  testWidgets('le bilan de la semaine se lit sur l accueil, et s ouvre', (tester) async {
+    final sport = MemorySport(sessions: [
+      SportSession(id: 'a', date: DateTime(2026, 9, 16), sportId: Sport.yoga, minutes: 40),
+    ]);
+    final recap = RecapService(
+      commute: commute,
+      subscriptions: subscriptions,
+      sport: sport,
+      preferences: MemoryPreferences(),
+      bridge: FakeRecapBridge(supported: false),
+      clock: () => now,
+    );
+    await tester.binding.setSurfaceSize(const Size(420, 2400));
+    await open(tester, given: page(recap: recap, sport: sport));
+
+    expect(find.text('BILAN DE LA SEMAINE'), findsOneWidget);
+    expect(find.text('40 min de sport en 1 séance'), findsOneWidget);
+
+    await tester.tap(find.text('BILAN DE LA SEMAINE'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bilan'), findsOneWidget);
+    expect(find.text('Du 14 sept. au 20 sept.'), findsOneWidget);
   });
 }

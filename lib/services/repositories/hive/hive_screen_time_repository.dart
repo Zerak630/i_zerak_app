@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:hive/hive.dart';
-import 'package:i_zerak_app/models/commute_dao.dart' show Goal, dayKey;
+import 'package:i_zerak_app/models/commute_dao.dart' show dayKey;
 import 'package:i_zerak_app/models/screen_time_dao.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_screen_time.dart';
 
@@ -11,8 +11,10 @@ import 'package:i_zerak_app/services/repositories/interfaces/i_screen_time.dart'
 /// prefixees par nature :
 ///
 ///   - `settings` : les reglages ;
-///   - `day:aaaa-mm-jj` : une journee terminee ;
-///   - `goal:<id>` : un objectif.
+///   - `day:aaaa-mm-jj` : une journee terminee.
+///
+/// Les cles `goal:<id>` qu'y a laissees la cagnotte d'autrefois ne sont plus
+/// lues.
 ///
 /// Une entree illisible est ignoree plutot que de faire echouer la lecture
 /// entiere.
@@ -23,7 +25,6 @@ class HiveScreenTimeRepository implements IScreenTime {
 
   static const String _settingsKey = 'settings';
   static const String _dayPrefix = 'day:';
-  static const String _goalPrefix = 'goal:';
 
   Object? _decode(String? raw) {
     if (raw == null) {
@@ -66,19 +67,4 @@ class HiveScreenTimeRepository implements IScreenTime {
 
   @override
   Future<void> saveDay(ScreenTimeDay day) => _put('$_dayPrefix${dayKey(day.date)}', day.toJson());
-
-  @override
-  Future<List<Goal>> getGoals() async => [
-        for (final raw in _valuesWithPrefix(_goalPrefix))
-          if (Goal.fromJson(raw) case final Goal goal) goal,
-      ];
-
-  @override
-  Future<void> saveGoal(Goal goal) => _put('$_goalPrefix${goal.id}', goal.toJson());
-
-  @override
-  Future<void> deleteGoal(String id) async {
-    await _box.delete('$_goalPrefix$id');
-    await _box.flush();
-  }
 }

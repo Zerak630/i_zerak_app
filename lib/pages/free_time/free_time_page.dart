@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
-import 'package:i_zerak_app/models/commute_dao.dart' show Goal;
 import 'package:i_zerak_app/models/screen_time_dao.dart';
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart' show CommuteFormat;
-import 'package:i_zerak_app/pages/commute/widgets/goal_sheets.dart';
-import 'package:i_zerak_app/pages/commute/widgets/pot_carousel.dart';
 import 'package:i_zerak_app/pages/free_time/free_time_settings_page.dart';
 import 'package:i_zerak_app/pages/free_time/free_time_setup_page.dart';
 import 'package:i_zerak_app/pages/free_time/widgets/free_time_ui.dart';
@@ -12,7 +9,10 @@ import 'package:i_zerak_app/services/screen_time/screen_time_service.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 
 /// L'onglet Temps libre : le temps passe aujourd'hui sur les reseaux, le
-/// quota qui baisse chaque semaine, et la cagnotte de ce qui a ete gagne.
+/// quota qui baisse chaque semaine, et le temps repris depuis le debut.
+///
+/// Du temps, pas d'argent : une heure loin d'Instagram ne vaut pas « 2 € »,
+/// elle vaut une heure — de quoi faire une seance de sport, par exemple.
 ///
 /// Rien ne se saisit ici : Android mesure, l'onglet compte.
 class FreeTimePage extends StatefulWidget {
@@ -78,65 +78,6 @@ class _FreeTimePageState extends State<FreeTimePage> {
     await _sync();
   }
 
-  /// Ce qui manque a un objectif, traduit en heures loin des reseaux.
-  double? _hoursFor(double amount) {
-    final rate = _ledger?.settings.ratePerHour ?? 0;
-    return rate <= 0 || amount <= 0 ? null : amount / rate;
-  }
-
-  Future<void> _newGoal() async {
-    final l10n = AppLocalizations.of(context)!;
-    final ledger = _ledger!;
-    final goal = await showNewGoalSheet(
-      context,
-      book: ledger.book,
-      missingHint: (missing) {
-        final hours = _hoursFor(missing);
-        return hours == null
-            ? null
-            : l10n.free_goal_missing_hours(_hoursLabel(hours), CommuteFormat(context).euros(ledger.settings.ratePerHour));
-      },
-    );
-    if (goal == null) {
-      return;
-    }
-    await widget.service.store.saveGoal(goal);
-    await _sync();
-  }
-
-  Future<void> _validateGoal(Goal goal) async {
-    final confirmed = await showValidateGoalSheet(context, goal: goal, book: _ledger!.book);
-    if (!confirmed || !_ledger!.book.progressOf(goal).reached) {
-      return;
-    }
-    await widget.service.store.saveGoal(goal.validated(DateTime.now()));
-    await _sync();
-  }
-
-  Future<void> _deleteGoal(Goal goal) async {
-    final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.goal_delete),
-        content: Text(l10n.delete_confirm(goal.name)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.delete)),
-        ],
-      ),
-    );
-    if (confirmed == true) {
-      await widget.service.store.deleteGoal(goal.id);
-      await _sync();
-    }
-  }
-
-  /// « 3 h », « 1,5 h » : un ordre de grandeur, pas un chronometre.
-  String _hoursLabel(double hours) => CommuteFormat(context).number(
-        hours >= 10 ? hours.roundToDouble() : (hours * 2).ceilToDouble() / 2,
-      );
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -166,28 +107,15 @@ class _FreeTimePageState extends State<FreeTimePage> {
       );
     }
 
-    final format = CommuteFormat(context);
     return RefreshIndicator(
       onRefresh: _sync,
       child: ListView(
         padding: const EdgeInsets.only(bottom: 24),
         children: [
-          GoalCarousel(
-            book: ledger.book,
-            leading: _FreePotTile(ledger: ledger),
-            remainingLabel: (remaining) {
-              final hours = _hoursFor(remaining);
-              return hours == null
-                  ? l10n.goal_remaining_amount(format.euros(remaining))
-                  : l10n.free_goal_remaining(format.euros(remaining), _hoursLabel(hours));
-            },
-            onValidate: _validateGoal,
-            onNewGoal: _newGoal,
-            onDeleteGoal: _deleteGoal,
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              _RegainedCard(ledger: ledger),
               const SizedBox(height: 12),
               if (!_access) ...[
                 _AccessLostCard(onFix: source.openAccessSettings),
@@ -253,8 +181,10 @@ class _Message extends StatelessWidget {
   }
 }
 
-class _FreePotTile extends StatelessWidget {
-  const _FreePotTile({required this.ledger});
+/// La carte de tete : le temps repris aux reseaux depuis la mise en route,
+/// et les quatorze derniers jours.
+class _RegainedCard extends StatelessWidget {
+  const _RegainedCard({required this.ledger});
 
   final ScreenTimeLedger ledger;
 
@@ -265,31 +195,35 @@ class _FreePotTile extends StatelessWidget {
     final scheme = theme.colorScheme;
     final format = CommuteFormat(context);
     final today = ledger.today;
+    final monday = DateTime(today.year, today.month, today.day - (today.weekday - 1));
+    final week = ledger.regainedBetween(monday, today) + ledger.todayRegained;
 
-    final String subtitle;
-    if (ledger.book.spent > 0) {
-      subtitle = l10n.commute_saved_and_spent(
-          format.euros(ledger.totalSaved), format.euros(ledger.book.spent));
-    } else if (ledger.days.isEmpty) {
-      subtitle = l10n.free_pot_first_day;
-    } else {
-      subtitle = l10n.free_pot_hours(
-          formatMinutes(l10n, ledger.hoursSaved * 60), format.dayMonth(ledger.settings.startDate!));
-    }
-
-    return PotTileFrame(
+    return Container(
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        PotTileHeader(
-          icon: Icons.savings_outlined,
-          label: l10n.free_pot,
-          color: scheme.primary,
-        ),
+        Row(children: [
+          Icon(Icons.hourglass_bottom, size: 18, color: scheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              l10n.free_regained_title.toUpperCase(),
+              style: theme.textTheme.labelMedium?.copyWith(
+                letterSpacing: 0.8,
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ]),
         const SizedBox(height: 10),
         FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
           child: Text(
-            format.euros(ledger.balance),
+            formatMinutes(l10n, ledger.regainedMinutes),
             style: theme.textTheme.displaySmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: scheme.primary,
@@ -298,11 +232,16 @@ class _FreePotTile extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        Text(subtitle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant)),
-        const Spacer(),
+        Text(
+          ledger.days.isEmpty
+              ? l10n.free_regained_first_day
+              : l10n.free_regained_since(
+                  format.dayMonth(ledger.settings.startDate!), formatMinutes(l10n, week)),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 16),
         Row(children: [
           for (var offset = 14; offset >= 1; offset--) ...[
             Container(
@@ -437,14 +376,14 @@ class _TodayCard extends StatelessWidget {
           Expanded(
             child: under
                 ? _Figure(
-                    icon: Icons.savings_outlined,
-                    value: '+ ${format.euros(ledger.todayGain)}',
-                    label: l10n.free_today_gain,
+                    icon: Icons.hourglass_bottom,
+                    value: '+ ${formatMinutes(l10n, ledger.todayRegained)}',
+                    label: l10n.free_today_regained,
                   )
                 : _Figure(
-                    icon: Icons.money_off,
-                    value: format.euros(ledger.todayMissed),
-                    label: l10n.free_today_missed,
+                    icon: Icons.timer_off_outlined,
+                    value: formatMinutes(l10n, ledger.todayOver),
+                    label: l10n.free_today_over_label,
                     color: scheme.tertiary,
                   ),
           ),
@@ -558,8 +497,8 @@ class _WeekCard extends StatelessWidget {
   }
 }
 
-/// Les deux cases sous la cagnotte : ce qu'ont rapporte les jours tenus, et
-/// ce qu'ont laisse passer les autres.
+/// Les deux cases sous le temps repris : les jours tenus, et le temps de trop
+/// des autres.
 class _Totals extends StatelessWidget {
   const _Totals({required this.ledger});
 
@@ -572,18 +511,18 @@ class _Totals extends StatelessWidget {
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Expanded(
         child: _TotalCard(
-          label: l10n.free_kept,
-          amount: ledger.totalSaved,
-          days: ledger.earningDays,
+          label: l10n.free_kept_days,
+          value: l10n.commute_days(ledger.keptDays),
+          detail: l10n.free_kept_detail(ledger.days.length),
           color: scheme.primary,
         ),
       ),
       const SizedBox(width: 10),
       Expanded(
         child: _TotalCard(
-          label: l10n.commute_missed,
-          amount: ledger.totalMissed,
-          days: ledger.missedDays,
+          label: l10n.free_over_total,
+          value: formatMinutes(l10n, ledger.overMinutes),
+          detail: l10n.commute_days(ledger.overDays),
           color: scheme.tertiary,
         ),
       ),
@@ -594,19 +533,18 @@ class _Totals extends StatelessWidget {
 class _TotalCard extends StatelessWidget {
   const _TotalCard({
     required this.label,
-    required this.amount,
-    required this.days,
+    required this.value,
+    required this.detail,
     required this.color,
   });
 
   final String label;
-  final double amount;
-  final int days;
+  final String value;
+  final String detail;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
@@ -625,9 +563,13 @@ class _TotalCard extends StatelessWidget {
           ),
         ]),
         const SizedBox(height: 4),
-        Text(CommuteFormat(context).euros(amount),
-            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, color: color)),
-        Text(l10n.commute_days(days), style: theme.textTheme.bodySmall?.copyWith(color: scheme.outline)),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(value,
+              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, color: color)),
+        ),
+        Text(detail, style: theme.textTheme.bodySmall?.copyWith(color: scheme.outline)),
       ]),
     );
   }
@@ -726,9 +668,11 @@ class _RecentDays extends StatelessWidget {
             SizedBox(
               width: 72,
               child: Text(
-                // Au-dessus du quota, la ligne montre ce qui a ete loupe, sans
-                // signe : comme une journee en voiture dans l'onglet Velo.
-                day.missed > 0 ? format.euros(day.missed) : '+ ${format.euros(day.amount)}',
+                // Au-dessus du quota, la ligne montre le temps de trop ; en
+                // dessous, le temps repris sur la moyenne de depart.
+                day.underQuota
+                    ? '+ ${formatMinutes(l10n, day.regainedMinutes)}'
+                    : '− ${formatMinutes(l10n, day.overMinutes)}',
                 textAlign: TextAlign.right,
                 style: theme.textTheme.bodyMedium
                     ?.copyWith(fontWeight: FontWeight.w500, color: _dayColor(scheme, day)),

@@ -72,6 +72,16 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+        <!-- Bilan de la semaine et du mois (cf. RecapReport.kt). Meme regles
+             que le bilan du soir. -->
+        <receiver
+            android:name=".RecapReportReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
         <!-- Widgets de l'ecran d'accueil (cf. HomeWidgets.kt). -->
         <receiver
             android:name=".CommuteWidgetProvider"

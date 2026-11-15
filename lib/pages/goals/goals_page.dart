@@ -2,29 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/commute_dao.dart';
 import 'package:i_zerak_app/models/companion_dao.dart';
+import 'package:i_zerak_app/models/payback_dao.dart';
+import 'package:i_zerak_app/models/subscription_dao.dart' show Subscription, SubscriptionFrequency;
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
 import 'package:i_zerak_app/pages/commute/widgets/goal_sheets.dart';
+import 'package:i_zerak_app/pages/subscriptions/widgets/subscription_ui.dart'
+    show SubscriptionAvatar;
 import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 
-/// L'onglet Objectifs : ce qui reste a atteindre, et quand.
+/// L'onglet Objectifs : ce que le velo rembourse, et ce qu'il rentabilise.
 ///
-/// Les objectifs vivaient dans le carrousel de l'onglet Velo, ou ils
-/// defilaient derriere la cagnotte. Ils ont ici la place d'afficher ce qui leur
-/// manquait : un rythme mesure, et la date que ce rythme donne. « 8 % » ne dit
-/// rien ; « pas avant 2030 » dit que la cible est mal posee.
+/// Deux facons de regarder la meme essence economisee :
+///
+///   - le mois en cours, face aux abonnements que l'on paie deja. Ils
+///     reviennent chaque mois, et n'ont rien a remplir : ce sont des
+///     objectifs tout trouves ;
+///   - les paliers, les gros achats qu'elle finit par rentabiliser — le velo
+///     lui-meme, un telephone. Ils se mesurent sur la duree.
+///
+/// La cagnotte ou l'on puisait pour acheter a disparu : personne ne lui
+/// donnait de but.
 class GoalsPage extends StatefulWidget {
   GoalsPage({
     super.key,
     ICommute? store,
+    ISubscriptions? subscriptions,
     CommutePriceService? prices,
     DateTime Function()? clock,
   })  : store = store ?? getIt<ICommute>(),
+        subscriptions = subscriptions ?? getIt<ISubscriptions>(),
         prices = prices ?? getIt<CommutePriceService>(),
         clock = clock ?? DateTime.now;
 
   final ICommute store;
+  final ISubscriptions subscriptions;
   final CommutePriceService prices;
   final DateTime Function() clock;
 
@@ -35,6 +49,7 @@ class GoalsPage extends StatefulWidget {
 class _GoalsPageState extends State<GoalsPage> {
   CommuteSettings _settings = const CommuteSettings();
   CommuteLedger _ledger = CommuteLedger(const [], const []);
+  List<Subscription> _subscriptions = const [];
   ResolvedPrice? _price;
   var _window = RateWindow.recent;
   var _loading = true;
@@ -61,12 +76,14 @@ class _GoalsPageState extends State<GoalsPage> {
     final settings = await widget.store.readSettings();
     final days = await widget.store.getDays();
     final goals = await widget.store.getGoals();
+    final subscriptions = await widget.subscriptions.getAll();
     if (!mounted) {
       return;
     }
     setState(() {
       _settings = settings;
       _ledger = CommuteLedger(days, goals);
+      _subscriptions = subscriptions;
       _loading = false;
     });
   }
@@ -80,6 +97,7 @@ class _GoalsPageState extends State<GoalsPage> {
     final goal = await showNewGoalSheet(
       context,
       book: _ledger.book,
+      today: _today,
       missingHint: (missing) {
         final trips = tripsFor(missing, tripValue);
         return trips == null ? null : l10n.goal_missing_trips(trips, format.euros(tripValue));
@@ -95,7 +113,7 @@ class _GoalsPageState extends State<GoalsPage> {
   Future<void> _validate(Goal goal) async {
     final confirmed = await showValidateGoalSheet(context, goal: goal, book: _ledger.book);
     // Relu apres la feuille : un trajet annule entre-temps pourrait avoir fait
-    // repasser l'achat sous son montant.
+    // repasser le palier sous son montant.
     if (!confirmed || !_ledger.progressOf(goal).reached) {
       return;
     }
@@ -123,6 +141,24 @@ class _GoalsPageState extends State<GoalsPage> {
     await _reload();
   }
 
+  Future<void> _chooseSubscriptions() async {
+    final excluded = await showModalBottomSheet<Set<String>>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (_) => _ChooseSubscriptionsSheet(
+        subscriptions: paybackSubscriptions(_subscriptions),
+        excluded: _settings.paybackExcluded,
+      ),
+    );
+    if (excluded == null) {
+      return;
+    }
+    await widget.store.saveSettings(_settings.copyWith(paybackExcluded: excluded));
+    await _reload();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -133,32 +169,55 @@ class _GoalsPageState extends State<GoalsPage> {
     final active = _ledger.activeGoals;
     final validated = _ledger.validatedGoals;
     final rate = SavingRate.of(_ledger.days, now: _today, window: _window);
-    final purchases = active.where((goal) => goal.kind == GoalKind.purchase).length;
+    final history = paybackHistory(
+      _today,
+      subscriptions: _subscriptions,
+      commute: _ledger,
+      excluded: _settings.paybackExcluded,
+    );
 
     return RefreshIndicator(
       onRefresh: _reload,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         children: [
+          _PaybackCard(
+            payback: history.first,
+            tripValue: _tripValue,
+            hasSubscriptions: paybackSubscriptions(_subscriptions).isNotEmpty,
+            onChoose: _chooseSubscriptions,
+          ),
+          if (history.skip(1).any((month) => month.saved > 0)) ...[
+            const SizedBox(height: 10),
+            // Les mois sans un seul trajet, avant les debuts du velo, ne
+            // diraient que « 0 sur 4 ».
+            _PaybackHistory(months: [for (final month in history.skip(1)) if (month.saved > 0) month]),
+          ],
+          const SizedBox(height: 22),
           Row(children: [
             Expanded(
-              child: Text(l10n.goals_active(active.length), style: theme.textTheme.titleMedium),
+              child: Text(l10n.goals_milestones, style: theme.textTheme.titleMedium),
             ),
             FilledButton.tonalIcon(
               onPressed: _newGoal,
               icon: const Icon(Icons.add),
-              label: Text(l10n.goal_new),
+              label: Text(l10n.goal_new_short),
             ),
           ]),
-          const SizedBox(height: 12),
-          _RateCard(
-            rate: rate,
-            onWindow: (window) => setState(() => _window = window),
+          const SizedBox(height: 4),
+          Text(
+            l10n.goals_milestones_hint,
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 12),
           if (active.isEmpty)
             _EmptyGoals(onNew: _newGoal)
-          else
+          else ...[
+            _RateCard(
+              rate: rate,
+              onWindow: (window) => setState(() => _window = window),
+            ),
+            const SizedBox(height: 12),
             for (final goal in active) ...[
               _GoalCard(
                 progress: _ledger.progressOf(goal),
@@ -170,9 +229,7 @@ class _GoalsPageState extends State<GoalsPage> {
               ),
               const SizedBox(height: 10),
             ],
-          // Deux achats au moins : avec un seul, la cagnotte ne se partage
-          // avec personne et la phrase n'aurait rien a prevenir.
-          if (purchases >= 2) const _SharedPotNote(),
+          ],
           if (validated.isNotEmpty) ...[
             const SizedBox(height: 14),
             Text(
@@ -191,9 +248,357 @@ class _GoalsPageState extends State<GoalsPage> {
   }
 }
 
-/// Le rythme, et la fenetre sur laquelle il se mesure.
-///
-/// La carte est en tete parce que tout le reste en depend : changer de fenetre
+/// Le mois en cours : l'essence economisee, et les abonnements qu'elle couvre.
+class _PaybackCard extends StatelessWidget {
+  const _PaybackCard({
+    required this.payback,
+    required this.tripValue,
+    required this.hasSubscriptions,
+    required this.onChoose,
+  });
+
+  final MonthPayback payback;
+  final double tripValue;
+
+  /// Faux quand aucun abonnement actif n'existe : la carte renvoie alors a
+  /// l'onglet Abonnements plutot que d'afficher une liste vide.
+  final bool hasSubscriptions;
+  final VoidCallback onChoose;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final format = CommuteFormat(context);
+    final next = payback.next;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          Icon(Icons.pedal_bike, size: 18, color: scheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              l10n.payback_title(format.month(payback.month)).toUpperCase(),
+              style: theme.textTheme.labelMedium?.copyWith(
+                letterSpacing: 0.7,
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ]),
+        const SizedBox(height: 10),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            format.euros(payback.saved),
+            style: theme.textTheme.displaySmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: scheme.primary,
+              letterSpacing: -1,
+            ),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          l10n.payback_saved(payback.bikeDays),
+          style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 14),
+        if (!hasSubscriptions)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(
+              l10n.payback_no_subscription,
+              style: theme.textTheme.bodySmall?.copyWith(color: scheme.outline, height: 1.4),
+            ),
+          )
+        else if (payback.lines.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(
+              l10n.payback_all_excluded,
+              style: theme.textTheme.bodySmall?.copyWith(color: scheme.outline),
+            ),
+          )
+        else ...[
+          Row(children: [
+            Expanded(
+              child: Text(
+                l10n.payback_count(payback.paidCount, payback.lines.length),
+                style: theme.textTheme.titleSmall,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              l10n.payback_amount(format.euros(payback.covered), format.euros(payback.total)),
+              style: theme.textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
+            ),
+          ]),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: payback.ratio,
+              minHeight: 8,
+              color: scheme.primary,
+              backgroundColor: scheme.surfaceContainerHighest,
+            ),
+          ),
+          const SizedBox(height: 6),
+          for (final line in payback.lines) _PaybackRow(line: line, highlighted: line == next),
+          if (next != null)
+            _NextHint(line: next, tripValue: tripValue)
+          else if (payback.surplus > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                l10n.payback_surplus(format.euros(payback.surplus)),
+                style: theme.textTheme.bodySmall?.copyWith(color: scheme.primary),
+              ),
+            ),
+        ],
+        if (hasSubscriptions)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: onChoose,
+              icon: const Icon(Icons.tune, size: 18),
+              label: Text(l10n.payback_choose),
+            ),
+          ),
+      ]),
+    );
+  }
+}
+
+class _PaybackRow extends StatelessWidget {
+  const _PaybackRow({required this.line, required this.highlighted});
+
+  final PaybackLine line;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final format = CommuteFormat(context);
+    final started = line.covered > 0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(children: [
+        SubscriptionAvatar(
+          iconId: line.subscription.iconId,
+          color: scheme.primary,
+          size: 30,
+          muted: !line.paid && !started,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(
+              line.subscription.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: highlighted ? FontWeight.w600 : null,
+              ),
+            ),
+            if (!line.paid && started) ...[
+              const SizedBox(height: 4),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(3),
+                child: LinearProgressIndicator(
+                  value: line.ratio,
+                  minHeight: 4,
+                  color: scheme.primary,
+                  backgroundColor: scheme.surfaceContainerHighest,
+                ),
+              ),
+            ],
+          ]),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          line.paid ? format.euros(line.monthly) : '${format.euros(line.covered)} / ${format.euros(line.monthly)}',
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: line.paid ? scheme.primary : scheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Icon(
+          line.paid ? Icons.check_circle : Icons.radio_button_unchecked,
+          size: 18,
+          color: line.paid ? scheme.primary : scheme.outlineVariant,
+        ),
+      ]),
+    );
+  }
+}
+
+/// Ce qu'il faut encore pour faire tomber l'abonnement suivant, en trajets
+/// quand le prix du jour est connu.
+class _NextHint extends StatelessWidget {
+  const _NextHint({required this.line, required this.tripValue});
+
+  final PaybackLine line;
+  final double tripValue;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final format = CommuteFormat(context);
+    final trips = tripsFor(line.remaining, tripValue);
+
+    return Container(
+      margin: const EdgeInsets.only(top: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(children: [
+        Icon(Icons.flag_outlined, size: 16, color: scheme.onPrimaryContainer),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            trips == null
+                ? l10n.payback_next_amount(format.euros(line.remaining), line.subscription.name)
+                : l10n.payback_next_trips(trips, line.subscription.name),
+            style: theme.textTheme.bodySmall?.copyWith(color: scheme.onPrimaryContainer),
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+/// Les mois precedents, une ligne chacun.
+class _PaybackHistory extends StatelessWidget {
+  const _PaybackHistory({required this.months});
+
+  final List<MonthPayback> months;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final format = CommuteFormat(context);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(
+          l10n.payback_history.toUpperCase(),
+          style: theme.textTheme.labelMedium?.copyWith(
+            letterSpacing: 0.7,
+            color: scheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 6),
+        for (final month in months)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Row(children: [
+              SizedBox(
+                width: 110,
+                child: Text(format.month(month.month), style: theme.textTheme.bodyMedium),
+              ),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: LinearProgressIndicator(
+                    value: month.ratio,
+                    minHeight: 6,
+                    color: month.allPaid ? scheme.primary : scheme.secondary,
+                    backgroundColor: scheme.surfaceContainerHighest,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                width: 92,
+                child: Text(
+                  month.lines.isEmpty
+                      ? format.euros(month.saved)
+                      : l10n.payback_history_row(month.paidCount, month.lines.length),
+                  textAlign: TextAlign.end,
+                  style: theme.textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+              ),
+            ]),
+          ),
+      ]),
+    );
+  }
+}
+
+/// Le choix des abonnements que le velo rembourse. Renvoie les exclus.
+class _ChooseSubscriptionsSheet extends StatefulWidget {
+  const _ChooseSubscriptionsSheet({required this.subscriptions, required this.excluded});
+
+  final List<Subscription> subscriptions;
+  final Set<String> excluded;
+
+  @override
+  State<_ChooseSubscriptionsSheet> createState() => _ChooseSubscriptionsSheetState();
+}
+
+class _ChooseSubscriptionsSheetState extends State<_ChooseSubscriptionsSheet> {
+  late final Set<String> _excluded = {...widget.excluded};
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final format = CommuteFormat(context);
+    return CommuteSheet(children: [
+      Text(l10n.payback_choose, style: theme.textTheme.titleLarge),
+      const SizedBox(height: 4),
+      Text(
+        l10n.payback_choose_hint,
+        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+      ),
+      const SizedBox(height: 8),
+      for (final subscription in widget.subscriptions)
+        CheckboxListTile(
+          contentPadding: EdgeInsets.zero,
+          value: !_excluded.contains(subscription.id),
+          title: Text(subscription.name),
+          subtitle: Text(l10n.payback_per_month(
+              format.euros(roundCents(subscription.amountIn(SubscriptionFrequency.monthly))))),
+          onChanged: (kept) => setState(() {
+            final id = subscription.id;
+            if (id == null) {
+              return;
+            }
+            kept == true ? _excluded.remove(id) : _excluded.add(id);
+          }),
+        ),
+      const SizedBox(height: 12),
+      FilledButton(
+        onPressed: () => Navigator.pop(context, _excluded),
+        child: Text(l10n.save),
+      ),
+    ]);
+  }
+}
+
 /// change toutes les dates des cartes du dessous.
 class _RateCard extends StatelessWidget {
   const _RateCard({required this.rate, required this.onWindow});
@@ -280,7 +685,8 @@ class _RateCard extends StatelessWidget {
   }
 }
 
-/// Un objectif : son anneau, son avancement, et sa date.
+
+/// Un palier : son anneau, ce qui est rentabilise, et sa date.
 class _GoalCard extends StatelessWidget {
   const _GoalCard({
     required this.progress,
@@ -305,8 +711,7 @@ class _GoalCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final format = CommuteFormat(context);
     final goal = progress.goal;
-    final milestone = goal.kind == GoalKind.milestone;
-    final color = goalColor(scheme, goal.kind);
+    final color = scheme.tertiary;
 
     return GestureDetector(
       onLongPress: onDelete,
@@ -324,6 +729,8 @@ class _GoalCard extends StatelessWidget {
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
+                  Icon(goalIconData(goal.icon), size: 18, color: color),
+                  const SizedBox(width: 6),
                   Flexible(
                     child: Text(
                       goal.name,
@@ -332,30 +739,20 @@ class _GoalCard extends StatelessWidget {
                       style: theme.textTheme.titleMedium,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  if (milestone)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: color),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        l10n.goal_label_milestone.toUpperCase(),
-                        style: theme.textTheme.labelSmall?.copyWith(color: color),
-                      ),
-                    ),
                 ]),
                 const SizedBox(height: 3),
                 Text(
-                  milestone
-                      ? l10n.goal_progress_milestone(
-                          format.euros(progress.current), format.euros(goal.target))
-                      : l10n.goal_progress_purchase(
-                          format.euros(progress.current.clamp(0, goal.target).toDouble()),
-                          format.euros(goal.target)),
+                  l10n.goal_progress_milestone(
+                      format.euros(progress.current), format.euros(goal.target)),
                   style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
                 ),
+                if (goal.since != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.goal_counted_since(format.shortDayWithYear(goal.since!)),
+                    style: theme.textTheme.labelSmall?.copyWith(color: scheme.outline),
+                  ),
+                ],
                 if (!progress.reached) ...[
                   const SizedBox(height: 5),
                   _Forecast(
@@ -373,12 +770,10 @@ class _GoalCard extends StatelessWidget {
             FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: color,
-                foregroundColor: milestone ? scheme.onTertiary : scheme.onPrimary,
+                foregroundColor: scheme.onTertiary,
               ),
               onPressed: onValidate,
-              child: Text(milestone
-                  ? l10n.goal_validate_milestone
-                  : l10n.goal_spend_validate(format.euros(goal.target))),
+              child: Text(l10n.goal_validate_milestone),
             ),
           ],
         ]),
@@ -432,7 +827,9 @@ class _Forecast extends StatelessWidget {
         child: Text(
           distant
               ? l10n.goals_forecast_year('${date.year}')
-              : l10n.goals_forecast(format.dayMonth(date)),
+              : l10n.goals_forecast(date.year == today.year
+                  ? format.dayMonth(date)
+                  : '${format.dayMonth(date)} ${date.year}'),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: theme.textTheme.bodySmall?.copyWith(color: color, fontWeight: FontWeight.w500),
@@ -486,32 +883,6 @@ class _Ring extends StatelessWidget {
   }
 }
 
-class _SharedPotNote extends StatelessWidget {
-  const _SharedPotNote();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(children: [
-        Icon(Icons.info_outline, size: 17, color: scheme.outline),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            AppLocalizations.of(context)!.goals_shared_pot,
-            style: theme.textTheme.labelSmall?.copyWith(color: scheme.outline, height: 1.4),
-          ),
-        ),
-      ]),
-    );
-  }
-}
 
 class _EmptyGoals extends StatelessWidget {
   const _EmptyGoals({required this.onNew});
@@ -524,7 +895,7 @@ class _EmptyGoals extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Container(
-      padding: const EdgeInsets.fromLTRB(18, 22, 18, 20),
+      padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: scheme.outlineVariant, width: 1.5),
@@ -532,8 +903,8 @@ class _EmptyGoals extends StatelessWidget {
       child: Column(children: [
         CircleAvatar(
           radius: 22,
-          backgroundColor: scheme.primaryContainer,
-          foregroundColor: scheme.onPrimaryContainer,
+          backgroundColor: scheme.tertiaryContainer,
+          foregroundColor: scheme.onTertiaryContainer,
           child: const Icon(Icons.flag_outlined),
         ),
         const SizedBox(height: 12),
@@ -565,7 +936,7 @@ class _ValidatedRow extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       visualDensity: VisualDensity.compact,
-      leading: Icon(Icons.check, color: scheme.primary),
+      leading: Icon(Icons.check, color: goalColor(scheme, goal.kind)),
       title: Text(goal.name, style: theme.textTheme.bodyLarge),
       trailing: Text(
         l10n.commute_validated_on(

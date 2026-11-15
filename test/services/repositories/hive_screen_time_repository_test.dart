@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
-import 'package:i_zerak_app/models/commute_dao.dart' show Goal, GoalIcon, GoalKind;
 import 'package:i_zerak_app/models/screen_time_dao.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_screen_time_repository.dart';
 
@@ -32,7 +31,7 @@ void main() {
     return open();
   }
 
-  test('reglages, journees et objectifs se relisent apres reouverture', () async {
+  test('reglages et journees se relisent apres reouverture', () async {
     final settings = ScreenTimeSettings(
       apps: const [TrackedApp(package: 'com.instagram.android', label: 'Instagram')],
       baselineMinutes: 110,
@@ -45,14 +44,6 @@ void main() {
     var repository = await open();
     await repository.saveSettings(settings);
     await repository.saveDay(settings.close(usage));
-    await repository.saveGoal(Goal(
-      id: 'g1',
-      name: 'Concert',
-      target: 40,
-      kind: GoalKind.purchase,
-      icon: GoalIcon.gift,
-      createdAt: DateTime(2026, 11, 3),
-    ));
 
     repository = await reopen();
     final read = await repository.readSettings();
@@ -61,12 +52,7 @@ void main() {
     expect(read.apps.single.label, 'Instagram');
     expect(days.single.minutes, 40);
     expect(days.single.usage.hourly[22], 40 * 60);
-    expect(days.single.amount, 2.33);
-    expect((await repository.getGoals()).single.name, 'Concert');
-
-    await repository.deleteGoal('g1');
-    repository = await reopen();
-    expect(await repository.getGoals(), isEmpty);
+    expect(days.single.regainedMinutes, 70);
   });
 
   test('une entree illisible est ignoree', () async {

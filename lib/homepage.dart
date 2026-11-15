@@ -6,6 +6,7 @@ import 'package:i_zerak_app/pages/app_tab_ui.dart';
 import 'package:i_zerak_app/pages/commute/commute_page.dart';
 import 'package:i_zerak_app/pages/dashboard/dashboard_page.dart';
 import 'package:i_zerak_app/pages/free_time/free_time_page.dart';
+import 'package:i_zerak_app/pages/sport/sport_page.dart';
 import 'package:i_zerak_app/pages/gas_stations/gas_station_page.dart';
 import 'package:i_zerak_app/pages/goals/goals_page.dart';
 import 'package:i_zerak_app/pages/more_sheet.dart';
@@ -16,14 +17,20 @@ import 'package:i_zerak_app/pages/system/system_page.dart';
 import 'package:i_zerak_app/pages/torrents/torrents_page.dart';
 import 'package:i_zerak_app/services/home_widgets/home_widgets_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
+import 'package:i_zerak_app/services/recap/recap_service.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 import 'package:i_zerak_app/services/sync/sync_service.dart';
 import 'package:i_zerak_app/utils/wide_layout.dart';
 
 class HomePage extends StatefulWidget {
   HomePage(
-      {super.key, IAppPreferences? preferences, SyncService? sync, HomeWidgetsService? widgets})
+      {super.key,
+      IAppPreferences? preferences,
+      SyncService? sync,
+      HomeWidgetsService? widgets,
+      RecapService? recap})
       : preferences = preferences ?? getIt<IAppPreferences>(),
+        recap = recap ?? (getIt.isRegistered<RecapService>() ? getIt<RecapService>() : null),
         sync = sync ?? (getIt.isRegistered<SyncService>() ? getIt<SyncService>() : null),
         widgets = widgets ??
             (getIt.isRegistered<HomeWidgetsService>() ? getIt<HomeWidgetsService>() : null);
@@ -36,6 +43,10 @@ class HomePage extends StatefulWidget {
   /// Les widgets de l'ecran d'accueil. Nul dans les tests qui n'en ont pas
   /// besoin.
   final HomeWidgetsService? widgets;
+
+  /// Le bilan, dont les notifications partent application fermee. Nul dans
+  /// les tests qui n'en ont pas besoin.
+  final RecapService? recap;
 
   @override
   HomePageState createState() => HomePageState();
@@ -66,7 +77,12 @@ class HomePageState extends State<HomePage> {
       },
       // Les widgets ne se voient que l'application quittee : c'est le moment
       // de leur transmettre ce qui a change.
-      onHide: () => widget.widgets?.refresh(),
+      onHide: () {
+        widget.widgets?.refresh();
+        // Meme moment pour le bilan : il ne partira que l'application
+        // quittee, et doit emporter ce qui vient d'etre saisi.
+        widget.recap?.push();
+      },
     );
     _loadTabs().then((_) => _syncWidgets());
   }
@@ -197,6 +213,7 @@ class HomePageState extends State<HomePage> {
         CommutePage(onOpenGoals: () => _open(AppTab.goals), askCarOnOpen: askCar),
       AppTab.goals => GoalsPage(),
       AppTab.freeTime => FreeTimePage(),
+      AppTab.sport => SportPage(),
       AppTab.torrents => const TorrentsPage(),
       AppTab.system => const SystemPage(),
       AppTab.gas => GasStationPage(),

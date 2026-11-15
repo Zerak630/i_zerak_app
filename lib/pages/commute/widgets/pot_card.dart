@@ -3,12 +3,12 @@ import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/commute_dao.dart';
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
 
-/// La carte de tete de l'onglet Velo : la cagnotte, et ce qu'elle finance.
+/// La carte de tete de l'onglet Velo : l'essence economisee, et ce qu'elle
+/// rembourse.
 ///
-/// Elle a longtemps ete un carrousel ou les objectifs defilaient derriere la
-/// cagnotte. Ils ont maintenant leur onglet, ou ils ont la place d'afficher
-/// leur date : il ne reste ici que le solde, les quatorze derniers jours, et
-/// une ligne vers eux.
+/// Plus de cagnotte a depenser : le total economise ne baisse jamais, et
+/// l'onglet Objectifs le confronte aux abonnements et aux gros achats. Il ne
+/// reste ici que le total, les quatorze derniers jours, et une ligne vers eux.
 class PotCard extends StatelessWidget {
   const PotCard({
     super.key,
@@ -34,10 +34,7 @@ class PotCard extends StatelessWidget {
     final first = ledger.firstBikeDay;
 
     final String subtitle;
-    if (ledger.spent > 0) {
-      subtitle = l10n.commute_saved_and_spent(
-          format.euros(ledger.totalSaved), format.euros(ledger.spent));
-    } else if (first == null) {
+    if (first == null) {
       subtitle = l10n.commute_no_bike_trip;
     } else {
       subtitle = l10n.commute_bike_trips(ledger.totals.bikeDays, format.dayMonth(first));
@@ -56,7 +53,7 @@ class PotCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
-                Icon(Icons.account_balance_wallet_outlined, size: 18, color: scheme.primary),
+                Icon(Icons.savings_outlined, size: 18, color: scheme.primary),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -73,7 +70,7 @@ class PotCard extends StatelessWidget {
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  format.euros(ledger.balance),
+                  format.euros(ledger.totalSaved),
                   style: theme.textTheme.displaySmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: scheme.primary,
@@ -121,8 +118,8 @@ class _DayDot extends StatelessWidget {
       );
 }
 
-/// Le pied de la carte : combien d'objectifs courent, et surtout si l'un est
-/// atteint — c'est la seule chose qui demande un geste.
+/// Le pied de la carte : ce que le velo rembourse, et surtout si un palier
+/// est franchi — c'est la seule chose qui demande un geste.
 class _GoalsLink extends StatelessWidget {
   const _GoalsLink({required this.ledger, required this.onTap});
 
@@ -152,7 +149,7 @@ class _GoalsLink extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              reached > 0 ? l10n.goals_reached_count(reached) : l10n.goals_active(active.length),
+              reached > 0 ? l10n.goals_reached_count(reached) : l10n.payback_link,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: reached > 0 ? scheme.onPrimaryContainer : scheme.onSurface,
                 fontWeight: reached > 0 ? FontWeight.w600 : null,

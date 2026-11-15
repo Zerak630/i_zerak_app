@@ -10,7 +10,7 @@ import 'package:i_zerak_app/services/screen_time/screen_time_service.dart';
 /// configure.
 ///
 /// Sert aussi a recalculer la moyenne depuis les reglages : les semaines du
-/// quota repartent alors de zero, la cagnotte et l'historique restent.
+/// quota repartent alors de zero, l'historique reste.
 class FreeTimeSetupPage extends StatefulWidget {
   const FreeTimeSetupPage({super.key, required this.service});
 

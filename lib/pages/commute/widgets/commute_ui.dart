@@ -131,10 +131,13 @@ IconData goalIconData(GoalIcon icon) => switch (icon) {
       GoalIcon.bag => Icons.shopping_bag_outlined,
       GoalIcon.gift => Icons.card_giftcard,
       GoalIcon.star => Icons.star_outline,
+      GoalIcon.phone => Icons.smartphone,
+      GoalIcon.laptop => Icons.laptop,
+      GoalIcon.fitness => Icons.fitness_center,
     };
 
-/// Couleur d'un objectif : primaire pour un achat, tertiaire pour un palier,
-/// qui se lit ainsi d'un coup d'oeil comme « rien a depenser ».
+/// Couleur d'un objectif : tertiaire pour un palier. Primaire ne reste qu'aux
+/// anciens achats, valides du temps de la cagnotte.
 Color goalColor(ColorScheme scheme, GoalKind kind) =>
     kind == GoalKind.milestone ? scheme.tertiary : scheme.primary;
 
