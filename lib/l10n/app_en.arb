@@ -190,6 +190,13 @@
 	"state_paused": "Paused",
 	"state_queued": "Queued",
 	"state_stalled": "Stalled",
+	"state_seeding_idle": "Seeding (no peer)",
+	"torrent_ratio": "Ratio {ratio}",
+	"@torrent_ratio": {
+		"placeholders": {
+			"ratio": { "type": "String" }
+		}
+	},
 	"state_checking": "Checking",
 	"state_moving": "Moving",
 	"state_allocating": "Allocating",
@@ -685,6 +692,9 @@
 	"home_metric_load": "load",
 	"home_metric_services": "services",
 	"home_downloads_none": "No download running",
+	"home_torrents_seeding": "seeding",
+	"home_torrents_downloading": "downloading",
+	"home_torrents_idle": "paused / stalled",
 	"home_fuel_station": "{station} — {count} stations followed",
 	"@home_fuel_station": {
 		"placeholders": {

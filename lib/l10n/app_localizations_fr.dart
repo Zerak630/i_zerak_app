@@ -487,6 +487,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get state_stalled => 'En attente de sources';
 
   @override
+  String get state_seeding_idle => 'Prêt à partager';
+
+  @override
+  String torrent_ratio(String ratio) {
+    return 'Ratio $ratio';
+  }
+
+  @override
   String get state_checking => 'Vérification';
 
   @override
@@ -1386,6 +1394,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get home_downloads_none => 'Aucun téléchargement en cours';
+
+  @override
+  String get home_torrents_seeding => 'en seed';
+
+  @override
+  String get home_torrents_downloading => 'en cours';
+
+  @override
+  String get home_torrents_idle => 'en pause / bloqués';
 
   @override
   String home_fuel_station(String station, int count) {

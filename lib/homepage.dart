@@ -207,7 +207,7 @@ class HomePageState extends State<HomePage> {
     final askCar = _askCar && tab == AppTab.commute;
     _askCar = false;
     return switch (tab) {
-      AppTab.home => DashboardPage(),
+      AppTab.home => DashboardPage(onOpenTab: _open),
       AppTab.subscriptions => SubscriptionsPage(),
       AppTab.commute =>
         CommutePage(onOpenGoals: () => _open(AppTab.goals), askCarOnOpen: askCar),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/agent_dao.dart';
+import 'package:i_zerak_app/models/app_tab.dart';
 import 'package:i_zerak_app/models/commute_dao.dart' hide dateOnly, roundCents;
 import 'package:i_zerak_app/models/companion_dao.dart';
 import 'package:i_zerak_app/services/agent/agent_service.dart';
@@ -66,8 +67,38 @@ Future<TorrentsSnapshot> _torrents() async => (
           tags: [],
           addedOn: 0,
         ),
+        TorrentDao(
+          hash: 'b',
+          name: 'Les Misérables',
+          progress: 1,
+          dlspeed: 0,
+          upspeed: 0,
+          size: 8000000000,
+          eta: 8640000,
+          ratio: 0.3,
+          state: TorrentState.stalledUp,
+          category: 'Films',
+          savePath: '/mnt/media/Films',
+          tags: [],
+          addedOn: 0,
+        ),
+        TorrentDao(
+          hash: 'c',
+          name: 'Notre-Dame de Paris',
+          progress: 1,
+          dlspeed: 0,
+          upspeed: 52000,
+          size: 6000000000,
+          eta: 8640000,
+          ratio: 2.1,
+          state: TorrentState.uploading,
+          category: 'Films',
+          savePath: '/mnt/media/Films',
+          tags: [],
+          addedOn: 0,
+        ),
       ],
-      transfer: const TransferInfoDao(dlInfoSpeed: 4200000),
+      transfer: const TransferInfoDao(dlInfoSpeed: 4200000, upInfoSpeed: 52000),
     );
 
 void main() {
@@ -80,6 +111,7 @@ void main() {
     Future<SystemSnapshot> Function()? system,
     Future<TorrentsSnapshot> Function()? torrents,
     Future<ScreenTimeLedger?> Function()? freeTime,
+    void Function(AppTab tab)? onOpenTab,
     RecapService? recap,
     ISport? sport,
   }) {
@@ -100,6 +132,7 @@ void main() {
       recap: recap,
       sport: sport,
       clock: () => now,
+      onOpenTab: onOpenTab,
     );
   }
 
@@ -127,7 +160,11 @@ void main() {
     expect(find.text('izerak'), findsOneWidget);
     expect(find.textContaining('47 °C'), findsOneWidget);
     expect(find.textContaining('61 %'), findsOneWidget);
-    expect(find.text('Le Comte de Monte-Cristo'), findsOneWidget);
+    // Deux torrents complets en seed, dont un sans pair, et un en cours.
+    expect(find.text('en seed'), findsOneWidget);
+    expect(find.text('2'), findsWidgets);
+    expect(find.text('en cours'), findsOneWidget);
+    expect(find.text('en pause / bloqués'), findsOneWidget);
     expect(find.textContaining('1,689'), findsOneWidget);
   });
 
@@ -209,7 +246,40 @@ void main() {
     expect(find.text('Raspberry Pi injoignable'), findsOneWidget);
     // Les sources locales et les transferts restent affiches.
     expect(find.text('à vélo ce mois-ci'), findsOneWidget);
-    expect(find.text('Le Comte de Monte-Cristo'), findsOneWidget);
+    // Deux torrents complets en seed, dont un sans pair, et un en cours.
+    expect(find.text('en seed'), findsOneWidget);
+    expect(find.text('2'), findsWidgets);
+    expect(find.text('en cours'), findsOneWidget);
+    expect(find.text('en pause / bloqués'), findsOneWidget);
+  });
+
+  testWidgets('les resumes du Pi et des telechargements ouvrent leur onglet', (tester) async {
+    final opened = <AppTab>[];
+    await open(tester, given: page(onOpenTab: opened.add));
+
+    await tester.tap(find.text('izerak'));
+    await tester.tap(find.text('en seed'));
+    await tester.pumpAndSettle();
+
+    expect(opened, [AppTab.system, AppTab.torrents]);
+  });
+
+  testWidgets('injoignable, la carte du Pi est grisee et ne s ouvre pas', (tester) async {
+    final opened = <AppTab>[];
+    await open(
+      tester,
+      given: page(
+        system: () async => throw const QbNetworkException('coupe'),
+        onOpenTab: opened.add,
+      ),
+    );
+
+    final tile = tester.widget<ListTile>(
+        find.ancestor(of: find.text('Raspberry Pi injoignable'), matching: find.byType(ListTile)));
+    expect(tile.enabled, isFalse);
+    await tester.tap(find.text('Raspberry Pi injoignable'));
+    await tester.pumpAndSettle();
+    expect(opened, isEmpty);
   });
 
   testWidgets('un serveur non configure le dit sans alarmer', (tester) async {

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/agent_dao.dart';
+import 'package:i_zerak_app/models/app_tab.dart';
 import 'package:i_zerak_app/models/commute_dao.dart' hide dateOnly, roundCents;
 import 'package:i_zerak_app/models/commute_dao.dart' as commute show dateOnly;
 import 'package:i_zerak_app/models/companion_dao.dart';
 import 'package:i_zerak_app/models/screen_time_dao.dart' show ScreenTimeLedger;
 import 'package:i_zerak_app/models/subscription_dao.dart';
+import 'package:i_zerak_app/models/torrent_state.dart' show TorrentActivity;
 import 'package:i_zerak_app/pages/commute/widgets/car_reason_sheet.dart';
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart'
     show carReasonLabel, showAddReasonDialog;
@@ -54,6 +56,7 @@ class DashboardPage extends StatefulWidget {
     RecapService? recap,
     ISport? sport,
     DateTime Function()? clock,
+    this.onOpenTab,
   })  : recap = recap ?? (getIt.isRegistered<RecapService>() ? getIt<RecapService>() : null),
         sport = sport ?? (getIt.isRegistered<ISport>() ? getIt<ISport>() : null),
         subscriptionService = subscriptionService ?? getIt<ISubscriptions>(),
@@ -76,6 +79,11 @@ class DashboardPage extends StatefulWidget {
   final IGasStations stations;
   final Future<SystemSnapshot> Function() systemLoader;
   final Future<TorrentsSnapshot> Function() torrentsLoader;
+
+  /// Ouvre l'onglet complet d'un resume (temps libre, telechargements, Pi).
+  /// Un changement d'onglet plutot qu'une page poussee : la page ne doit etre
+  /// joignable qu'a un seul endroit.
+  final void Function(AppTab tab)? onOpenTab;
 
   /// Le temps libre du jour. Nul quand l'onglet n'est pas configure, ou hors
   /// Android.
@@ -735,8 +743,8 @@ class _DashboardPageState extends State<DashboardPage> {
     final minutes = ledger.live.minutes;
     final color = ledger.todayUnderQuota ? scheme.primary : scheme.tertiary;
 
-    return Card(
-      margin: EdgeInsets.zero,
+    return _openable(
+      tab: AppTab.freeTime,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -820,6 +828,7 @@ class _DashboardPageState extends State<DashboardPage> {
         context,
         icon: Icons.developer_board,
         title: l10n.system_title,
+        tab: AppTab.system,
         detail: _systemError == null
             ? null
             : _systemError is QbNotConfiguredException
@@ -836,8 +845,8 @@ class _DashboardPageState extends State<DashboardPage> {
         ? volume.usedBytes! / volume.totalBytes!
         : null;
 
-    return Card(
-      margin: EdgeInsets.zero,
+    return _openable(
+      tab: AppTab.system,
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -932,6 +941,7 @@ class _DashboardPageState extends State<DashboardPage> {
         context,
         icon: Icons.download,
         title: l10n.torrents_title,
+        tab: AppTab.torrents,
         detail: _torrentsError == null
             ? null
             : _torrentsError is QbNotConfiguredException
@@ -940,13 +950,25 @@ class _DashboardPageState extends State<DashboardPage> {
       );
     }
 
-    final running = [
-      for (final torrent in snapshot.torrents)
-        if (torrent.progress < 1) torrent,
-    ]..sort((a, b) => b.progress.compareTo(a.progress));
+    // Des compteurs plutot qu'un apercu : les deux torrents les plus avances
+    // restaient les memes d'un jour a l'autre et ne disaient rien du reste.
+    var seeding = 0;
+    var downloading = 0;
+    var idle = 0;
+    for (final torrent in snapshot.torrents) {
+      switch (torrent.activity) {
+        case TorrentActivity.seeding:
+          seeding++;
+        case TorrentActivity.downloading:
+          downloading++;
+        case TorrentActivity.idle:
+          idle++;
+      }
+    }
+    final transfer = snapshot.transfer;
 
-    return Card(
-      margin: EdgeInsets.zero,
+    return _openable(
+      tab: AppTab.torrents,
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -954,40 +976,29 @@ class _DashboardPageState extends State<DashboardPage> {
             Icon(Icons.download, size: 18, color: scheme.onSurfaceVariant),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                running.isEmpty ? l10n.home_downloads_none : l10n.torrents_title,
-                style: theme.textTheme.bodyMedium,
-              ),
+              child: Text(l10n.torrents_title, style: theme.textTheme.bodyMedium),
             ),
-            if (running.isNotEmpty)
-              Text(
-                formatSpeed(snapshot.transfer.dlInfoSpeed),
-                style: theme.textTheme.labelSmall?.copyWith(color: scheme.outline),
-              ),
+            Text(
+              '↓ ${formatSpeed(transfer.dlInfoSpeed)} · ↑ ${formatSpeed(transfer.upInfoSpeed)}',
+              style: theme.textTheme.labelSmall?.copyWith(color: scheme.outline),
+            ),
           ]),
-          for (final torrent in running.take(2)) ...[
-            const SizedBox(height: 10),
-            Row(children: [
-              Expanded(
-                child: Text(
-                  torrent.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                formatProgress(torrent.progress),
-                style: theme.textTheme.labelSmall?.copyWith(color: scheme.primary),
-              ),
-            ]),
-            const SizedBox(height: 5),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(3),
-              child: LinearProgressIndicator(value: torrent.progress, minHeight: 5),
+          const SizedBox(height: 12),
+          Row(children: [
+            Expanded(
+              child: _metric(context, value: '$seeding', label: l10n.home_torrents_seeding),
             ),
-          ],
+            Expanded(
+              child: _metric(
+                context,
+                value: '$downloading',
+                label: l10n.home_torrents_downloading,
+              ),
+            ),
+            Expanded(
+              child: _metric(context, value: '$idle', label: l10n.home_torrents_idle),
+            ),
+          ]),
         ]),
       ),
     );
@@ -1022,17 +1033,37 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
+  VoidCallback? _opener(AppTab? tab) {
+    final open = widget.onOpenTab;
+    return tab == null || open == null ? null : () => open(tab);
+  }
+
+  /// Une carte qui ouvre l'onglet complet de ce qu'elle resume.
+  Widget _openable({required AppTab tab, required Widget child}) => Card(
+        margin: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(onTap: _opener(tab), child: child),
+      );
+
   /// Une carte reduite a son titre, quand la source n'a rien donne.
   Widget _statusCard(
     BuildContext context, {
     required IconData icon,
     required String title,
     required String? detail,
+    AppTab? tab,
   }) {
     final theme = Theme.of(context);
+    // Une erreur de chargement : l'onglet complet ne montrerait rien de plus,
+    // la carte se grise et ne s'ouvre pas.
+    final unavailable = detail != null;
     return Card(
       margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      color: unavailable ? theme.colorScheme.surfaceContainerLow : null,
       child: ListTile(
+        enabled: !unavailable,
+        onTap: unavailable ? null : _opener(tab),
         leading: Icon(icon, color: theme.colorScheme.outline),
         title: Text(title, style: theme.textTheme.bodyMedium),
         subtitle: detail == null ? null : Text(detail),
