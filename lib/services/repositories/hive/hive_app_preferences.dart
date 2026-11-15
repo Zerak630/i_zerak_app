@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:hive/hive.dart';
 import 'package:i_zerak_app/models/app_tab.dart';
+import 'package:i_zerak_app/models/recap_dao.dart' show RecapSettings;
 import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
 
 /// Preferences d'affichage, dans une `Box<String>` de JSON.
@@ -14,6 +15,7 @@ class HiveAppPreferences implements IAppPreferences {
   final Box<String> _box;
 
   static const String _tabsKey = 'pinned_tabs';
+  static const String _recapKey = 'recap';
 
   @override
   Future<TabLayout> readTabs() async {
@@ -37,6 +39,25 @@ class HiveAppPreferences implements IAppPreferences {
     // Une boite Hive sert ses valeurs depuis un cache en memoire : sans ce
     // `flush`, le choix disparaitrait si Android tuait l'application juste
     // apres.
+    await _box.flush();
+  }
+
+  @override
+  Future<RecapSettings> readRecapSettings() async {
+    final raw = _box.get(_recapKey);
+    if (raw == null) {
+      return const RecapSettings();
+    }
+    try {
+      return RecapSettings.fromJson(json.decode(raw));
+    } on FormatException {
+      return const RecapSettings();
+    }
+  }
+
+  @override
+  Future<void> saveRecapSettings(RecapSettings settings) async {
+    await _box.put(_recapKey, json.encode(settings.toJson()));
     await _box.flush();
   }
 }

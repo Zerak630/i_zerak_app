@@ -78,10 +78,10 @@ void main() {
     expect(store.settings.baselineMinutes, 90);
     expect(store.settings.packages, {insta});
     expect(source.notificationRequests, 1);
-    expect(find.text('Cagnotte temps libre'.toUpperCase()), findsOneWidget);
+    expect(find.text('Temps repris aux réseaux'.toUpperCase()), findsOneWidget);
   });
 
-  testWidgets('configure, l onglet montre la journee, la serie et la cagnotte', (tester) async {
+  testWidgets('configure, l onglet montre la journee, la serie et le temps repris', (tester) async {
     store.settings = ScreenTimeSettings(
       apps: const [TrackedApp(package: insta, label: 'Instagram')],
       baselineMinutes: 120,
@@ -97,16 +97,16 @@ void main() {
     ]);
     await open(tester);
 
-    // 60 puis 90 minutes gagnees, a 2 €/h.
-    // La cagnotte, et la case des jours tenus.
-    expect(find.text('5,00\u00a0€'), findsNWidgets(2));
+    // 60 puis 90 minutes reprises sur la moyenne de 120.
+    expect(find.text('2 h 30'), findsOneWidget);
+    expect(find.text('+ 1 h 30'), findsOneWidget);
     // La serie, et le nombre de jours tenus.
     expect(find.text('2 jours'), findsNWidgets(2));
     expect(find.text('sur 1 h 48'), findsOneWidget);
     expect(find.text('Instagram'), findsOneWidget);
   });
 
-  testWidgets('les jours au-dessus du quota remplissent les economies loupees', (tester) async {
+  testWidgets('les jours au-dessus du quota comptent leur temps de trop', (tester) async {
     store.settings = ScreenTimeSettings(
       apps: const [TrackedApp(package: insta, label: 'Instagram')],
       baselineMinutes: 120,
@@ -122,11 +122,13 @@ void main() {
     ]);
     await open(tester);
 
-    expect(find.text('Économies loupées'), findsOneWidget);
-    // (120 - 108) minutes a 2 €/h, sur la case et sur la ligne du jour.
-    expect(find.text('0,40\u00a0€'), findsNWidgets(2));
-    // Seule la journee tenue alimente la cagnotte : 90 minutes gagnees.
-    expect(find.text('3,00\u00a0€'), findsWidgets);
+    expect(find.text('Temps de trop'), findsOneWidget);
+    // 180 minutes pour un quota de 108 : la case, et la ligne du jour.
+    expect(find.text('1 h 12'), findsOneWidget);
+    expect(find.text('− 1 h 12'), findsOneWidget);
+    // Seule la journee tenue a rendu du temps : 90 minutes.
+    expect(find.text('1 h 30'), findsOneWidget);
+    expect(find.text('Économies loupées'), findsNothing);
   });
 
   testWidgets('acces retire : la carte le signale et renvoie aux reglages', (tester) async {

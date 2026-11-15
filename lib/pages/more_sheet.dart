@@ -21,6 +21,12 @@ Future<AppTab?> showMoreSheet(
 }) =>
     showModalBottomSheet<AppTab>(
       context: context,
+      // Six onglets ou plus dans le menu : la hauteur par defaut, plafonnee a
+      // la moitie de l'ecran, obligeait a faire defiler pour atteindre le
+      // dernier. La feuille prend la hauteur de son contenu, et defile
+      // seulement si l'ecran est trop petit.
+      isScrollControlled: true,
+      useSafeArea: true,
       showDragHandle: true,
       builder: (_) => _MoreSheet(
         layout: layout,

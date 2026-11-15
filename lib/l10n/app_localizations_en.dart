@@ -615,7 +615,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bb_commute => 'Bike';
 
   @override
-  String get commute_pot => 'Bike savings';
+  String get commute_pot => 'Fuel saved';
 
   @override
   String commute_bike_trips(int count, String date) {
@@ -630,11 +630,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commute_no_bike_trip => 'No bike trip yet';
-
-  @override
-  String commute_saved_and_spent(String total, String spent) {
-    return '$total saved · $spent spent';
-  }
 
   @override
   String get commute_last_14_days => 'Last 14 days';
@@ -655,7 +650,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String commute_by_bike_gain(String amount) {
-    return '+ $amount saved';
+    return '+ $amount of fuel saved';
   }
 
   @override
@@ -682,7 +677,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String commute_snack_bike(String amount) {
-    return 'Bike recorded — $amount saved';
+    return 'Bike trip saved — $amount of fuel saved';
   }
 
   @override
@@ -742,7 +737,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commute_setup_hint =>
-      'Enter the round-trip distance: every bike trip will then feed the savings.';
+      'Enter the round-trip distance: every bike trip will count the fuel saved.';
 
   @override
   String get commute_setup_action => 'Set up';
@@ -1022,41 +1017,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Measured on total savings: nothing to spend';
 
   @override
-  String goal_spend_validate(String amount) {
-    return 'Spend $amount and validate';
-  }
+  String get goal_validate_milestone => 'Mark as paid off';
 
   @override
-  String get goal_validate_milestone => 'Validate the milestone';
-
-  @override
-  String get goal_new => 'New goal';
-
-  @override
-  String get goal_kind_purchase => 'Purchase';
-
-  @override
-  String get goal_kind_purchase_hint => 'paid with the savings';
-
-  @override
-  String get goal_kind_milestone => 'Milestone';
-
-  @override
-  String get goal_kind_milestone_hint => 'reached, nothing spent';
+  String get goal_new => 'New milestone';
 
   @override
   String get goal_name => 'Name';
 
   @override
-  String get goal_amount => 'Amount';
+  String get goal_amount => 'Purchase price';
 
   @override
   String get goal_icon => 'Icon';
-
-  @override
-  String goal_missing(String amount) {
-    return '$amount to go';
-  }
 
   @override
   String goal_missing_trips(int trips, String amount) {
@@ -1077,30 +1050,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String goal_validate_title(String name) {
-    return 'Validate “$name”?';
-  }
-
-  @override
-  String goal_validate_purchase_detail(String amount) {
-    return '$amount leave the savings. The goal moves to the goals reached.';
-  }
-
-  @override
-  String get goal_validate_milestone_detail =>
-      'Nothing is spent: the milestone moves to the goals reached.';
-
-  @override
-  String get goal_row_pot => 'Savings';
-
-  @override
-  String get goal_row_saved => 'Saved in total';
-
-  @override
-  String get goal_unchanged => 'unchanged';
-
-  @override
-  String goal_spend(String amount) {
-    return 'Spend $amount';
+    return '“$name” has paid off';
   }
 
   @override
@@ -1496,18 +1446,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get goals_shared_pot =>
-      'Purchases all draw on the same savings: validating one pushes the others back.';
+  String get goals_reached_section => 'Already paid off';
 
   @override
-  String get goals_reached_section => 'Already reached';
-
-  @override
-  String get goals_empty => 'No goal yet';
+  String get goals_empty => 'No milestone yet';
 
   @override
   String get goals_empty_hint =>
-      'A goal turns the savings into a date: “the helmet, around 10 April”.';
+      '“The bike, paid off around 10 April”: a milestone puts a date on your savings.';
 
   @override
   String goals_active(int count) {
@@ -1526,8 +1472,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count goals reached',
-      one: '1 goal reached',
+      other: '$count milestones paid off',
+      one: '1 milestone paid off',
     );
     return '$_temp0';
   }
@@ -1854,14 +1800,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String free_per_hour(String amount) {
-    return '$amount/h';
-  }
-
-  @override
-  String get free_per_hour_suffix => '€/h';
-
-  @override
   String get free_unsupported_title => 'Available on Android';
 
   @override
@@ -1873,7 +1811,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get free_intro_body =>
-      'iZerak measures the time you spend on social media, sets a limit that drops every week, and turns every hour won back into money for your goals.';
+      'iZerak measures time spent on social media, sets a limit that drops every week, and counts the time you take back.';
 
   @override
   String get free_intro_action => 'Get started';
@@ -1975,36 +1913,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get free_pot => 'Free time pot';
-
-  @override
-  String get free_pot_first_day =>
-      'First gain tomorrow morning, once the day is over';
-
-  @override
-  String free_pot_hours(String hours, String date) {
-    return '$hours won back since $date';
-  }
-
-  @override
   String get free_last_14_days => 'Last 14 days';
-
-  @override
-  String free_goal_remaining(String amount, String hours) {
-    return '$amount to go — about $hours h away from social media';
-  }
-
-  @override
-  String free_goal_missing_hours(String hours, String rate) {
-    return 'About $hours h away from social media, at $rate an hour.';
-  }
 
   @override
   String get free_access_lost => 'Usage access revoked';
 
   @override
   String get free_access_lost_hint =>
-      'Without it, iZerak can no longer measure your time: the pot is on hold.';
+      'Without it, iZerak can no longer measure your time: the count is paused.';
 
   @override
   String free_today_quota(String quota) {
@@ -2043,9 +1959,6 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get free_today_gain => 'if the day ended now';
 
   @override
   String get free_week_title => 'This week';
@@ -2121,7 +2034,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get free_settings_restart_confirm =>
-      'The limit will start again from week one. The pot, goals and history are kept.';
+      'The limit will restart from week one. History is kept.';
 
   @override
   String get free_settings_restart_action => 'Measure again';
@@ -2139,15 +2052,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get free_settings_floor_hint => 'The limit never goes below this';
 
   @override
-  String get free_settings_pot => 'Pot';
-
-  @override
-  String get free_settings_rate => 'Value of an hour won back';
-
-  @override
-  String get free_settings_rate_hint => 'Compared with your starting average';
-
-  @override
   String get free_settings_report => 'Evening summary';
 
   @override
@@ -2155,14 +2059,494 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get free_settings_report_hint =>
-      'A notification with today\'s time, the gain and your streak';
+      'A notification with today’s time, the time taken back and your streak';
 
   @override
   String get free_settings_report_time => 'Summary time';
 
   @override
-  String get free_today_missed => 'missed if the day ended now';
+  String payback_title(String month) {
+    return 'What the bike pays back · $month';
+  }
 
   @override
-  String get free_kept => 'Earned on days kept';
+  String payback_saved(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'of fuel saved in $days bike trips',
+      one: 'of fuel saved in 1 bike trip',
+      zero: 'of fuel saved — no bike trip yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String payback_count(int paid, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      paid,
+      locale: localeName,
+      other: '$paid subscriptions paid back out of $total',
+      one: '1 subscription paid back out of $total',
+      zero: 'No subscription paid back out of $total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String payback_amount(String covered, String total) {
+    return '$covered of $total';
+  }
+
+  @override
+  String payback_next_trips(int trips, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      trips,
+      locale: localeName,
+      other: '$trips more bike trips to pay back $name',
+      one: '1 more bike trip to pay back $name',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String payback_next_amount(String amount, String name) {
+    return '$amount more to pay back $name';
+  }
+
+  @override
+  String payback_surplus(String amount) {
+    return 'All paid back, plus $amount on top.';
+  }
+
+  @override
+  String get payback_no_subscription =>
+      'Add your subscriptions in the Subscriptions tab: every bike trip will pay part of them back.';
+
+  @override
+  String get payback_all_excluded => 'No subscription chosen.';
+
+  @override
+  String get payback_choose => 'Choose subscriptions';
+
+  @override
+  String get payback_choose_hint =>
+      'Untick what the bike shouldn’t pay back, such as rent or insurance.';
+
+  @override
+  String payback_per_month(String amount) {
+    return '$amount a month';
+  }
+
+  @override
+  String get payback_history => 'Previous months';
+
+  @override
+  String payback_history_row(int paid, int total) {
+    return '$paid of $total';
+  }
+
+  @override
+  String get goals_milestones => 'Big purchases to pay off';
+
+  @override
+  String get goals_milestones_hint =>
+      'Fuel savings add up until they cover the price: the bike, a phone, sports gear…';
+
+  @override
+  String get goal_new_short => 'Milestone';
+
+  @override
+  String get goal_new_hint =>
+      'A purchase that cost a lot, which your savings will eventually pay off.';
+
+  @override
+  String get goal_since => 'Count savings';
+
+  @override
+  String get goal_since_start => 'From the start';
+
+  @override
+  String get goal_since_purchase => 'Since purchase…';
+
+  @override
+  String get goal_since_hint =>
+      'A bike you already had counts from the first trip; a phone bought yesterday, from yesterday.';
+
+  @override
+  String goal_preview(String current, String missing) {
+    return '$current already saved, $missing to go';
+  }
+
+  @override
+  String goal_counted_since(String date) {
+    return 'counted since $date';
+  }
+
+  @override
+  String goal_validate_detail(String current, String target) {
+    return '$current saved for a $target purchase. The milestone joins those already reached; nothing is spent.';
+  }
+
+  @override
+  String get payback_link => 'What the bike pays back';
+
+  @override
+  String get home_bike_month => 'by bike this month';
+
+  @override
+  String get free_regained_title => 'Time taken back from social media';
+
+  @override
+  String get free_regained_first_day =>
+      'First count tomorrow morning, once the day is over';
+
+  @override
+  String free_regained_since(String date, String week) {
+    return 'since $date · $week this week';
+  }
+
+  @override
+  String get free_today_regained => 'taken back if the day ended now';
+
+  @override
+  String get free_today_over_label => 'over if the day ended now';
+
+  @override
+  String get free_kept_days => 'Days kept';
+
+  @override
+  String free_kept_detail(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'out of $count measured days',
+      one: 'out of 1 measured day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get free_over_total => 'Time over the limit';
+
+  @override
+  String get bb_sport => 'Sport';
+
+  @override
+  String get sport_unknown => 'Deleted sport';
+
+  @override
+  String get sport_strength => 'Strength';
+
+  @override
+  String get sport_cardio => 'Cardio';
+
+  @override
+  String get sport_yoga => 'Yoga';
+
+  @override
+  String get sport_stretching => 'Stretching';
+
+  @override
+  String get sport_running => 'Running';
+
+  @override
+  String get sport_minutes_custom => 'Other duration';
+
+  @override
+  String get sport_new_session => 'Add a session';
+
+  @override
+  String get sport_which => 'Which sport?';
+
+  @override
+  String get sport_when => 'When?';
+
+  @override
+  String get sport_today => 'Today';
+
+  @override
+  String get sport_yesterday => 'Yesterday';
+
+  @override
+  String get sport_other_day => 'Another day';
+
+  @override
+  String get sport_duration => 'Duration';
+
+  @override
+  String get sport_save_session => 'Save session';
+
+  @override
+  String sport_slot_planned(String day, String minutes) {
+    return 'Planned $day · $minutes';
+  }
+
+  @override
+  String get sport_slot_how_long => 'How long?';
+
+  @override
+  String sport_slot_done(String minutes) {
+    return 'Done — $minutes';
+  }
+
+  @override
+  String get sport_slot_skip => 'Not done';
+
+  @override
+  String get sport_slot_clear => 'Clear entry';
+
+  @override
+  String get sport_slot_status_skipped => 'Not done';
+
+  @override
+  String get sport_slot_status_pending => 'To fill in';
+
+  @override
+  String get sport_slot_status_upcoming => 'Upcoming';
+
+  @override
+  String get sport_plan => 'Plan';
+
+  @override
+  String get sport_plan_title => 'Weekly plan';
+
+  @override
+  String get sport_plan_hint =>
+      'The sessions planned each week. Nothing ticks itself: each slot waits for you to say whether it was done, and for how long.';
+
+  @override
+  String get sport_plan_add => 'Add a slot';
+
+  @override
+  String get sport_plan_edit => 'Edit slot';
+
+  @override
+  String get sport_plan_day => 'Which day?';
+
+  @override
+  String get sport_plan_delete => 'Remove this slot?';
+
+  @override
+  String get sport_plan_delete_hint =>
+      'Sessions already entered for this slot stay counted.';
+
+  @override
+  String sport_plan_total(int count, String minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count slots a week, $minutes in total',
+      one: '1 slot a week, $minutes in total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sport_plan_empty => 'No plan yet';
+
+  @override
+  String get sport_plan_empty_hint =>
+      'Plan your weekly sessions — yoga on Monday, strength on Thursday — then say each week what you did.';
+
+  @override
+  String get sport_plan_prepare => 'Set up my plan';
+
+  @override
+  String get sport_my_sports => 'My sports';
+
+  @override
+  String get sport_add_sport => 'Add a sport';
+
+  @override
+  String get sport_this_week => 'This week';
+
+  @override
+  String sport_week_of(String date) {
+    return 'Week of $date';
+  }
+
+  @override
+  String get sport_previous_week => 'Previous week';
+
+  @override
+  String get sport_next_week => 'Next week';
+
+  @override
+  String sport_sessions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sessions',
+      one: '1 session',
+      zero: 'No session',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sport_sessions_short(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sessions',
+      one: '1 session',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sport_plan_progress(int done, int total) {
+    return 'plan $done of $total';
+  }
+
+  @override
+  String sport_streak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks kept in a row',
+      one: '1 week kept',
+      zero: 'No week kept in a row yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sport_pending_last_week => 'Still to fill in from last week';
+
+  @override
+  String get sport_planned_section => 'Planned';
+
+  @override
+  String get sport_extras_section => 'On top of the plan';
+
+  @override
+  String get sport_by_sport => 'Time per sport';
+
+  @override
+  String get sport_by_sport_empty => 'No session in this period.';
+
+  @override
+  String get sport_period_week => 'Week';
+
+  @override
+  String get sport_period_month => 'This month';
+
+  @override
+  String get sport_delete_session => 'Delete session';
+
+  @override
+  String get sport_delete_hint => 'Long-press an extra session to delete it.';
+
+  @override
+  String get recap_title_week => 'Your week';
+
+  @override
+  String recap_title_month(String month) {
+    return 'Your $month';
+  }
+
+  @override
+  String recap_bike(String amount, int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$amount of fuel saved in $days trips',
+      one: '$amount of fuel saved in 1 trip',
+      zero: '$amount of fuel saved — no bike trip',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recap_payback(int paid, int total) {
+    return '$paid of $total subscriptions paid back';
+  }
+
+  @override
+  String recap_free(String minutes, int kept, int measured) {
+    return '$minutes taken back from social media · $kept of $measured days kept';
+  }
+
+  @override
+  String recap_sport(String minutes, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sessions',
+      one: '1 session',
+    );
+    return '$minutes of sport in $_temp0';
+  }
+
+  @override
+  String get recap_sport_none => 'No sport session';
+
+  @override
+  String get recap_page_title => 'Recap';
+
+  @override
+  String get recap_month => 'Month';
+
+  @override
+  String get recap_previous => 'Previous period';
+
+  @override
+  String get recap_next => 'Next period';
+
+  @override
+  String get recap_in_progress =>
+      'In progress: the recap fills in as the days go by.';
+
+  @override
+  String recap_week_range(String from, String to) {
+    return '$from – $to';
+  }
+
+  @override
+  String recap_before(String value) {
+    return 'before: $value';
+  }
+
+  @override
+  String get recap_bike_title => 'Bike';
+
+  @override
+  String recap_free_detail(int kept, int measured, String over) {
+    return '$kept of $measured days kept · $over over';
+  }
+
+  @override
+  String recap_sport_share(String regained, String sport) {
+    return 'Of the $regained taken back from social media, $sport went into sport.';
+  }
+
+  @override
+  String get recap_notifications => 'Notifications';
+
+  @override
+  String get recap_notify_weekly => 'Weekly recap';
+
+  @override
+  String get recap_notify_weekly_hint => 'Every Sunday evening';
+
+  @override
+  String get recap_notify_monthly => 'Monthly recap';
+
+  @override
+  String get recap_notify_monthly_hint => 'On the last day of the month';
+
+  @override
+  String get recap_notify_hint =>
+      'The notification covers what was entered up to the last time iZerak was opened.';
+
+  @override
+  String get recap_home_title => 'This week';
+
+  @override
+  String get recap_open => 'See the recap';
+
+  @override
+  String get sport_period_all => 'All';
 }

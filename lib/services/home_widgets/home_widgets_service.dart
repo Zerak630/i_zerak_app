@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:i_zerak_app/models/commute_dao.dart';
-import 'package:i_zerak_app/models/screen_time_dao.dart' show ScreenTimeLedger;
+import 'package:i_zerak_app/models/payback_dao.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
-import 'package:i_zerak_app/services/repositories/interfaces/i_screen_time.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
 
 /// Ce que l'application peut demander aux widgets de l'ecran d'accueil.
 abstract interface class IHomeWidgetBridge {
@@ -65,14 +65,14 @@ class AndroidHomeWidgetBridge implements IHomeWidgetBridge {
 class HomeWidgetsService {
   HomeWidgetsService({
     required this.commute,
-    required this.screenTime,
+    required this.subscriptions,
     required this.prices,
     required this.bridge,
     DateTime Function()? clock,
   }) : clock = clock ?? DateTime.now;
 
   final ICommute commute;
-  final IScreenTime screenTime;
+  final ISubscriptions subscriptions;
   final CommutePriceService prices;
   final IHomeWidgetBridge bridge;
   final DateTime Function() clock;
@@ -132,11 +132,11 @@ class HomeWidgetsService {
     final today = dateOnly(now);
     final settings = await commute.readSettings();
     final ledger = CommuteLedger(await commute.getDays(), await commute.getGoals());
-    final free = ScreenTimeLedger(
-      settings: await screenTime.readSettings(),
-      days: await screenTime.getDays(),
-      goals: await screenTime.getGoals(),
-      today: today,
+    final payback = paybackOf(
+      today,
+      subscriptions: await subscriptions.getAll(),
+      commute: ledger,
+      excluded: settings.paybackExcluded,
     );
 
     // Pas d'appel reseau ici : l'application passe en arriere-plan, et le
@@ -150,8 +150,8 @@ class HomeWidgetsService {
       commuteConfigured: settings.isConfigured,
       tripValue: tripValue,
       recorded: recorded,
-      commuteBook: ledger.book,
-      freeBook: free.book,
+      payback: payback,
+      book: ledger.book,
     );
   }
 
@@ -162,16 +162,16 @@ class HomeWidgetsService {
     required bool commuteConfigured,
     required double tripValue,
     required CommuteDay? recorded,
-    required GoalBook commuteBook,
-    required GoalBook freeBook,
+    required MonthPayback payback,
+    required GoalBook book,
   }) {
-    Map<String, Object?> goal(Goal goal, GoalBook book, String pot) {
+    Map<String, Object?> goal(Goal goal) {
       final progress = book.progressOf(goal);
       return {
         'id': goal.id,
         'name': goal.name,
-        'pot': pot,
-        'milestone': goal.kind == GoalKind.milestone,
+        'pot': 'commute',
+        'milestone': true,
         'current': roundCents(progress.current),
         'target': goal.target,
       };
@@ -191,8 +191,21 @@ class HomeWidgetsService {
         if (recorded?.bucket != null) 'bucket': recorded!.bucket!.name,
       },
       'goals': [
-        for (final g in commuteBook.activeGoals) goal(g, commuteBook, 'commute'),
-        for (final g in freeBook.activeGoals) goal(g, freeBook, 'free'),
+        // Les abonnements du mois d'abord : c'est l'objectif qui bouge a
+        // chaque trajet. Le widget en compose lui-meme le titre, dans sa
+        // langue, a partir de `paid` et `count`.
+        if (payback.lines.isNotEmpty)
+          {
+            'id': 'payback',
+            'name': '',
+            'pot': 'payback',
+            'milestone': false,
+            'current': payback.covered,
+            'target': payback.total,
+            'paid': payback.paidCount,
+            'count': payback.lines.length,
+          },
+        for (final g in book.activeGoals) goal(g),
       ],
     };
   }

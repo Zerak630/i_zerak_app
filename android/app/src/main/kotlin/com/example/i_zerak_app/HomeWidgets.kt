@@ -247,8 +247,9 @@ class CommuteWidgetProvider : AppWidgetProvider() {
 }
 
 /**
- * « Objectif » : un objectif des cagnottes Velo et Temps libre. Un appui
- * passe au suivant ; l'icone en haut a droite ouvre l'application.
+ * « Objectif » : les abonnements du mois que le velo rembourse, puis les
+ * paliers a rentabiliser. Un appui passe au suivant ; l'icone en haut a
+ * droite ouvre l'application.
  */
 class GoalWidgetProvider : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
@@ -315,23 +316,32 @@ class GoalWidgetProvider : AppWidgetProvider() {
             val target = goal.optDouble("target", 0.0)
             val ratio = if (target <= 0) 1.0 else (current / target).coerceIn(0.0, 1.0)
             val reached = current + 0.005 >= target
-            val milestone = goal.optBoolean("milestone", false)
+            val payback = goal.optString("pot") == "payback"
             val pot = context.getString(
-                if (goal.optString("pot") == "free") R.string.widget_pot_free else R.string.widget_pot_commute
+                if (payback) R.string.widget_pot_payback else R.string.widget_pot_commute
             )
+            // Les abonnements du mois : le titre se compose ici, dans la
+            // langue du telephone.
+            val name = if (payback) {
+                val count = goal.optInt("count", 0)
+                context.resources.getQuantityString(
+                    R.plurals.widget_payback_name, count, goal.optInt("paid", 0), count
+                )
+            } else {
+                goal.optString("name")
+            }
 
             views.setViewVisibility(R.id.widget_goal_content, View.VISIBLE)
             views.setViewVisibility(R.id.widget_goal_empty, View.GONE)
             views.setTextViewText(
                 R.id.widget_goal_pot,
-                (if (milestone) "$pot · ${context.getString(R.string.widget_milestone)}" else pot)
-                    .uppercase(Locale.getDefault()),
+                pot.uppercase(Locale.getDefault()),
             )
             views.setTextViewText(
                 R.id.widget_goal_position,
                 if (goals.size > 1) context.getString(R.string.widget_goal_position, index + 1, goals.size) else "",
             )
-            views.setTextViewText(R.id.widget_goal_name, goal.optString("name"))
+            views.setTextViewText(R.id.widget_goal_name, name)
             views.setProgressBar(R.id.widget_goal_progress, 1000, (ratio * 1000).roundToInt(), false)
             views.setTextViewText(
                 R.id.widget_goal_amounts,
@@ -457,10 +467,11 @@ class FreeTimeWidgetProvider : AppWidgetProvider() {
             views.setProgressBar(bar, 1000, (ratio * 1000).roundToInt(), false)
             views.setTextViewText(
                 R.id.widget_free_amount,
-                context.getString(
-                    if (day.under) R.string.widget_free_gain else R.string.widget_free_missed,
-                    HomeWidgetStore.euros(day.amount),
-                ),
+                if (day.under) {
+                    context.getString(R.string.widget_free_gain, DailyReport.formatMinutes(context, day.regained.toLong()))
+                } else {
+                    context.getString(R.string.widget_free_missed, DailyReport.formatMinutes(context, day.over.toLong()))
+                },
             )
             views.setTextColor(R.id.widget_free_amount, color)
             views.setTextViewText(

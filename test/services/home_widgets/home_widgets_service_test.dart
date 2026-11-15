@@ -1,11 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:i_zerak_app/models/commute_dao.dart';
 import 'package:i_zerak_app/models/gas_station_dao.dart';
+import 'package:i_zerak_app/models/payback_dao.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/home_widgets/home_widgets_service.dart';
 
 import '../../__mocks__/commute_fakes.dart';
-import '../../__mocks__/screen_time_fakes.dart';
+import '../../__mocks__/subscription_fakes.dart';
 
 /// Des widgets imaginaires : ce qu'on leur envoie, et ce qu'ils ont note.
 class FakeBridge implements IHomeWidgetBridge {
@@ -48,7 +49,7 @@ void main() {
   final now = DateTime(2026, 9, 18, 18);
   const settings = CommuteSettings(distanceKm: 12.4, consumption: 5.2);
   late MemoryCommute commute;
-  late MemoryScreenTime screenTime;
+  late MemorySubscriptions subscriptions;
   late FakeGasService gas;
   late FakeBridge bridge;
 
@@ -56,7 +57,7 @@ void main() {
     final favorites = StaticFavorites([(id: 1, label: 'Rue A', customName: null)]);
     return HomeWidgetsService(
       commute: commute,
-      screenTime: screenTime,
+      subscriptions: subscriptions,
       prices: CommutePriceService(gas: gas, favorites: favorites, store: commute, clock: () => now),
       bridge: bridge,
       clock: () => now,
@@ -65,7 +66,7 @@ void main() {
 
   setUp(() {
     commute = MemoryCommute(settings: settings);
-    screenTime = MemoryScreenTime();
+    subscriptions = MemorySubscriptions();
     gas = FakeGasService(stations: [station(1, {FuelType.gazole: 1.689})]);
     bridge = FakeBridge();
   });
@@ -96,12 +97,14 @@ void main() {
     expect(commute.days, isEmpty);
   });
 
-  test('l instantane reunit la journee et les objectifs des deux cagnottes', () async {
+  test('l instantane reunit la journee, les abonnements rembourses et les paliers', () async {
     commute.days['2026-09-18'] =
         CommuteDay.bike(DateTime(2026, 9, 18), settings, const ResolvedPrice.fallback());
     commute.goals['velo'] = goal('velo', 40);
     commute.goals['fait'] = goal('fait', 1).validated(DateTime(2026, 9, 10));
-    screenTime.goals['libre'] = goal('libre', 25, kind: GoalKind.milestone);
+    subscriptions.items['Spotify'] = sub('Spotify', 10.99);
+    subscriptions.items['Loyer'] = sub('Loyer', 700);
+    commute.settings = settings.copyWith(paybackExcluded: {'Loyer'});
     await commute.recordPrice(FuelType.gazole, DateTime(2026, 9, 17), 1.7, null);
 
     await service().refresh();
@@ -114,10 +117,14 @@ void main() {
     expect(day['tripValue'], settings.tripValue(1.7));
 
     final goals = (snapshot['goals']! as List).cast<Map>();
-    expect(goals.map((g) => g['id']), ['velo', 'libre'],
+    expect(goals.map((g) => g['id']), ['payback', 'velo'],
         reason: 'un objectif valide ne s affiche plus');
-    expect(goals.first['pot'], 'commute');
-    expect(goals.last['pot'], 'free');
+    expect(goals.first['pot'], 'payback');
+    expect(goals.first['count'], 1, reason: 'le loyer est exclu');
+    expect(goals.first['paid'], 0);
+    expect(goals.first['target'], 10.99);
+    expect(goals.first['current'], settings.tripValue(kFallbackFuelPrice));
+    expect(goals.last['pot'], 'commute');
     expect(goals.last['milestone'], isTrue);
   });
 
@@ -159,8 +166,8 @@ void main() {
       commuteConfigured: false,
       tripValue: 0,
       recorded: null,
-      commuteBook: GoalBook(const [], totalSaved: 0),
-      freeBook: GoalBook([goal('g', 10)], totalSaved: 4),
+      payback: MonthPayback(month: DateTime(2026, 9), saved: 0, bikeDays: 0, lines: const []),
+      book: GoalBook([goal('g', 10)], savings: [(date: DateTime(2026, 9, 2), amount: 4)]),
     );
     final day = snapshot['commute']! as Map;
     expect(day.containsKey('recorded'), isFalse);

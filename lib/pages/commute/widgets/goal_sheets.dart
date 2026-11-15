@@ -3,13 +3,19 @@ import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/commute_dao.dart';
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
 
-/// Creation d'un objectif. Renvoie l'objectif, pas encore enregistre.
+/// Creation d'un palier : un gros achat a rentabiliser. Renvoie le palier, pas
+/// encore enregistre.
 ///
-/// [missingHint] traduit ce qui manque dans l'unite de l'onglet — des trajets
-/// a velo, des heures loin des reseaux. Nul quand il n'a rien a dire.
+/// Il n'y a plus d'achat a financer : la cagnotte ou l'on puisait a laisse la
+/// place aux abonnements rembourses. Reste ce qui se rentabilise avec le
+/// temps — le velo, un telephone, du materiel de sport.
+///
+/// [missingHint] traduit ce qui manque en trajets a velo. Nul quand il n'a
+/// rien a dire.
 Future<Goal?> showNewGoalSheet(
   BuildContext context, {
   required GoalBook book,
+  required DateTime today,
   String? Function(double missing)? missingHint,
 }) =>
     showModalBottomSheet<Goal>(
@@ -17,13 +23,14 @@ Future<Goal?> showNewGoalSheet(
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,
-      builder: (_) => _NewGoalSheet(book: book, missingHint: missingHint),
+      builder: (_) => _NewGoalSheet(book: book, today: today, missingHint: missingHint),
     );
 
 class _NewGoalSheet extends StatefulWidget {
-  const _NewGoalSheet({required this.book, required this.missingHint});
+  const _NewGoalSheet({required this.book, required this.today, required this.missingHint});
 
   final GoalBook book;
+  final DateTime today;
   final String? Function(double missing)? missingHint;
 
   @override
@@ -34,8 +41,10 @@ class _NewGoalSheetState extends State<_NewGoalSheet> {
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
   final _amount = TextEditingController();
-  var _kind = GoalKind.purchase;
-  var _icon = GoalIcon.gift;
+  var _icon = GoalIcon.bike;
+
+  /// Nul : compte depuis le premier trajet. Sinon, depuis la date d'achat.
+  DateTime? _since;
 
   @override
   void initState() {
@@ -51,6 +60,18 @@ class _NewGoalSheetState extends State<_NewGoalSheet> {
     super.dispose();
   }
 
+  Future<void> _pickSince() async {
+    final chosen = await showDatePicker(
+      context: context,
+      initialDate: _since ?? widget.today,
+      firstDate: DateTime(2000),
+      lastDate: widget.today,
+    );
+    if (chosen != null) {
+      setState(() => _since = dateOnly(chosen));
+    }
+  }
+
   void _submit() {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -62,9 +83,10 @@ class _NewGoalSheetState extends State<_NewGoalSheet> {
         id: 'goal-${now.microsecondsSinceEpoch}',
         name: _name.text.trim(),
         target: roundCents(parseDecimal(_amount.text)!),
-        kind: _kind,
+        kind: GoalKind.milestone,
         icon: _icon,
         createdAt: now,
+        since: _since,
       ),
     );
   }
@@ -77,30 +99,18 @@ class _NewGoalSheetState extends State<_NewGoalSheet> {
     final format = CommuteFormat(context);
 
     final target = parseDecimal(_amount.text);
-    final current = _kind == GoalKind.purchase ? widget.book.balance : widget.book.totalSaved;
+    final current = widget.book.savedSince(_since);
 
     return Form(
       key: _formKey,
       child: CommuteSheet(children: [
         Text(l10n.goal_new, style: theme.textTheme.titleLarge),
-        const SizedBox(height: 16),
-        Row(children: [
-          for (final kind in GoalKind.values) ...[
-            if (kind != GoalKind.values.first) const SizedBox(width: 10),
-            Expanded(
-              child: _KindCard(
-                title: kind == GoalKind.purchase ? l10n.goal_kind_purchase : l10n.goal_kind_milestone,
-                hint: kind == GoalKind.purchase
-                    ? l10n.goal_kind_purchase_hint
-                    : l10n.goal_kind_milestone_hint,
-                selected: _kind == kind,
-                color: goalColor(scheme, kind),
-                onTap: () => setState(() => _kind = kind),
-              ),
-            ),
-          ],
-        ]),
-        const SizedBox(height: 20),
+        const SizedBox(height: 4),
+        Text(
+          l10n.goal_new_hint,
+          style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 18),
         TextFormField(
           controller: _name,
           textCapitalization: TextCapitalization.sentences,
@@ -123,17 +133,43 @@ class _NewGoalSheetState extends State<_NewGoalSheet> {
           },
         ),
         const SizedBox(height: 16),
+        Text(l10n.goal_since, style: theme.textTheme.labelLarge),
+        const SizedBox(height: 8),
+        SegmentedButton<bool>(
+          showSelectedIcon: false,
+          segments: [
+            ButtonSegment(value: false, label: Text(l10n.goal_since_start)),
+            ButtonSegment(
+              value: true,
+              label: Text(_since == null ? l10n.goal_since_purchase : format.shortDayWithYear(_since!)),
+            ),
+          ],
+          selected: {_since != null},
+          onSelectionChanged: (selection) {
+            if (selection.first) {
+              _pickSince();
+            } else {
+              setState(() => _since = null);
+            }
+          },
+        ),
+        const SizedBox(height: 6),
+        Text(
+          l10n.goal_since_hint,
+          style: theme.textTheme.labelSmall?.copyWith(color: scheme.outline),
+        ),
+        const SizedBox(height: 16),
         Text(l10n.goal_icon, style: theme.textTheme.labelLarge),
         const SizedBox(height: 8),
-        Wrap(spacing: 10, children: [
+        Wrap(spacing: 10, runSpacing: 10, children: [
           for (final icon in GoalIcon.values)
             IconButton(
               isSelected: _icon == icon,
               style: IconButton.styleFrom(
                 fixedSize: const Size.square(52),
-                backgroundColor: _icon == icon ? scheme.primaryContainer : null,
+                backgroundColor: _icon == icon ? scheme.tertiaryContainer : null,
                 side: BorderSide(
-                  color: _icon == icon ? scheme.primary : scheme.outlineVariant,
+                  color: _icon == icon ? scheme.tertiary : scheme.outlineVariant,
                   width: _icon == icon ? 2 : 1,
                 ),
               ),
@@ -171,12 +207,14 @@ class _NewGoalSheetState extends State<_NewGoalSheet> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: scheme.primaryContainer.withValues(alpha: 0.35),
+        color: scheme.tertiaryContainer.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
-          missing <= 0 ? l10n.goal_already_reached : l10n.goal_missing(format.euros(missing)),
+          missing <= 0
+              ? l10n.goal_already_reached
+              : l10n.goal_preview(format.euros(current), format.euros(missing)),
           style: theme.textTheme.titleSmall,
         ),
         if (hint != null) ...[
@@ -191,51 +229,10 @@ class _NewGoalSheetState extends State<_NewGoalSheet> {
   }
 }
 
-class _KindCard extends StatelessWidget {
-  const _KindCard({
-    required this.title,
-    required this.hint,
-    required this.selected,
-    required this.color,
-    required this.onTap,
-  });
-
-  final String title;
-  final String hint;
-  final bool selected;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Material(
-      color: selected ? color.withValues(alpha: 0.14) : scheme.surfaceContainer,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: selected ? color : scheme.outlineVariant, width: selected ? 2 : 1),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: theme.textTheme.titleSmall?.copyWith(color: selected ? color : null)),
-            const SizedBox(height: 2),
-            Text(hint, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
-          ]),
-        ),
-      ),
-    );
-  }
-}
-
-/// Confirmation d'un objectif atteint. Renvoie `true` s'il faut le valider.
+/// Confirmation d'un palier franchi. Renvoie `true` s'il faut le valider.
 ///
-/// Pour un achat, la feuille montre ce que la depense retire aux autres
-/// achats avant de confirmer : ils puisent tous dans le meme solde.
+/// Valider ne depense rien : le palier rejoint la liste de ceux qui sont
+/// rentabilises.
 Future<bool> showValidateGoalSheet(
   BuildContext context, {
   required Goal goal,
@@ -262,16 +259,15 @@ class _ValidateGoalSheet extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final format = CommuteFormat(context);
-    final purchase = goal.kind == GoalKind.purchase;
-    final after = book.validating(goal, DateTime.now());
+    final color = scheme.tertiary;
 
     return CommuteSheet(children: [
       Align(
         alignment: Alignment.centerLeft,
         child: CircleAvatar(
           radius: 26,
-          backgroundColor: goalColor(scheme, goal.kind).withValues(alpha: 0.18),
-          foregroundColor: goalColor(scheme, goal.kind),
+          backgroundColor: color.withValues(alpha: 0.18),
+          foregroundColor: color,
           child: Icon(goalIconData(goal.icon), size: 26),
         ),
       ),
@@ -279,47 +275,9 @@ class _ValidateGoalSheet extends StatelessWidget {
       Text(l10n.goal_validate_title(goal.name), style: theme.textTheme.titleLarge),
       const SizedBox(height: 6),
       Text(
-        purchase
-            ? l10n.goal_validate_purchase_detail(format.euros(goal.target))
-            : l10n.goal_validate_milestone_detail,
+        l10n.goal_validate_detail(
+            format.euros(book.progressOf(goal).current), format.euros(goal.target)),
         style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
-      ),
-      const SizedBox(height: 16),
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        decoration:
-            BoxDecoration(color: scheme.surfaceContainer, borderRadius: BorderRadius.circular(16)),
-        child: Column(children: [
-          if (purchase)
-            _ChangeRow(
-              label: l10n.goal_row_pot,
-              before: format.euros(book.balance),
-              after: format.euros(after.balance),
-              color: scheme.primary,
-            ),
-          for (final other in book.activeGoals)
-            if (other.id != goal.id)
-              if (purchase && other.kind == GoalKind.purchase)
-                _ChangeRow(
-                  label: other.name,
-                  before: format.percent(book.progressOf(other).ratio),
-                  after: format.percent(after.progressOf(other).ratio),
-                  color: goalColor(scheme, other.kind),
-                )
-              else if (other.kind == GoalKind.milestone)
-                _ChangeRow(
-                  label: other.name,
-                  after: format.percent(book.progressOf(other).ratio),
-                  color: goalColor(scheme, other.kind),
-                  note: l10n.goal_unchanged,
-                ),
-          _ChangeRow(
-            label: l10n.goal_row_saved,
-            after: format.euros(book.totalSaved),
-            color: scheme.onSurface,
-            note: l10n.goal_unchanged,
-          ),
-        ]),
       ),
       const SizedBox(height: 20),
       Row(children: [
@@ -333,51 +291,12 @@ class _ValidateGoalSheet extends StatelessWidget {
         Expanded(
           flex: 2,
           child: FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: color, foregroundColor: scheme.onTertiary),
             onPressed: () => Navigator.pop(context, true),
-            child: Text(purchase ? l10n.goal_spend(format.euros(goal.target)) : l10n.goal_validate_milestone),
+            child: Text(l10n.goal_validate_milestone),
           ),
         ),
       ]),
     ]);
-  }
-}
-
-class _ChangeRow extends StatelessWidget {
-  const _ChangeRow({
-    required this.label,
-    required this.after,
-    required this.color,
-    this.before,
-    this.note,
-  });
-
-  final String label;
-  final String? before;
-  final String after;
-  final Color color;
-  final String? note;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurfaceVariant;
-    return SizedBox(
-      height: 52,
-      child: Row(children: [
-        Expanded(child: Text(label, style: theme.textTheme.bodyMedium, overflow: TextOverflow.ellipsis)),
-        if (before != null) ...[
-          Text(before!, style: theme.textTheme.bodyMedium?.copyWith(color: muted)),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            child: Icon(Icons.arrow_forward, size: 16, color: muted),
-          ),
-        ],
-        if (note != null) ...[
-          Text(note!, style: theme.textTheme.bodySmall?.copyWith(color: muted)),
-          const SizedBox(width: 10),
-        ],
-        Text(after, style: theme.textTheme.titleSmall?.copyWith(color: color)),
-      ]),
-    );
   }
 }

@@ -12,6 +12,7 @@ enum AppTab {
   commute,
   goals,
   freeTime,
+  sport,
   torrents,
   system,
   gas;
@@ -28,7 +29,7 @@ enum AppTab {
 
 /// Ce que la barre du bas montre en permanence.
 ///
-/// Huit onglets ne tiennent pas cote a cote sans devenir illisibles. Trois sont
+/// Neuf onglets ne tiennent pas cote a cote sans devenir illisibles. Trois sont
 /// epingles, le reste se range derriere « Plus » — et c'est l'utilisateur qui
 /// decide lesquels.
 class TabLayout {

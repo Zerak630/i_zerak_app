@@ -71,18 +71,6 @@ class _FreeTimeSettingsPageState extends State<FreeTimeSettingsPage> {
     }
   }
 
-  Future<void> _editRate() async {
-    final l10n = AppLocalizations.of(context)!;
-    final value = await _askNumber(
-      title: l10n.free_settings_rate,
-      initial: _settings.ratePerHour,
-      suffix: l10n.free_per_hour_suffix,
-    );
-    if (value != null && value >= 0) {
-      await _save(_settings.copyWith(ratePerHour: roundTo2(value)));
-    }
-  }
-
   Future<void> _editFloor() async {
     final l10n = AppLocalizations.of(context)!;
     final value = await _askNumber(
@@ -94,8 +82,6 @@ class _FreeTimeSettingsPageState extends State<FreeTimeSettingsPage> {
       await _save(_settings.copyWith(floorMinutes: value.round()));
     }
   }
-
-  static double roundTo2(double value) => (value * 100).roundToDouble() / 100;
 
   Future<double?> _askNumber({
     required String title,
@@ -241,15 +227,6 @@ class _FreeTimeSettingsPageState extends State<FreeTimeSettingsPage> {
                   trailing: Text(formatMinutes(l10n, _settings.floorMinutes.toDouble()),
                       style: theme.textTheme.titleSmall),
                   onTap: _editFloor,
-                ),
-                _Section(l10n.free_settings_pot),
-                ListTile(
-                  leading: const Icon(Icons.savings_outlined),
-                  title: Text(l10n.free_settings_rate),
-                  subtitle: Text(l10n.free_settings_rate_hint),
-                  trailing: Text(l10n.free_per_hour(format.euros(_settings.ratePerHour)),
-                      style: theme.textTheme.titleSmall),
-                  onTap: _editRate,
                 ),
                 _Section(l10n.free_settings_report),
                 SwitchListTile(

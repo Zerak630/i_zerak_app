@@ -17,7 +17,6 @@ import java.util.TimeZone
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
-import kotlin.math.roundToLong
 
 /**
  * Le bilan du soir : une notification par jour, calculee application fermee.
@@ -26,8 +25,8 @@ import kotlin.math.roundToLong
  * ScreenTimeService.reportConfig) ; ils sont gardes dans les preferences, et
  * l'alarme se reprogramme d'elle-meme chaque soir et apres un redemarrage.
  *
- * Le quota, le gain et l'economie loupee sont recalcules ici avec la meme
- * formule que ScreenTimeSettings.quotaFor, earnedOn et missedOn : les deux
+ * Le quota et le temps repris sont recalcules ici avec la meme formule que
+ * ScreenTimeSettings.quotaFor et ScreenTimeDay.regainedMinutes : les deux
  * doivent rester d'accord.
  */
 object DailyReport {
@@ -115,12 +114,17 @@ object DailyReport {
         }
 
         val day = ScreenTimeToday.measure(context, config)
-        val euros = HomeWidgetStore.euros(day.amount)
         val spent = formatMinutes(context, day.minutes.toLong())
         val limit = formatMinutes(context, day.quota.toLong())
-        var text = context.getString(
-            if (day.under) R.string.report_under else R.string.report_over, spent, limit, euros
-        )
+        var text = if (day.under) {
+            context.getString(
+                R.string.report_under, spent, limit, formatMinutes(context, day.regained.toLong())
+            )
+        } else {
+            context.getString(
+                R.string.report_over, spent, limit, formatMinutes(context, day.over.toLong())
+            )
+        }
         if (day.streak != null) {
             text += context.resources.getQuantityString(R.plurals.report_streak, day.streak, day.streak)
         }
@@ -160,20 +164,22 @@ object DailyReport {
  * La journee en cours du Temps libre, mesuree application fermee : pour le
  * bilan du soir et le widget.
  *
- * Meme formule que ScreenTimeSettings.quotaFor, earnedOn et missedOn cote
- * Dart : les deux doivent rester d'accord.
+ * Meme formule que ScreenTimeSettings.quotaFor et ScreenTimeDay cote Dart :
+ * les deux doivent rester d'accord.
  */
 object ScreenTimeToday {
     class Day(
         val seconds: Long,
         val quota: Double,
-        /** Le gain si le quota tient, sinon l'economie loupee. */
-        val amount: Double,
+        /** Minutes reprises sur la moyenne de depart. */
+        val regained: Double,
         /** Jours tenus d'affilee, aujourd'hui compris ; nul si inconnu ou rompu. */
         val streak: Int?,
     ) {
         val minutes: Double get() = seconds / 60.0
         val under: Boolean get() = seconds <= quota * 60
+        /** Minutes au-dessus du quota ; nulles un jour tenu. */
+        val over: Double get() = max(0.0, minutes - quota)
     }
 
     /** Jours depuis le 1er janvier 1970, sur la date calendaire locale. */
@@ -206,19 +212,15 @@ object ScreenTimeToday {
         val target = baseline * (1 - config.optDouble("decrease", 0.1)).pow((week + 1).toDouble())
         val floor = min(config.optDouble("floor", 20.0), baseline)
         val quota = Math.round(max(target, floor)).toDouble()
-        val rate = config.optDouble("rate", 2.0)
-        fun gainFor(spent: Double) = (max(0.0, baseline - spent) / 60 * rate * 100).roundToLong() / 100.0
         val under = seconds <= quota * 60
-        // Sous le quota, le gain du jour ; au-dessus, rien dans la cagnotte,
-        // et ce que le quota aurait rapporte part en economies loupees.
-        val amount = if (under) gainFor(minutes) else gainFor(quota)
+        val regained = max(0.0, baseline - minutes)
         // La serie n'est connue que si l'onglet a ete ouvert depuis hier.
         val streak = if (under && config.optLong("streakThroughEpochDay", -1) == today - 1) {
             config.optInt("streak", 0) + 1
         } else {
             null
         }
-        return Day(seconds, quota, amount, streak)
+        return Day(seconds, quota, regained, streak)
     }
 }
 

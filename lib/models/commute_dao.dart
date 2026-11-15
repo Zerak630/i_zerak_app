@@ -182,6 +182,7 @@ class CommuteSettings {
     this.consumption = 5.2,
     this.fuel = FuelType.gazole,
     this.reasons = CarReason.defaults,
+    this.paybackExcluded = const {},
   });
 
   /// Aller et retour compris. Nulle tant qu'elle n'a pas ete renseignee :
@@ -194,6 +195,10 @@ class CommuteSettings {
   final FuelType fuel;
 
   final List<CarReason> reasons;
+
+  /// Les abonnements que le velo ne rembourse pas : le loyer, une assurance —
+  /// ce qu'on ne paie pas « en plus », et qu'aucun trajet ne couvrirait.
+  final Set<String> paybackExcluded;
 
   bool get isConfigured => (distanceKm ?? 0) > 0;
 
@@ -215,12 +220,14 @@ class CommuteSettings {
     double? consumption,
     FuelType? fuel,
     List<CarReason>? reasons,
+    Set<String>? paybackExcluded,
   }) =>
       CommuteSettings(
         distanceKm: distanceKm ?? this.distanceKm,
         consumption: consumption ?? this.consumption,
         fuel: fuel ?? this.fuel,
         reasons: reasons ?? this.reasons,
+        paybackExcluded: paybackExcluded ?? this.paybackExcluded,
       );
 
   Map<String, dynamic> toJson() => {
@@ -228,6 +235,7 @@ class CommuteSettings {
         'consumption': consumption,
         'fuel': fuel.name,
         'reasons': [for (final reason in reasons) reason.toJson()],
+        if (paybackExcluded.isNotEmpty) 'payback_excluded': [...paybackExcluded]..sort(),
       };
 
   /// Relecture tolerante : un champ manquant ou d'un type inattendu reprend sa
@@ -246,6 +254,11 @@ class CommuteSettings {
       consumption: _asDouble(raw['consumption']) ?? 5.2,
       fuel: FuelType.fromName(_asString(raw['fuel'])),
       reasons: raw['reasons'] is List ? reasons : CarReason.defaults,
+      paybackExcluded: {
+        if (raw['payback_excluded'] case final List<dynamic> list)
+          for (final id in list)
+            if (id is String) id,
+      },
     );
   }
 }
@@ -369,12 +382,15 @@ class CommuteDay {
 }
 
 enum GoalKind {
-  /// Un achat : il avance avec le solde de la cagnotte, et le valider depense
-  /// son montant.
+  /// Un achat finance par la cagnotte. Il n'en est plus cree : la cagnotte a
+  /// laisse la place aux abonnements rembourses (cf. `payback_dao.dart`). Ceux
+  /// qui existaient se lisent desormais comme des paliers, et ceux deja
+  /// valides restent dans l'historique.
   purchase,
 
-  /// Un palier : il se mesure sur le total economise depuis le debut, et se
-  /// valide sans rien depenser. « Rentabiliser le velo » en est un.
+  /// Un palier : un gros achat que l'argent economise finit par rentabiliser.
+  /// Il se mesure sur le total economise depuis [Goal.since], et se valide
+  /// sans rien depenser. « Rentabiliser le velo » en est un.
   milestone;
 
   static GoalKind fromName(String? raw) =>
@@ -389,7 +405,10 @@ enum GoalIcon {
   helmet,
   bag,
   gift,
-  star;
+  star,
+  phone,
+  laptop,
+  fitness;
 
   static GoalIcon fromName(String? raw) =>
       values.firstWhere((icon) => icon.name == raw, orElse: () => star);
@@ -403,6 +422,7 @@ class Goal {
     required this.kind,
     required this.icon,
     required this.createdAt,
+    this.since,
     this.validatedAt,
   });
 
@@ -413,8 +433,14 @@ class Goal {
   final GoalIcon icon;
   final DateTime createdAt;
 
-  /// Renseigne une fois l'objectif valide. Un achat valide sort de la
-  /// cagnotte ; un palier valide ne coute rien.
+  /// Premier jour dont l'economie compte. Nul : depuis le premier trajet.
+  ///
+  /// Un telephone achete en novembre ne se rentabilise pas avec l'essence
+  /// economisee en mars ; le velo, lui, si — il etait deja la.
+  final DateTime? since;
+
+  /// Renseigne une fois l'objectif valide. Valider ne depense rien : c'est
+  /// constater qu'il est rentabilise.
   final DateTime? validatedAt;
 
   bool get isValidated => validatedAt != null;
@@ -426,6 +452,7 @@ class Goal {
         kind: kind,
         icon: icon,
         createdAt: createdAt,
+        since: since,
         validatedAt: at,
       );
 
@@ -436,6 +463,7 @@ class Goal {
         'kind': kind.name,
         'icon': icon.name,
         'created': createdAt.toIso8601String(),
+        if (since != null) 'since': dayKey(since!),
         if (validatedAt != null) 'validated': validatedAt!.toIso8601String(),
       };
 
@@ -450,6 +478,7 @@ class Goal {
       kind: GoalKind.fromName(_asString(raw['kind'])),
       icon: GoalIcon.fromName(_asString(raw['icon'])),
       createdAt: DateTime.tryParse('${raw['created']}') ?? DateTime(2000),
+      since: parseDayKey('${raw['since']}'),
       validatedAt: DateTime.tryParse('${raw['validated']}'),
     );
   }
@@ -461,7 +490,7 @@ class GoalProgress {
 
   final Goal goal;
 
-  /// Le solde de la cagnotte pour un achat, le total economise pour un palier.
+  /// Ce qui a ete economise depuis [Goal.since].
   final double current;
 
   bool get reached => current + 0.005 >= goal.target;
@@ -515,27 +544,39 @@ class CommuteTotals {
   final int missedDays;
 }
 
-/// Des objectifs, et la cagnotte dans laquelle ils puisent.
+/// Une somme economisee un jour donne.
+typedef Saving = ({DateTime date, double amount});
+
+/// Des paliers, et l'argent economise qui les rentabilise.
 ///
-/// Partage par les onglets Velo et Temps libre : seule change la facon dont
-/// la cagnotte se remplit, pas celle dont on la depense.
+/// Plus de cagnotte ou l'on puise : valider un objectif ne retire rien. Le
+/// meme argent economise peut donc rentabiliser le velo et rembourser les
+/// abonnements du mois — ce sont deux facons de le regarder, pas deux
+/// depenses.
 class GoalBook {
-  GoalBook(Iterable<Goal> goals, {required this.totalSaved})
-      : goals = [...goals]..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+  GoalBook(Iterable<Goal> goals, {required Iterable<Saving> savings})
+      : goals = [...goals]..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
+        _savings = [...savings],
+        totalSaved = roundCents(savings.fold(0.0, (sum, saving) => sum + saving.amount));
 
   /// Du plus ancien au plus recent : l'ordre dans lequel ils ont ete crees.
   final List<Goal> goals;
 
-  /// Tout ce que la cagnotte a recu depuis le debut. Ne baisse jamais.
+  final List<Saving> _savings;
+
+  /// Tout ce qui a ete economise depuis le debut. Ne baisse jamais.
   final double totalSaved;
 
-  /// Les achats valides.
-  double get spent => roundCents(goals
-      .where((goal) => goal.isValidated && goal.kind == GoalKind.purchase)
-      .fold(0.0, (sum, goal) => sum + goal.target));
-
-  /// Ce qui reste a depenser.
-  double get balance => roundCents(totalSaved - spent);
+  /// Ce qui a ete economise depuis [from] inclus, ou depuis le debut.
+  double savedSince(DateTime? from) {
+    if (from == null) {
+      return totalSaved;
+    }
+    final start = dateOnly(from);
+    return roundCents(_savings
+        .where((saving) => !saving.date.isBefore(start))
+        .fold(0.0, (sum, saving) => sum + saving.amount));
+  }
 
   List<Goal> get activeGoals => [for (final goal in goals) if (!goal.isValidated) goal];
 
@@ -543,15 +584,7 @@ class GoalBook {
       [for (final goal in goals) if (goal.isValidated) goal]
         ..sort((a, b) => b.validatedAt!.compareTo(a.validatedAt!));
 
-  GoalProgress progressOf(Goal goal) =>
-      GoalProgress(goal, goal.kind == GoalKind.purchase ? balance : totalSaved);
-
-  /// Le meme carnet, une fois [goal] valide : de quoi montrer ce que la
-  /// validation changerait avant de la confirmer.
-  GoalBook validating(Goal goal, DateTime at) => GoalBook(
-        [for (final other in goals) other.id == goal.id ? other.validated(at) : other],
-        totalSaved: totalSaved,
-      );
+  GoalProgress progressOf(Goal goal) => GoalProgress(goal, savedSince(goal.since));
 }
 
 /// Tout ce que l'onglet affiche, calcule a partir des jours et des objectifs.
@@ -564,7 +597,10 @@ class CommuteLedger {
     return CommuteLedger._(
       [...days]..sort((a, b) => b.date.compareTo(a.date)),
       totals,
-      GoalBook(goals, totalSaved: totals.bike),
+      GoalBook(goals, savings: [
+        for (final day in days)
+          if (day.isBike) (date: day.date, amount: day.amount),
+      ]),
     );
   }
 
@@ -582,12 +618,6 @@ class CommuteLedger {
 
   /// Tout ce que le velo a rapporte depuis le premier trajet. Ne baisse jamais.
   double get totalSaved => totals.bike;
-
-  /// Les achats valides.
-  double get spent => book.spent;
-
-  /// Ce qui reste a depenser.
-  double get balance => book.balance;
 
   DateTime? get firstBikeDay {
     DateTime? first;

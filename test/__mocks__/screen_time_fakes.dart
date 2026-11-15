@@ -1,4 +1,4 @@
-import 'package:i_zerak_app/models/commute_dao.dart' show Goal, dateOnly, dayKey;
+import 'package:i_zerak_app/models/commute_dao.dart' show dateOnly, dayKey;
 import 'package:i_zerak_app/models/screen_time_dao.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_screen_time.dart';
 import 'package:i_zerak_app/services/screen_time/usage_source.dart';
@@ -11,7 +11,6 @@ class MemoryScreenTime implements IScreenTime {
 
   ScreenTimeSettings settings;
   final Map<String, ScreenTimeDay> days;
-  final Map<String, Goal> goals = {};
 
   @override
   Future<ScreenTimeSettings> readSettings() async => settings;
@@ -25,14 +24,6 @@ class MemoryScreenTime implements IScreenTime {
   @override
   Future<void> saveDay(ScreenTimeDay day) async => days[dayKey(day.date)] = day;
 
-  @override
-  Future<List<Goal>> getGoals() async => [...goals.values];
-
-  @override
-  Future<void> saveGoal(Goal goal) async => goals[goal.id] = goal;
-
-  @override
-  Future<void> deleteGoal(String id) async => goals.remove(id);
 }
 
 /// Un Android imaginaire : des sessions, et les jours dont il garde la trace.

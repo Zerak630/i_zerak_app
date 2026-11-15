@@ -46,7 +46,6 @@ class ScreenTimeService {
     final today = dateOnly(now);
     final settings = await store.readSettings();
     final days = await store.getDays();
-    final goals = await store.getGoals();
 
     DailyUsage? live;
     if (settings.isConfigured && await source.hasAccess()) {
@@ -71,7 +70,6 @@ class ScreenTimeService {
     final ledger = ScreenTimeLedger(
       settings: settings,
       days: days,
-      goals: goals,
       today: today,
       live: live,
     );
@@ -98,7 +96,7 @@ class ScreenTimeService {
   /// Transmet au bilan du soir et au widget Temps libre de quoi se calculer
   /// seuls, application fermee.
   ///
-  /// Le natif refait le calcul du quota et du gain (cf. ScreenTimeToday dans
+  /// Le natif refait le calcul du quota et du temps repris (cf. ScreenTimeToday dans
   /// DailyReport.kt) : il recoit donc les memes parametres, et la serie
   /// arretee a hier.
   Future<void> pushReport(ScreenTimeLedger ledger) async {
@@ -130,7 +128,6 @@ class ScreenTimeService {
       'startEpochDay': epochDay(settings.startDate!),
       'decrease': settings.weeklyDecrease,
       'floor': settings.floorMinutes,
-      'rate': settings.ratePerHour,
       'streak': ledger.streak,
       'streakThroughEpochDay': epochDay(yesterday),
     };

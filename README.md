@@ -2,8 +2,9 @@
 
 Application Flutter personnelle qui pilote un serveur auto-hébergé depuis le téléphone :
 téléchargements qBittorrent, supervision d'un Raspberry Pi, suivi d'abonnements et prix des
-carburants. Deux onglets aident aussi au quotidien : une cagnotte pour les trajets à vélo, et le
-**Temps libre** pour décrocher des réseaux sociaux.
+carburants. Trois onglets aident aussi au quotidien : le **Vélo**, dont l'essence économisée
+rembourse les abonnements et rentabilise les gros achats, le **Temps libre** pour décrocher des
+réseaux sociaux, et le **Sport** à la maison.
 
 ## Architecture
 
@@ -45,7 +46,7 @@ doit l'être dans les deux langues.
 
 ```bash
 flutter analyze   # doit rester sans avertissement
-flutter test      # 441 tests
+flutter test      # 484 tests
 ```
 
 Les versions release se construisent **sans élagage des icônes** :
@@ -59,6 +60,20 @@ Avec Flutter 3.47, l'élagage retire de la police Material des glyphes pourtant 
 (`phone_android`, `hourglass_bottom`, `settings_outlined`…) : ils s'affichent comme une case vide.
 La police complète ajoute environ 1,5 Mo.
 
+## Objectifs : ce que le vélo rembourse
+
+Il n'y a plus de cagnotte où l'on puise pour acheter. L'onglet **Objectifs** confronte l'essence
+réellement économisée à vélo à ce qu'on paie déjà :
+
+- **les abonnements du mois**, remboursés du moins cher au plus cher, au coût mensuel (un annuel de
+  120 € compte pour 10 € par mois). On peut en exclure (le loyer, une assurance) ; l'historique
+  montre les mois précédents ;
+- **les paliers**, les gros achats que les économies rentabilisent sur la durée : le vélo, un
+  téléphone… Un palier compte depuis le premier trajet, ou depuis sa date d'achat.
+
+C'est le même argent vu sous deux angles : valider un palier ne retire rien. Le calcul est dans
+`lib/models/payback_dao.dart` et `GoalBook` (`lib/models/commute_dao.dart`).
+
 ## Temps libre (Android)
 
 L'onglet **Temps libre** aide à décrocher des réseaux sociaux. Il lit les statistiques d'utilisation
@@ -66,25 +81,49 @@ d'Android (autorisation « Accès aux données d'utilisation », accordée à la
 téléphone), mesure une moyenne de départ sur les jours que le téléphone a gardés, puis fixe un quota
 qui baisse chaque semaine (−10 % par défaut, plancher de 20 min).
 
-Chaque journée terminée sous le quota alimente une cagnotte (2 € par heure gagnée sur la moyenne de
-départ, par défaut) qui finance les mêmes objectifs que la cagnotte vélo. Une journée au-dessus du
-quota ne rapporte rien : ce que le quota aurait rapporté part dans la case « Économies loupées ». Une notification dresse le bilan chaque
-soir (21 h 30 par défaut).
+Il compte **du temps, pas de l'argent** : les minutes reprises sur la moyenne de départ, et le temps
+passé au-dessus du quota. Une notification dresse le bilan chaque soir (21 h 30 par défaut).
 
 Tout reste sur l'appareil : les journées sont figées dans Hive à minuit, et rien n'est envoyé nulle
 part. Le bilan du soir est calculé côté natif, application fermée (`DailyReport.kt`), avec la même
-formule que `ScreenTimeSettings` (`quotaFor`, `earnedOn`, `missedOn`) : toute modification du calcul doit être faite des deux côtés.
+formule que `ScreenTimeSettings.quotaFor` et `ScreenTimeDay.regainedMinutes` : toute modification
+du calcul doit être faite des deux côtés.
+
+## Sport
+
+L'onglet **Sport** compte du temps, jamais d'argent. On y décrit ses sports (cinq livrés, d'autres
+s'ajoutent), un **programme de la semaine** (yoga le lundi, renforcement le jeudi…), et on saisit à
+la main chaque séance : un créneau du programme se dit « fait », avec sa durée, ou « pas fait » ; une
+séance en plus s'ajoute en trois choix. Les semaines passées se remplissent après coup, et les
+créneaux oubliés de la semaine précédente sont rappelés.
+
+L'onglet montre la semaine jour par jour, les semaines tenues d'affilée (tout le programme, ou au
+moins une séance sans programme) et le temps passé sur chaque sport. Les données vivent dans la
+boîte Hive `sport`, une entrée par séance, synchronisée comme les trajets.
+
+## Bilan de la semaine et du mois
+
+Le **bilan** met côte à côte, sans les additionner, l'essence économisée à vélo (et, au mois, les
+abonnements remboursés), le temps repris aux réseaux et le temps de sport, avec la période
+précédente pour comparer. Il s'ouvre depuis l'accueil (carte « Bilan de la semaine ») et depuis
+l'onglet Sport.
+
+Une notification le résume chaque dimanche soir et le dernier jour du mois (19 h 30 par défaut,
+réglable dans le bilan). Comme les widgets, le natif ne lit pas Hive : `RecapService` lui transmet
+les textes déjà rédigés chaque fois que l'application passe en arrière-plan, et `RecapReport.kt`
+notifie celui dont la période se termine ce jour-là. Le bilan reprend donc ce qui a été saisi
+jusqu'à la dernière ouverture d'iZerak.
 
 ## Widgets de l'écran d'accueil (Android)
 
 - **Vélo / Voiture ?** : « À vélo » enregistre la journée sans ouvrir l'application ; « Voiture »
   l'ouvre sur la question de la raison. Une fois la journée saisie, le widget affiche le montant et
-  la case où il est parti : cagnotte vélo, coûts indispensables ou économies loupées.
-- **Temps libre** : le temps passé aujourd'hui sur les réseaux, face au quota, avec le gain ou
-  l'économie loupée du jour et la série. Il se mesure seul, côté natif (`ScreenTimeToday`), toutes
+  la case où il est parti : essence économisée, coûts indispensables ou économies loupées.
+- **Temps libre** : le temps passé aujourd'hui sur les réseaux, face au quota, avec le temps
+  repris ou le temps de trop du jour, et la série. Il se mesure seul, côté natif (`ScreenTimeToday`), toutes
   les 30 minutes, à chaque appui et chaque fois qu'iZerak passe en arrière-plan.
-- **Objectif** : un objectif actif des cagnottes Vélo et Temps libre. Un appui passe au suivant,
-  l'icône en haut à droite ouvre l'application.
+- **Objectif** : les abonnements du mois que le vélo rembourse, puis les paliers en cours. Un appui
+  passe au suivant, l'icône en haut à droite ouvre l'application.
 
 Les widgets ne lisent pas Hive. L'application leur transmet un instantané chaque fois qu'elle passe
 en arrière-plan (`HomeWidgetsService`) ; en retour, un appui sur « À vélo » ne fait que noter la
