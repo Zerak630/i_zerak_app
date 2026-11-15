@@ -46,7 +46,7 @@ doit l'être dans les deux langues.
 
 ```bash
 flutter analyze   # doit rester sans avertissement
-flutter test      # 488 tests
+flutter test      # 484 tests
 ```
 
 Les versions release se construisent **sans élagage des icônes** :
