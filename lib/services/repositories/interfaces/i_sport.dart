@@ -13,6 +13,11 @@ abstract class ISport {
   /// Ajoute le sport, ou remplace celui qui porte le meme identifiant.
   Future<void> saveSport(Sport sport);
 
+  /// Supprime un sport ajoute. Un sport livre, qui reviendrait sinon de
+  /// `Sport.defaults`, est enregistre masque. A l'appelant de verifier qu'il
+  /// n'est plus utilise (cf. `SportUsage`).
+  Future<void> deleteSport(Sport sport);
+
   Future<List<PlannedSlot>> getPlan();
 
   Future<void> saveSlot(PlannedSlot slot);
@@ -28,11 +33,15 @@ abstract class ISport {
 }
 
 /// Les sports livres, puis ceux enregistres : un sport livre renomme prend sa
-/// place, un sport ajoute vient a la suite.
+/// place, un sport ajoute vient a la suite, un sport livre masque disparait.
 List<Sport> mergeSports(Iterable<Sport> stored) {
   final byId = {for (final sport in stored) sport.id: sport};
   return [
     for (final sport in Sport.defaults) byId.remove(sport.id) ?? sport,
     ...byId.values,
-  ];
+  ].where((sport) => !sport.hidden).toList();
 }
+
+/// Ce qu'enregistre la suppression d'un sport livre : son nom et son icone
+/// tels quels, et la marque qui le masque.
+Sport hiddenSport(Sport sport) => Sport(id: sport.id, label: sport.label, icon: sport.icon, hidden: true);

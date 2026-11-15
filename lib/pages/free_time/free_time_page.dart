@@ -611,7 +611,7 @@ class _HoursCard extends StatelessWidget {
                   child: Container(
                     height: max <= 0 ? 2 : 2 + 62 * profile[hour] / max,
                     decoration: BoxDecoration(
-                      color: hour == peak ? scheme.tertiary : scheme.primary.withValues(alpha: 0.55),
+                      color: hour == peak ? scheme.tertiary : scheme.outline.withValues(alpha: 0.55),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),

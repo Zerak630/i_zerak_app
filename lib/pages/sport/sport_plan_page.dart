@@ -21,6 +21,7 @@ class SportPlanPage extends StatefulWidget {
 class _SportPlanPageState extends State<SportPlanPage> {
   List<Sport> _sports = const [];
   List<PlannedSlot> _plan = const [];
+  List<SportSession> _sessions = const [];
   var _loading = true;
 
   @override
@@ -32,11 +33,13 @@ class _SportPlanPageState extends State<SportPlanPage> {
   Future<void> _reload() async {
     final sports = await widget.store.getSports();
     final plan = await widget.store.getPlan();
+    final sessions = await widget.store.getSessions();
     if (!mounted) {
       return;
     }
     setState(() {
       _sports = sports;
+      _sessions = sessions;
       _plan = [...plan]..sort((a, b) {
           final byDay = a.weekday.compareTo(b.weekday);
           return byDay != 0 ? byDay : a.id.compareTo(b.id);
@@ -82,12 +85,24 @@ class _SportPlanPageState extends State<SportPlanPage> {
     }
   }
 
-  Future<void> _addSport() async {
-    final sport = await showNewSportSheet(context);
-    if (sport == null) {
-      return;
+  /// Ajoute un sport, ou modifie [sport] : nom, icone, suppression s'il ne
+  /// sert plus.
+  Future<void> _editSport([Sport? sport]) async {
+    final edit = await showSportEditor(
+      context,
+      sport: sport,
+      usage: sport == null
+          ? const SportUsage(sessions: 0, slots: 0)
+          : SportUsage.of(sport.id, plan: _plan, sessions: _sessions),
+    );
+    switch (edit) {
+      case SportSaved(:final sport):
+        await widget.store.saveSport(sport);
+      case SportDeleted() when sport != null:
+        await widget.store.deleteSport(sport);
+      default:
+        return;
     }
-    await widget.store.saveSport(sport);
     await _reload();
   }
 
@@ -155,18 +170,23 @@ class _SportPlanPageState extends State<SportPlanPage> {
                 Row(children: [
                   Expanded(child: Text(l10n.sport_my_sports, style: theme.textTheme.titleMedium)),
                   TextButton.icon(
-                    onPressed: _addSport,
+                    onPressed: _editSport,
                     icon: const Icon(Icons.add),
                     label: Text(l10n.sport_add_sport),
                   ),
                 ]),
-                const SizedBox(height: 4),
+                Text(
+                  l10n.sport_my_sports_hint,
+                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+                const SizedBox(height: 8),
                 Wrap(spacing: 8, runSpacing: 8, children: [
                   for (final sport in _sports)
-                    Chip(
+                    ActionChip(
                       avatar: Icon(sportIconData(sport.icon), size: 18,
                           color: sportColor(scheme, _sports, sport.id)),
                       label: Text(sportLabel(l10n, sport)),
+                      onPressed: () => _editSport(sport),
                     ),
                 ]),
               ],

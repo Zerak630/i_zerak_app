@@ -151,13 +151,13 @@ class _ReasonTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: missed ? scheme.tertiaryContainer : scheme.secondaryContainer,
+                color: missed ? scheme.tertiaryContainer : scheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
                 missed ? l10n.commute_chip_missed : l10n.commute_chip_essential,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: missed ? scheme.onTertiaryContainer : scheme.onSecondaryContainer,
+                  color: missed ? scheme.onTertiaryContainer : scheme.onSurfaceVariant,
                 ),
               ),
             ),

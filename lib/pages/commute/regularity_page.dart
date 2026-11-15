@@ -414,7 +414,7 @@ class _Legend extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Wrap(spacing: 12, runSpacing: 6, children: [
       _LegendItem(color: scheme.primary, label: l10n.commute_legend_bike),
-      _LegendItem(color: scheme.secondary, label: l10n.commute_legend_essential),
+      _LegendItem(color: scheme.outline, label: l10n.commute_legend_essential),
       _LegendItem(color: scheme.tertiary, label: l10n.commute_legend_missed),
       _LegendItem(color: scheme.surfaceContainerHighest, label: l10n.regularity_legend_none),
     ]);
@@ -547,7 +547,7 @@ class _WeekdayBar extends StatelessWidget {
         child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           if (stat.bike > 0) Expanded(flex: stat.bike, child: ColoredBox(color: scheme.primary)),
           if (stat.essential > 0)
-            Expanded(flex: stat.essential, child: ColoredBox(color: scheme.secondary)),
+            Expanded(flex: stat.essential, child: ColoredBox(color: scheme.outline)),
           if (stat.missed > 0)
             Expanded(flex: stat.missed, child: ColoredBox(color: scheme.tertiary)),
           if (rest > 0) Expanded(flex: rest, child: const SizedBox()),

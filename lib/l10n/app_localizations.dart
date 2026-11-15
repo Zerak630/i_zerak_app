@@ -3615,6 +3615,18 @@ abstract class AppLocalizations {
   /// **'How long?'**
   String get sport_slot_how_long;
 
+  /// No description provided for @sport_slot_which_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Which day?'**
+  String get sport_slot_which_day;
+
+  /// No description provided for @sport_slot_moved.
+  ///
+  /// In en, this message translates to:
+  /// **'moved to {date}'**
+  String sport_slot_moved(String date);
+
   /// No description provided for @sport_slot_done.
   ///
   /// In en, this message translates to:
@@ -3734,6 +3746,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add a sport'**
   String get sport_add_sport;
+
+  /// No description provided for @sport_my_sports_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a sport to rename it, change its icon or delete it.'**
+  String get sport_my_sports_hint;
+
+  /// No description provided for @sport_edit_sport.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit sport'**
+  String get sport_edit_sport;
+
+  /// No description provided for @sport_delete_sport.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this sport'**
+  String get sport_delete_sport;
+
+  /// No description provided for @sport_in_use.
+  ///
+  /// In en, this message translates to:
+  /// **'In use: {what}. Delete those first to delete the sport.'**
+  String sport_in_use(String what);
+
+  /// No description provided for @sport_slots_short.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 plan slot} other{{count} plan slots}}'**
+  String sport_slots_short(int count);
 
   /// No description provided for @sport_this_week.
   ///

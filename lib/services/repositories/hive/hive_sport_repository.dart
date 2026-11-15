@@ -65,6 +65,10 @@ class HiveSportRepository implements ISport {
   Future<void> saveSport(Sport sport) => _put('$_sportPrefix${sport.id}', sport.toJson());
 
   @override
+  Future<void> deleteSport(Sport sport) =>
+      sport.isBuiltIn ? saveSport(hiddenSport(sport)) : _delete('$_sportPrefix${sport.id}');
+
+  @override
   Future<List<PlannedSlot>> getPlan() async => [
         for (final raw in _valuesWithPrefix(_slotPrefix))
           if (PlannedSlot.fromJson(raw) case final PlannedSlot slot) slot,

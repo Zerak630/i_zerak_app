@@ -46,7 +46,7 @@ doit l'être dans les deux langues.
 
 ```bash
 flutter analyze   # doit rester sans avertissement
-flutter test      # 484 tests
+flutter test      # 498 tests
 ```
 
 Les versions release se construisent **sans élagage des icônes** :
@@ -92,8 +92,10 @@ du calcul doit être faite des deux côtés.
 ## Sport
 
 L'onglet **Sport** compte du temps, jamais d'argent. On y décrit ses sports (cinq livrés, d'autres
-s'ajoutent), un **programme de la semaine** (yoga le lundi, renforcement le jeudi…), et on saisit à
-la main chaque séance : un créneau du programme se dit « fait », avec sa durée, ou « pas fait » ; une
+s'ajoutent ; chacun se renomme, change d'icône, et se supprime tant qu'aucune séance ni aucun
+créneau ne l'utilise), un **programme de la semaine** (yoga le lundi, renforcement le jeudi…), et on saisit à
+la main chaque séance : un créneau du programme se dit « fait », avec sa durée — le jour prévu ou
+décalé à un autre jour de la semaine, qui reçoit alors le temps —, ou « pas fait » ; une
 séance en plus s'ajoute en trois choix. Les semaines passées se remplissent après coup, et les
 créneaux oubliés de la semaine précédente sont rappelés.
 

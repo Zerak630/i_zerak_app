@@ -2303,6 +2303,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sport_slot_how_long => 'How long?';
 
   @override
+  String get sport_slot_which_day => 'Which day?';
+
+  @override
+  String sport_slot_moved(String date) {
+    return 'moved to $date';
+  }
+
+  @override
   String sport_slot_done(String minutes) {
     return 'Done — $minutes';
   }
@@ -2374,6 +2382,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sport_add_sport => 'Add a sport';
+
+  @override
+  String get sport_my_sports_hint =>
+      'Tap a sport to rename it, change its icon or delete it.';
+
+  @override
+  String get sport_edit_sport => 'Edit sport';
+
+  @override
+  String get sport_delete_sport => 'Delete this sport';
+
+  @override
+  String sport_in_use(String what) {
+    return 'In use: $what. Delete those first to delete the sport.';
+  }
+
+  @override
+  String sport_slots_short(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plan slots',
+      one: '1 plan slot',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get sport_this_week => 'This week';

@@ -575,7 +575,7 @@ class _DashboardPageState extends State<DashboardPage> {
         child: ListTile(
           leading: Icon(
             recorded.isBike ? Icons.pedal_bike : Icons.directions_car_outlined,
-            color: recorded.isBike ? scheme.primary : scheme.secondary,
+            color: recorded.isBike ? scheme.primary : scheme.outline,
           ),
           title: Text(recorded.isBike
               ? l10n.commute_recorded_bike
@@ -683,7 +683,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   context,
                   amount: format.euros(SubscriptionLedger.totalOf(upcoming)),
                   label: l10n.sub_remaining,
-                  color: scheme.secondary,
+                  color: scheme.onSurface,
                 ),
               ),
               Container(

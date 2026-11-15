@@ -481,7 +481,7 @@ class _BucketTotals extends StatelessWidget {
           label: l10n.commute_essential,
           amount: totals.essential,
           days: totals.essentialDays,
-          color: scheme.secondary,
+          color: scheme.outline,
         ),
       ),
       const SizedBox(width: 10),

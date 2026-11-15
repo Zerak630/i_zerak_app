@@ -28,17 +28,33 @@ DateTime weekStart(DateTime day) => DateTime(day.year, day.month, day.day - (day
 DateTime dayOfWeek(DateTime monday, int weekday) =>
     DateTime(monday.year, monday.month, monday.day + weekday - 1);
 
-/// Icones proposees pour un sport. Le nom est la cle de persistance.
+/// Icones proposees pour un sport. Le nom est la cle de persistance : on
+/// peut reordonner la liste, jamais renommer une valeur.
 enum SportIcon {
   strength,
   run,
   yoga,
   stretch,
+  gymnastics,
   bike,
   walk,
+  hiking,
   swim,
+  rowing,
   dance,
   boxing,
+  martialArts,
+  racket,
+  football,
+  basketball,
+  volleyball,
+  handball,
+  rugby,
+  hockey,
+  golf,
+  ski,
+  skate,
+  surf,
   other;
 
   static SportIcon fromName(String? raw) =>
@@ -48,7 +64,7 @@ enum SportIcon {
 /// Un sport pratique. Ceux livres ont un identifiant fixe et un libelle nul :
 /// leur nom vient des traductions, comme les raisons de prendre la voiture.
 class Sport {
-  const Sport({required this.id, this.label, required this.icon});
+  const Sport({required this.id, this.label, required this.icon, this.hidden = false});
 
   final String id;
 
@@ -56,6 +72,10 @@ class Sport {
   final String? label;
 
   final SportIcon icon;
+
+  /// Vrai pour un sport livre qu'on a supprime : il ne peut pas sortir de
+  /// `defaults`, alors on garde sa trace pour ne plus le proposer.
+  final bool hidden;
 
   static const String strength = 'strength';
   static const String cardio = 'cardio';
@@ -78,6 +98,7 @@ class Sport {
         'id': id,
         if (label != null) 'label': label,
         'icon': icon.name,
+        if (hidden) 'hidden': true,
       };
 
   static Sport? fromJson(Object? raw) {
@@ -88,8 +109,33 @@ class Sport {
       id: raw['id'] as String,
       label: _asString(raw['label']),
       icon: SportIcon.fromName(_asString(raw['icon'])),
+      hidden: raw['hidden'] == true,
     );
   }
+}
+
+/// Ce qui renvoie encore a un sport. Un sport utilise ne se supprime pas :
+/// ses seances et ses creneaux perdraient leur nom.
+class SportUsage {
+  const SportUsage({required this.sessions, required this.slots});
+
+  /// Seances saisies, creneaux dits « pas faits » compris.
+  final int sessions;
+
+  /// Creneaux du programme.
+  final int slots;
+
+  bool get inUse => sessions > 0 || slots > 0;
+
+  static SportUsage of(
+    String sportId, {
+    required Iterable<PlannedSlot> plan,
+    required Iterable<SportSession> sessions,
+  }) =>
+      SportUsage(
+        sessions: sessions.where((session) => session.sportId == sportId).length,
+        slots: plan.where((slot) => slot.sportId == sportId).length,
+      );
 }
 
 /// Un creneau du programme : tel sport, tel jour de la semaine, tant de
@@ -146,19 +192,28 @@ class SportSession {
     required this.minutes,
     this.slotId,
     this.skipped = false,
+    this.plannedDate,
   });
 
   /// Une seance faite pour le creneau [slot] du jour [date]. Son identifiant
   /// est fixe : saisir de nouveau le meme creneau le remplace, sur cet
   /// appareil comme apres une synchro.
-  factory SportSession.forSlot(PlannedSlot slot, DateTime date, {required int minutes}) =>
-      SportSession(
-        id: slotSessionId(slot, date),
-        date: dateOnly(date),
-        sportId: slot.sportId,
-        minutes: minutes,
-        slotId: slot.id,
-      );
+  ///
+  /// [on] dit le jour ou elle a vraiment eu lieu, quand on l'a decalee —
+  /// la piscine du mardi faite le jeudi. Le creneau du mardi est rempli, et
+  /// le temps compte le jeudi.
+  factory SportSession.forSlot(PlannedSlot slot, DateTime date, {required int minutes, DateTime? on}) {
+    final planned = dateOnly(date);
+    final actual = on == null ? planned : dateOnly(on);
+    return SportSession(
+      id: slotSessionId(slot, planned),
+      date: actual,
+      sportId: slot.sportId,
+      minutes: minutes,
+      slotId: slot.id,
+      plannedDate: actual == planned ? null : planned,
+    );
+  }
 
   /// Un creneau qu'on dit ne pas avoir fait : il sort de la liste « a
   /// saisir », sans rien compter.
@@ -185,6 +240,15 @@ class SportSession {
   /// Vrai pour un creneau dit « pas fait ».
   final bool skipped;
 
+  /// Le jour du creneau, quand la seance a ete decalee a [date]. Nul sinon.
+  final DateTime? plannedDate;
+
+  /// Le jour du creneau que la seance remplit.
+  DateTime get slotDay => plannedDate ?? date;
+
+  /// Vrai pour un creneau fait un autre jour que prevu.
+  bool get moved => plannedDate != null;
+
   bool get done => !skipped && minutes > 0;
 
   Map<String, dynamic> toJson() => {
@@ -194,6 +258,7 @@ class SportSession {
         'minutes': minutes,
         if (slotId != null) 'slot': slotId,
         if (skipped) 'skipped': true,
+        if (plannedDate != null) 'planned': dayKey(plannedDate!),
       };
 
   static SportSession? fromJson(Object? raw) {
@@ -212,6 +277,7 @@ class SportSession {
       minutes: minutes,
       slotId: _asString(raw['slot']),
       skipped: raw['skipped'] == true,
+      plannedDate: raw['planned'] == null ? null : parseDayKey('${raw['planned']}'),
     );
   }
 }
@@ -351,11 +417,13 @@ class SportLedger {
   /// mais les seances qu'il a recues restent comptees.
   List<WeekSlot> slotsOf(DateTime monday) {
     final start = weekStart(monday);
+    // Par le jour du creneau, pas celui de la seance : la piscine du mardi
+    // faite le jeudi remplit le creneau du mardi.
     final bySlot = <String, SportSession>{
       for (final session in sessions)
-        if (session.slotId != null && !session.date.isBefore(start) &&
-            session.date.isBefore(dayOfWeek(start, 8)))
-          '${session.slotId}|${dayKey(session.date)}': session,
+        if (session.slotId != null && !session.slotDay.isBefore(start) &&
+            session.slotDay.isBefore(dayOfWeek(start, 8)))
+          '${session.slotId}|${dayKey(session.slotDay)}': session,
     };
     return [
       for (final slot in plan)

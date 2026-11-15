@@ -349,7 +349,7 @@ class _FreeCard extends StatelessWidget {
       icon: Icons.hourglass_bottom,
       title: l10n.free_regained_title,
       value: writer(free.regainedMinutes),
-      color: scheme.secondary,
+      color: scheme.primary,
       detail: l10n.recap_free_detail(free.keptDays, free.measuredDays, writer(free.overMinutes)),
       trend: _trend(l10n, writer, free.regainedMinutes, previous?.freeTime?.regainedMinutes),
     );
@@ -383,7 +383,7 @@ class _SportCard extends StatelessWidget {
       icon: Icons.fitness_center,
       title: l10n.bb_sport,
       value: writer(recap.sportMinutes),
-      color: scheme.tertiary,
+      color: scheme.primary,
       detail: recap.planned > 0
           ? '${l10n.sport_sessions(recap.sportSessions)} · ${l10n.sport_plan_progress(recap.plannedDone, recap.planned)}'
           : l10n.sport_sessions(recap.sportSessions),
@@ -408,7 +408,7 @@ class _SportCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
             decoration: BoxDecoration(
-              color: scheme.tertiaryContainer.withValues(alpha: 0.5),
+              color: scheme.primaryContainer.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -416,7 +416,7 @@ class _SportCard extends StatelessWidget {
                 writer(recap.freeTime!.regainedMinutes),
                 writer(recap.sportMinutes),
               ),
-              style: theme.textTheme.bodySmall?.copyWith(color: scheme.onTertiaryContainer),
+              style: theme.textTheme.bodySmall?.copyWith(color: scheme.onPrimaryContainer),
             ),
           ),
         ],

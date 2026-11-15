@@ -27,11 +27,28 @@ IconData sportIconData(SportIcon icon) => switch (icon) {
       SportIcon.run => Icons.directions_run,
       SportIcon.yoga => Icons.self_improvement,
       SportIcon.stretch => Icons.accessibility_new,
+      SportIcon.gymnastics => Icons.sports_gymnastics,
       SportIcon.bike => Icons.directions_bike,
       SportIcon.walk => Icons.directions_walk,
+      SportIcon.hiking => Icons.hiking,
       SportIcon.swim => Icons.pool,
+      SportIcon.rowing => Icons.rowing,
       SportIcon.dance => Icons.music_note,
       SportIcon.boxing => Icons.sports_mma,
+      SportIcon.martialArts => Icons.sports_martial_arts,
+      // Tennis, badminton, padel, squash, ping-pong : Material n'a qu'une
+      // raquette.
+      SportIcon.racket => Icons.sports_tennis,
+      SportIcon.football => Icons.sports_soccer,
+      SportIcon.basketball => Icons.sports_basketball,
+      SportIcon.volleyball => Icons.sports_volleyball,
+      SportIcon.handball => Icons.sports_handball,
+      SportIcon.rugby => Icons.sports_rugby,
+      SportIcon.hockey => Icons.sports_hockey,
+      SportIcon.golf => Icons.sports_golf,
+      SportIcon.ski => Icons.downhill_skiing,
+      SportIcon.skate => Icons.skateboarding,
+      SportIcon.surf => Icons.surfing,
       SportIcon.other => Icons.sports,
     };
 
@@ -64,6 +81,9 @@ class SportFormat {
   /// « lun. »
   String weekdayShort(int weekday) =>
       DateFormat('E', _locale).format(DateTime(2026, 11, 15 + weekday));
+
+  /// « jeu. 12 »
+  String weekdayDay(DateTime day) => DateFormat('E d', _locale).format(day);
 
   /// « lun. 16 nov. »
   String shortDay(DateTime day) => DateFormat('E d MMM', _locale).format(day);

@@ -19,6 +19,10 @@ class MemorySport implements ISport {
   Future<void> saveSport(Sport sport) async => sports[sport.id] = sport;
 
   @override
+  Future<void> deleteSport(Sport sport) async =>
+      sport.isBuiltIn ? sports[sport.id] = hiddenSport(sport) : sports.remove(sport.id);
+
+  @override
   Future<List<PlannedSlot>> getPlan() async => [...plan.values];
 
   @override

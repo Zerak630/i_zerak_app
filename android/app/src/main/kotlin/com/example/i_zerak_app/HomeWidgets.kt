@@ -239,6 +239,15 @@ class CommuteWidgetProvider : AppWidgetProvider() {
                 views.setTextViewText(R.id.widget_status_title, title)
                 views.setTextViewText(R.id.widget_status_detail, detail)
                 views.setViewVisibility(R.id.widget_status_detail, if (detail == null) View.GONE else View.VISIBLE)
+                // Les couleurs de l'application : bleu pour la cagnotte velo,
+                // violet pour une economie loupee, gris pour un cout
+                // indispensable.
+                val detailColor = when {
+                    state != State.CAR -> R.color.widget_primary
+                    commute?.optString("bucket") == "missed" -> R.color.widget_tertiary
+                    else -> R.color.widget_muted
+                }
+                views.setTextColor(R.id.widget_status_detail, context.getColor(detailColor))
                 views.setOnClickPendingIntent(R.id.widget_status, HomeWidgetStore.openApp(context, 10))
             }
             return views

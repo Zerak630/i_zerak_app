@@ -83,6 +83,27 @@ void main() {
     expect(find.text('1 séance · programme 1 sur 2'), findsOneWidget);
   });
 
+  testWidgets('un creneau se dit fait un autre jour de la semaine', (tester) async {
+    store = MemorySport(plan: [yoga]);
+    await open(tester);
+
+    await tester.tap(find.text('À saisir').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Quel jour ?'), findsOneWidget);
+    expect(find.widgetWithText(ChoiceChip, 'jeu. 19'), findsNothing, reason: 'demain ne se propose pas');
+    await tester.tap(find.widgetWithText(ChoiceChip, 'mer. 18'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Fait — 30 min'));
+    await tester.pumpAndSettle();
+
+    final session = store.sessions.values.single;
+    expect(session.date, DateTime(2026, 11, 18));
+    expect(session.slotDay, DateTime(2026, 11, 16));
+    expect(find.textContaining('décalé au mer. 18 nov.'), findsOneWidget);
+    expect(find.text('1 séance · programme 1 sur 1'), findsOneWidget);
+    expect(find.text('EN PLUS DU PROGRAMME'), findsNothing);
+  });
+
   testWidgets('un creneau dit pas fait ne compte pas, et s efface', (tester) async {
     store = MemorySport(plan: [yoga]);
     await open(tester);

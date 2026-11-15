@@ -81,8 +81,8 @@ class _SportPageState extends State<SportPage> {
     switch (answer) {
       case null:
         return;
-      case SlotDone(:final minutes):
-        await widget.store.saveSession(SportSession.forSlot(slot.slot, slot.date, minutes: minutes));
+      case SlotDone(:final minutes, :final on):
+        await widget.store.saveSession(SportSession.forSlot(slot.slot, slot.date, minutes: minutes, on: on));
       case SlotSkipped():
         await widget.store.saveSession(SportSession.skipped(slot.slot, slot.date));
       case SlotCleared():
@@ -354,7 +354,7 @@ class _WeekCard extends StatelessWidget {
             if (isCurrent) ...[
               const SizedBox(height: 12),
               Row(children: [
-                Icon(Icons.local_fire_department_outlined, size: 18, color: scheme.tertiary),
+                Icon(Icons.local_fire_department_outlined, size: 18, color: scheme.primary),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -409,7 +409,9 @@ class _SlotRow extends StatelessWidget {
           muted: status == SlotStatus.skipped,
         ),
         title: Text(sportLabel(l10n, sport)),
-        subtitle: Text('${format.shortDay(slot.date)} · ${sportMinutes(l10n, slot.slot.minutes)}'),
+        subtitle: Text(slot.session?.moved ?? false
+            ? '${format.shortDay(slot.date)} · ${l10n.sport_slot_moved(format.shortDay(slot.session!.date))}'
+            : '${format.shortDay(slot.date)} · ${sportMinutes(l10n, slot.slot.minutes)}'),
         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
           Text(label, style: theme.textTheme.labelLarge?.copyWith(color: color)),
           const SizedBox(width: 6),

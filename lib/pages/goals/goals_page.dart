@@ -525,7 +525,7 @@ class _PaybackHistory extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: month.ratio,
                     minHeight: 6,
-                    color: month.allPaid ? scheme.primary : scheme.secondary,
+                    color: month.allPaid ? scheme.primary : scheme.primary.withValues(alpha: 0.55),
                     backgroundColor: scheme.surfaceContainerHighest,
                   ),
                 ),
@@ -711,7 +711,7 @@ class _GoalCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final format = CommuteFormat(context);
     final goal = progress.goal;
-    final color = scheme.tertiary;
+    final color = scheme.primary;
 
     return GestureDetector(
       onLongPress: onDelete,
@@ -770,7 +770,7 @@ class _GoalCard extends StatelessWidget {
             FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: color,
-                foregroundColor: scheme.onTertiary,
+                foregroundColor: scheme.onPrimary,
               ),
               onPressed: onValidate,
               child: Text(l10n.goal_validate_milestone),
@@ -818,7 +818,7 @@ class _Forecast extends StatelessWidget {
     // mensongere : seule l'annee est annoncee, et elle dit d'elle-meme que la
     // cible est hors de portee.
     final distant = date.year > today.year + 1;
-    final color = distant ? scheme.tertiary : scheme.secondary;
+    final color = distant ? scheme.outline : scheme.primary;
 
     return Row(children: [
       Icon(distant ? Icons.hourglass_empty : Icons.event_outlined, size: 14, color: color),
@@ -903,8 +903,8 @@ class _EmptyGoals extends StatelessWidget {
       child: Column(children: [
         CircleAvatar(
           radius: 22,
-          backgroundColor: scheme.tertiaryContainer,
-          foregroundColor: scheme.onTertiaryContainer,
+          backgroundColor: scheme.primaryContainer,
+          foregroundColor: scheme.onPrimaryContainer,
           child: const Icon(Icons.flag_outlined),
         ),
         const SizedBox(height: 12),

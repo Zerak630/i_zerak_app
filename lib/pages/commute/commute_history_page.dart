@@ -252,7 +252,7 @@ class _CommuteHistoryPageState extends State<CommuteHistoryPage> {
                     label: l10n.commute_legend_essential,
                     amount: totals.essential,
                     days: totals.essentialDays,
-                    color: scheme.secondary,
+                    color: scheme.outline,
                   ),
                   const SizedBox(width: 8),
                   _MonthTotal(
@@ -267,7 +267,7 @@ class _CommuteHistoryPageState extends State<CommuteHistoryPage> {
                 const SizedBox(height: 12),
                 Wrap(spacing: 14, runSpacing: 6, children: [
                   _Legend(color: scheme.primaryContainer, label: l10n.commute_legend_bike),
-                  _Legend(color: scheme.secondaryContainer, label: l10n.commute_legend_essential),
+                  _Legend(color: scheme.surfaceContainerHighest, label: l10n.commute_legend_essential),
                   _Legend(color: scheme.tertiaryContainer, label: l10n.commute_legend_missed),
                 ]),
                 const SizedBox(height: 8),

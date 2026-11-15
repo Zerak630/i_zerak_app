@@ -1194,6 +1194,13 @@
 		}
 	},
 	"sport_slot_how_long": "How long?",
+	"sport_slot_which_day": "Which day?",
+	"sport_slot_moved": "moved to {date}",
+	"@sport_slot_moved": {
+		"placeholders": {
+			"date": { "type": "String" }
+		}
+	},
 	"sport_slot_done": "Done — {minutes}",
 	"@sport_slot_done": {
 		"placeholders": {
@@ -1225,6 +1232,21 @@
 	"sport_plan_prepare": "Set up my plan",
 	"sport_my_sports": "My sports",
 	"sport_add_sport": "Add a sport",
+	"sport_my_sports_hint": "Tap a sport to rename it, change its icon or delete it.",
+	"sport_edit_sport": "Edit sport",
+	"sport_delete_sport": "Delete this sport",
+	"sport_in_use": "In use: {what}. Delete those first to delete the sport.",
+	"@sport_in_use": {
+		"placeholders": {
+			"what": { "type": "String" }
+		}
+	},
+	"sport_slots_short": "{count, plural, =1{1 plan slot} other{{count} plan slots}}",
+	"@sport_slots_short": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	},
 	"sport_this_week": "This week",
 	"sport_week_of": "Week of {date}",
 	"@sport_week_of": {

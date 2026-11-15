@@ -167,9 +167,9 @@ class _NewGoalSheetState extends State<_NewGoalSheet> {
               isSelected: _icon == icon,
               style: IconButton.styleFrom(
                 fixedSize: const Size.square(52),
-                backgroundColor: _icon == icon ? scheme.tertiaryContainer : null,
+                backgroundColor: _icon == icon ? scheme.primaryContainer : null,
                 side: BorderSide(
-                  color: _icon == icon ? scheme.tertiary : scheme.outlineVariant,
+                  color: _icon == icon ? scheme.primary : scheme.outlineVariant,
                   width: _icon == icon ? 2 : 1,
                 ),
               ),
@@ -207,7 +207,7 @@ class _NewGoalSheetState extends State<_NewGoalSheet> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: scheme.tertiaryContainer.withValues(alpha: 0.35),
+        color: scheme.primaryContainer.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -259,7 +259,7 @@ class _ValidateGoalSheet extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final format = CommuteFormat(context);
-    final color = scheme.tertiary;
+    final color = scheme.primary;
 
     return CommuteSheet(children: [
       Align(
@@ -291,7 +291,7 @@ class _ValidateGoalSheet extends StatelessWidget {
         Expanded(
           flex: 2,
           child: FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: color, foregroundColor: scheme.onTertiary),
+            style: FilledButton.styleFrom(backgroundColor: color, foregroundColor: scheme.onPrimary),
             onPressed: () => Navigator.pop(context, true),
             child: Text(l10n.goal_validate_milestone),
           ),

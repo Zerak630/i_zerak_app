@@ -46,6 +46,33 @@ void main() {
       expect(skipped.first.status, SlotStatus.skipped);
     });
 
+    test('un creneau decale remplit son jour, et le temps compte le jour fait', () {
+      // Le yoga du lundi 16, fait le mercredi 18.
+      final moved = SportSession.forSlot(_yoga, monday, minutes: 40, on: today);
+      final week = ledger([moved]);
+
+      final slot = week.slotsOf(today).first;
+      expect(slot.status, SlotStatus.done);
+      expect(slot.session!.moved, isTrue);
+      expect(week.weekOf(monday).perDay, [0, 0, 40, 0, 0, 0, 0]);
+      expect(week.extrasOf(monday), isEmpty);
+      expect(week.pending, hasLength(2), reason: 'seulement les creneaux de la semaine derniere');
+
+      // Meme identifiant que sans decalage : le redire le remplace.
+      expect(moved.id, SportSession.forSlot(_yoga, monday, minutes: 30).id);
+      final read = SportSession.fromJson(moved.toJson())!;
+      expect((read.date, read.slotDay, read.moved), (today, monday, true));
+      expect(SportSession.forSlot(_yoga, monday, minutes: 30, on: monday).moved, isFalse);
+    });
+
+    test('un creneau avance a la semaine d avant ne deborde pas sur la suivante', () {
+      // Le jeudi 19 fait des le mercredi 18 : toujours dans la semaine.
+      final early = SportSession.forSlot(_strength, DateTime(2026, 11, 19), minutes: 20, on: today);
+      final slots = ledger([early]).slotsOf(today);
+      expect(slots.last.status, SlotStatus.done);
+      expect(ledger([early]).slotsOf(DateTime(2026, 11, 23)).last.session, isNull);
+    });
+
     test('saisir de nouveau le meme creneau le remplace', () {
       final first = SportSession.forSlot(_yoga, monday, minutes: 30);
       final again = SportSession.skipped(_yoga, monday);
@@ -161,6 +188,35 @@ void main() {
       expect(sports.map((sport) => sport.id).toList(),
           [...Sport.defaults.map((sport) => sport.id), 'escalade']);
       expect(sports[1].label, 'HIIT');
+    });
+
+    test('un sport livre masque ne revient pas, et le masque se relit', () {
+      final hidden = Sport.fromJson(hiddenSport(Sport.defaults.first).toJson())!;
+      expect(hidden.hidden, isTrue);
+      final sports = mergeSports([hidden]);
+      expect(sports.map((sport) => sport.id), isNot(contains(Sport.strength)));
+      expect(sports, hasLength(Sport.defaults.length - 1));
+    });
+
+    test('une icone inconnue retombe sur « autre », les nouvelles se relisent', () {
+      expect(SportIcon.fromName('trampoline'), SportIcon.other);
+      const sport = Sport(id: 'padel', label: 'Padel', icon: SportIcon.racket);
+      expect(Sport.fromJson(sport.toJson())!.icon, SportIcon.racket);
+    });
+  });
+
+  group('usage', () {
+    test('un sport sert tant qu une seance ou un creneau le cite', () {
+      final usage = SportUsage.of(
+        Sport.yoga,
+        plan: [_yoga],
+        sessions: [
+          SportSession.forSlot(_yoga, monday, minutes: 30),
+          SportSession.skipped(_yoga, DateTime(2026, 11, 9)),
+        ],
+      );
+      expect((usage.sessions, usage.slots, usage.inUse), (2, 1, true));
+      expect(SportUsage.of('escalade', plan: [_yoga], sessions: const []).inUse, isFalse);
     });
   });
 }

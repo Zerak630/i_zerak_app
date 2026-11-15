@@ -133,9 +133,13 @@ sealed class SlotAnswer {
 }
 
 class SlotDone extends SlotAnswer {
-  const SlotDone(this.minutes);
+  const SlotDone(this.minutes, {required this.on});
 
   final int minutes;
+
+  /// Le jour ou la seance a eu lieu : celui du creneau, ou un autre de la
+  /// meme semaine quand on l'a decalee.
+  final DateTime on;
 }
 
 class SlotSkipped extends SlotAnswer {
@@ -176,6 +180,13 @@ class _SlotSheetState extends State<_SlotSheet> {
       ? widget.slot.session!.minutes
       : widget.slot.slot.minutes;
 
+  /// Le jour de la seance : celui du creneau, sauf si elle a deja ete
+  /// saisie decalee, ou si le creneau n'est pas encore arrive — une seance
+  /// avancee s'est faite au plus tard aujourd'hui.
+  late DateTime _on = (widget.slot.session?.done ?? false)
+      ? widget.slot.session!.date
+      : (widget.slot.date.isAfter(widget.slot.today) ? widget.slot.today : widget.slot.date);
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -183,6 +194,8 @@ class _SlotSheetState extends State<_SlotSheet> {
     final scheme = theme.colorScheme;
     final format = SportFormat(context);
     final answered = widget.slot.session != null;
+    final monday = weekStart(widget.slot.date);
+    final today = widget.slot.today;
 
     return SportSheet(children: [
       Row(children: [
@@ -200,12 +213,26 @@ class _SlotSheetState extends State<_SlotSheet> {
         ),
       ]),
       const SizedBox(height: 18),
+      Text(l10n.sport_slot_which_day, style: theme.textTheme.labelLarge),
+      const SizedBox(height: 8),
+      // Les jours de la semaine du creneau, jusqu'a aujourd'hui : une
+      // seance decalee se fait la meme semaine, et pas encore demain.
+      Wrap(spacing: 6, runSpacing: 6, children: [
+        for (var day = DateTime.monday; day <= DateTime.sunday; day++)
+          if (dayOfWeek(monday, day) case final date when !date.isAfter(today))
+            ChoiceChip(
+              label: Text(format.weekdayDay(date)),
+              selected: _on == date,
+              onSelected: (_) => setState(() => _on = date),
+            ),
+      ]),
+      const SizedBox(height: 18),
       Text(l10n.sport_slot_how_long, style: theme.textTheme.labelLarge),
       const SizedBox(height: 8),
       MinutesPicker(minutes: _minutes, onChanged: (minutes) => setState(() => _minutes = minutes)),
       const SizedBox(height: 20),
       FilledButton.icon(
-        onPressed: () => Navigator.pop(context, SlotDone(_minutes)),
+        onPressed: () => Navigator.pop(context, SlotDone(_minutes, on: _on)),
         icon: const Icon(Icons.check),
         label: Text(l10n.sport_slot_done(sportMinutes(l10n, _minutes))),
       ),
@@ -312,30 +339,102 @@ class _SlotEditorState extends State<_SlotEditor> {
   }
 }
 
-/// Un sport ajoute a la main. Renvoie le sport.
-Future<Sport?> showNewSportSheet(BuildContext context) => showModalBottomSheet<Sport>(
+/// Ce que la feuille d'un sport decide.
+sealed class SportEdit {
+  const SportEdit();
+}
+
+/// Le sport, nouveau ou modifie, a enregistrer.
+class SportSaved extends SportEdit {
+  const SportSaved(this.sport);
+
+  final Sport sport;
+}
+
+/// Le sport a supprimer.
+class SportDeleted extends SportEdit {
+  const SportDeleted();
+}
+
+/// Un sport, nouveau ou a modifier : son nom, son icone, et sa suppression
+/// tant que rien ne l'utilise.
+Future<SportEdit?> showSportEditor(
+  BuildContext context, {
+  Sport? sport,
+  SportUsage usage = const SportUsage(sessions: 0, slots: 0),
+}) =>
+    showModalBottomSheet<SportEdit>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,
-      builder: (_) => const _NewSportSheet(),
+      builder: (_) => _SportEditor(sport: sport, usage: usage),
     );
 
-class _NewSportSheet extends StatefulWidget {
-  const _NewSportSheet();
+class _SportEditor extends StatefulWidget {
+  const _SportEditor({required this.sport, required this.usage});
+
+  final Sport? sport;
+  final SportUsage usage;
 
   @override
-  State<_NewSportSheet> createState() => _NewSportSheetState();
+  State<_SportEditor> createState() => _SportEditorState();
 }
 
-class _NewSportSheetState extends State<_NewSportSheet> {
+class _SportEditorState extends State<_SportEditor> {
   final _name = TextEditingController();
-  var _icon = SportIcon.other;
+  late var _icon = widget.sport?.icon ?? SportIcon.other;
+
+  /// Le nom traduit d'un sport livre : le garder tel quel laisse le libelle
+  /// nul, et le sport suit la langue de l'application.
+  String? _builtInName;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final sport = widget.sport;
+    if (sport != null && _builtInName == null && _name.text.isEmpty) {
+      final l10n = AppLocalizations.of(context)!;
+      _builtInName = sport.isBuiltIn ? sportLabel(l10n, Sport(id: sport.id, icon: sport.icon)) : null;
+      _name.text = sportLabel(l10n, sport);
+    }
+  }
 
   @override
   void dispose() {
     _name.dispose();
     super.dispose();
+  }
+
+  void _save() {
+    final name = _name.text.trim();
+    final sport = widget.sport;
+    Navigator.pop(
+      context,
+      SportSaved(Sport(
+        id: sport?.id ?? 'sport-${DateTime.now().microsecondsSinceEpoch}',
+        label: name == _builtInName ? null : name,
+        icon: _icon,
+      )),
+    );
+  }
+
+  Future<void> _delete() async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.sport_delete_sport),
+        content: Text(l10n.delete_confirm(_name.text.trim())),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.delete)),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      Navigator.pop(context, const SportDeleted());
+    }
   }
 
   @override
@@ -344,13 +443,15 @@ class _NewSportSheetState extends State<_NewSportSheet> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final name = _name.text.trim();
+    final editing = widget.sport != null;
+    final usage = widget.usage;
 
     return SportSheet(children: [
-      Text(l10n.sport_add_sport, style: theme.textTheme.titleLarge),
+      Text(editing ? l10n.sport_edit_sport : l10n.sport_add_sport, style: theme.textTheme.titleLarge),
       const SizedBox(height: 16),
       TextField(
         controller: _name,
-        autofocus: true,
+        autofocus: !editing,
         textCapitalization: TextCapitalization.sentences,
         decoration: InputDecoration(labelText: l10n.goal_name, border: const OutlineInputBorder()),
         onChanged: (_) => setState(() {}),
@@ -361,6 +462,7 @@ class _NewSportSheetState extends State<_NewSportSheet> {
       Wrap(spacing: 10, runSpacing: 10, children: [
         for (final icon in SportIcon.values)
           IconButton(
+            key: ValueKey('sport-icon-${icon.name}'),
             isSelected: _icon == icon,
             style: IconButton.styleFrom(
               fixedSize: const Size.square(48),
@@ -375,15 +477,27 @@ class _NewSportSheetState extends State<_NewSportSheet> {
           ),
       ]),
       const SizedBox(height: 20),
-      FilledButton(
-        onPressed: name.isEmpty
-            ? null
-            : () => Navigator.pop(
-                  context,
-                  Sport(id: 'sport-${DateTime.now().microsecondsSinceEpoch}', label: name, icon: _icon),
-                ),
-        child: Text(l10n.save),
-      ),
+      FilledButton(onPressed: name.isEmpty ? null : _save, child: Text(l10n.save)),
+      if (editing) ...[
+        const SizedBox(height: 8),
+        TextButton.icon(
+          onPressed: usage.inUse ? null : _delete,
+          icon: const Icon(Icons.delete_outline),
+          label: Text(l10n.sport_delete_sport),
+          style: TextButton.styleFrom(foregroundColor: scheme.error),
+        ),
+        if (usage.inUse)
+          Text(
+            l10n.sport_in_use(
+              [
+                if (usage.sessions > 0) l10n.sport_sessions_short(usage.sessions),
+                if (usage.slots > 0) l10n.sport_slots_short(usage.slots),
+              ].join(' · '),
+            ),
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+      ],
     ]);
   }
 }

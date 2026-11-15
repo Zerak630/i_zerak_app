@@ -101,11 +101,16 @@ String dayLabel(AppLocalizations l10n, CommuteDay day, List<CarReason> reasons) 
   return reasonLabel(l10n, id: day.reasonId, label: day.reasonLabel);
 }
 
-/// Une couleur par nature de journee, reprise partout : cagnotte velo en
-/// primaire, couts indispensables en secondaire, economies loupees en
-/// tertiaire.
+/// Une couleur par nature de journee, reprise partout.
+///
+/// La regle vaut pour toute l'application, Velo comme Temps libre : le bleu
+/// (primaire) dit le positif — argent economise, temps repris —, le violet
+/// (tertiaire) le negatif — economies loupees, quota depasse —, et le gris
+/// (outline) ce qui n'est ni l'un ni l'autre, comme les couts
+/// indispensables. Le secondaire du theme, gris-bleu, se confondrait avec le
+/// bleu : il n'en dit rien.
 Color bucketColor(ColorScheme scheme, CarBucket? bucket) =>
-    bucket == CarBucket.missed ? scheme.tertiary : scheme.secondary;
+    bucket == CarBucket.missed ? scheme.tertiary : scheme.outline;
 
 Color dayColor(ColorScheme scheme, CommuteDay? day) {
   if (day == null) {
@@ -122,7 +127,7 @@ Color dayColor(ColorScheme scheme, CommuteDay? day) {
   if (day.bucket == CarBucket.missed) {
     return (background: scheme.tertiaryContainer, foreground: scheme.onTertiaryContainer);
   }
-  return (background: scheme.secondaryContainer, foreground: scheme.onSecondaryContainer);
+  return (background: scheme.surfaceContainerHighest, foreground: scheme.onSurfaceVariant);
 }
 
 IconData goalIconData(GoalIcon icon) => switch (icon) {
@@ -136,10 +141,9 @@ IconData goalIconData(GoalIcon icon) => switch (icon) {
       GoalIcon.fitness => Icons.fitness_center,
     };
 
-/// Couleur d'un objectif : tertiaire pour un palier. Primaire ne reste qu'aux
-/// anciens achats, valides du temps de la cagnotte.
-Color goalColor(ColorScheme scheme, GoalKind kind) =>
-    kind == GoalKind.milestone ? scheme.tertiary : scheme.primary;
+/// Couleur d'un objectif : bleu, palier comme ancien achat — c'est de
+/// l'argent que le velo rapporte.
+Color goalColor(ColorScheme scheme, GoalKind kind) => scheme.primary;
 
 /// Nombre de trajets a velo qu'il faut encore, au prix du trajet donne.
 int? tripsFor(double amount, double tripValue) =>
