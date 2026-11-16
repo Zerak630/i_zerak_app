@@ -120,11 +120,21 @@ class QbClient {
             body: fields,
           ));
 
-  Future<http.Response> postMultipart(String path, Map<String, String> fields) =>
+  /// `files` est une fabrique et non une liste : un `MultipartFile` ne se
+  /// finalise qu'une fois, or la requete est reconstruite si la session a
+  /// expire et qu'il faut la rejouer.
+  Future<http.Response> postMultipart(
+    String path,
+    Map<String, String> fields, {
+    List<http.MultipartFile> Function()? files,
+  }) =>
       _authorized((headers) async {
         final request = http.MultipartRequest('POST', uri(path))
           ..headers.addAll(headers)
           ..fields.addAll(fields);
+        if (files != null) {
+          request.files.addAll(files());
+        }
         return http.Response.fromStream(await _client.send(request));
       });
 

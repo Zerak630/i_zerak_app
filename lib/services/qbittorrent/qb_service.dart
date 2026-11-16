@@ -13,6 +13,15 @@ import 'package:i_zerak_app/services/repositories/interfaces/i_server_config.dar
 /// Instantane complet de l'etat des transferts.
 typedef TorrentsSnapshot = ({List<TorrentDao> torrents, TransferInfoDao transfer});
 
+/// Vrai si le contenu a l'allure d'un fichier `.torrent`.
+///
+/// Un torrent est un dictionnaire bencode : il commence par `d` et finit par
+/// `e`. Ce n'est pas une validation complete, seulement de quoi refuser tout
+/// de suite une image ou une page HTML enregistree sous le mauvais nom, que
+/// qBittorrent rejetterait sans dire pourquoi.
+bool looksLikeTorrentFile(List<int> bytes) =>
+    bytes.length > 2 && bytes.first == 0x64 && bytes.last == 0x65;
+
 /// API typee de qBittorrent, au-dessus de [QbClient].
 ///
 /// Resout la configuration et le mot de passe a la demande, et conserve le
@@ -169,7 +178,49 @@ class QbService {
     bool? createSubfolder,
   }) async {
     final client = await _resolve();
-    final fields = <String, String>{'urls': magnet};
+    await client.postMultipart('torrents/add', {
+      'urls': magnet,
+      ..._addFields(
+        savePath: savePath,
+        category: category,
+        autoTmm: autoTmm,
+        createSubfolder: createSubfolder,
+      ),
+    });
+  }
+
+  /// Ajoute un fichier `.torrent` en envoyant son contenu au serveur.
+  ///
+  /// Memes options, et memes pieges, que [addMagnet].
+  Future<void> addTorrentFile(
+    List<int> bytes, {
+    required String filename,
+    String? savePath,
+    String? category,
+    bool? autoTmm,
+    bool? createSubfolder,
+  }) async {
+    final client = await _resolve();
+    await client.postMultipart(
+      'torrents/add',
+      _addFields(
+        savePath: savePath,
+        category: category,
+        autoTmm: autoTmm,
+        createSubfolder: createSubfolder,
+      ),
+      // `torrents` est le nom de champ attendu par qBittorrent.
+      files: () => [http.MultipartFile.fromBytes('torrents', bytes, filename: filename)],
+    );
+  }
+
+  Map<String, String> _addFields({
+    String? savePath,
+    String? category,
+    bool? autoTmm,
+    bool? createSubfolder,
+  }) {
+    final fields = <String, String>{};
     if (savePath != null && savePath.isNotEmpty) {
       fields['savepath'] = savePath;
     }
@@ -186,7 +237,7 @@ class QbService {
       // les champs qu'elles ne connaissent pas.
       fields['root_folder'] = createSubfolder ? 'true' : 'false';
     }
-    await client.postMultipart('torrents/add', fields);
+    return fields;
   }
 
   Future<void> pause(List<String> hashes) async {
