@@ -70,7 +70,7 @@ void main() {
     final repository = await open();
     await repository.saveDay(CommuteDay.bike(DateTime(2026, 9, 18, 8), settings, price));
     await repository.saveDay(
-        CommuteDay.car(DateTime(2026, 9, 18, 18), settings, price, CarReason.defaults.last));
+        CommuteDay.car(DateTime(2026, 9, 18, 18), settings, price, CarBucket.missed));
 
     final days = await (await reopen()).getDays();
     expect(days.single.mode, CommuteMode.car);

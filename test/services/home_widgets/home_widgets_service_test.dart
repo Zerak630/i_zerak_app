@@ -77,7 +77,7 @@ void main() {
       DateTime(2026, 9, 17),
       settings,
       const ResolvedPrice.fallback(),
-      CarReason.defaults.first,
+      CarBucket.essential,
     );
 
     expect(await service().importPendingBikeDays(), 1);
@@ -129,8 +129,8 @@ void main() {
   });
 
   test('en voiture, l instantane dit dans quelle case le trajet est parti', () async {
-    final lazy = CarReason.defaults.firstWhere((r) => r.bucket == CarBucket.missed);
-    final day = CommuteDay.car(DateTime(2026, 9, 18), settings, const ResolvedPrice.fallback(), lazy);
+    final day = CommuteDay.car(
+        DateTime(2026, 9, 18), settings, const ResolvedPrice.fallback(), CarBucket.missed);
     commute.days['2026-09-18'] = day;
 
     await service().refresh();
