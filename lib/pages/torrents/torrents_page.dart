@@ -288,13 +288,25 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
     }
 
     try {
-      await _service.addMagnet(
-        request.magnet,
-        savePath: request.options.savePath,
-        category: request.options.category,
-        autoTmm: request.options.autoTmm,
-        createSubfolder: request.options.createSubfolder,
-      );
+      final file = request.file;
+      if (file != null) {
+        await _service.addTorrentFile(
+          file.bytes,
+          filename: file.name,
+          savePath: request.options.savePath,
+          category: request.options.category,
+          autoTmm: request.options.autoTmm,
+          createSubfolder: request.options.createSubfolder,
+        );
+      } else {
+        await _service.addMagnet(
+          request.magnet,
+          savePath: request.options.savePath,
+          category: request.options.category,
+          autoTmm: request.options.autoTmm,
+          createSubfolder: request.options.createSubfolder,
+        );
+      }
       if (!mounted) {
         return;
       }

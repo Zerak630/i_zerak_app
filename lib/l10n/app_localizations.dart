@@ -803,8 +803,26 @@ abstract class AppLocalizations {
   /// No description provided for @please_enter_a_magnet.
   ///
   /// In en, this message translates to:
-  /// **'Please enter a magnet link'**
+  /// **'Enter a magnet link or pick a .torrent file'**
   String get please_enter_a_magnet;
+
+  /// No description provided for @pick_torrent_file.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a .torrent file'**
+  String get pick_torrent_file;
+
+  /// No description provided for @remove_torrent_file.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the file'**
+  String get remove_torrent_file;
+
+  /// No description provided for @invalid_torrent_file.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is not a valid .torrent'**
+  String get invalid_torrent_file;
 
   /// No description provided for @please_enter_a_valid_magnet.
   ///

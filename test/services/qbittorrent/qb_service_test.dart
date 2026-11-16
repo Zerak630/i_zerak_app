@@ -135,6 +135,34 @@ void main() {
     expect(fields.containsKey('savepath'), isFalse);
   });
 
+  test('un fichier .torrent part dans le champ torrents, sans champ urls', () async {
+    final bytes = 'd4:infod4:name1:aee'.codeUnits;
+    await buildService().addTorrentFile(
+      bytes,
+      filename: 'film.torrent',
+      savePath: '/srv/nas1/Emby/Films/Un film (2024) [tmdbid=42]',
+      category: 'Films',
+      autoTmm: false,
+    );
+
+    final request = verify(client.send(captureAny)).captured.single as http.MultipartRequest;
+    expect(request.url.path, '/api/v2/torrents/add');
+    expect(request.fields.containsKey('urls'), isFalse);
+    expect(request.fields['savepath'], '/srv/nas1/Emby/Films/Un film (2024) [tmdbid=42]');
+    expect(request.fields['autoTMM'], 'false');
+
+    final file = request.files.single;
+    expect(file.field, 'torrents');
+    expect(file.filename, 'film.torrent');
+    expect(file.length, bytes.length);
+  });
+
+  test('looksLikeTorrentFile ne retient que les dictionnaires bencode', () {
+    expect(looksLikeTorrentFile('d4:infod4:name1:aee'.codeUnits), isTrue);
+    expect(looksLikeTorrentFile('<html></html>'.codeUnits), isFalse);
+    expect(looksLikeTorrentFile(const []), isFalse);
+  });
+
   test('les champs vides ne sont pas transmis', () async {
     await buildService().addMagnet('magnet:?xt=urn:btih:abc', savePath: '', category: '');
 

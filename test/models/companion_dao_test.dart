@@ -60,12 +60,12 @@ void main() {
     });
 
     test('les quatorze derniers jours ouvres sautent les week-ends', () {
-      // Vendredi 18 septembre : du lundi 31 aout au vendredi 18, sans samedi
-      // ni dimanche.
+      // Vendredi 18 septembre : du mardi 1er au vendredi 18, sans samedi ni
+      // dimanche. Le lundi 31 aout serait le quinzieme jour.
       final days = lastWorkdays(DateTime(2026, 9, 18, 8, 30), 14);
 
       expect(days.length, 14);
-      expect(days.first, DateTime(2026, 8, 31));
+      expect(days.first, DateTime(2026, 9, 1));
       expect(days.last, DateTime(2026, 9, 18));
       expect(days.where((day) => !isWorkday(day)), isEmpty);
     });
@@ -74,7 +74,7 @@ void main() {
       final days = lastWorkdays(DateTime(2026, 9, 20), 14);
 
       expect(days.last, DateTime(2026, 9, 18));
-      expect(days.first, DateTime(2026, 8, 31));
+      expect(days.first, DateTime(2026, 9, 1));
     });
 
     test('le lundi d une semaine se trouve depuis n importe quel jour', () {

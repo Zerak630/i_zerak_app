@@ -388,7 +388,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get magnet_link => 'Magnet link';
 
   @override
-  String get please_enter_a_magnet => 'Please enter a magnet link';
+  String get please_enter_a_magnet =>
+      'Enter a magnet link or pick a .torrent file';
+
+  @override
+  String get pick_torrent_file => 'Pick a .torrent file';
+
+  @override
+  String get remove_torrent_file => 'Remove the file';
+
+  @override
+  String get invalid_torrent_file => 'This file is not a valid .torrent';
 
   @override
   String get please_enter_a_valid_magnet =>

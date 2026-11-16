@@ -1,22 +1,33 @@
 import 'dart:async';
 
+import 'package:file_selector/file_selector.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/media_match_dao.dart';
 import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/models/torrent_destination.dart';
+import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
 import 'package:i_zerak_app/services/tmdb/tmdb_service.dart';
 
 /// Ce que la feuille renvoie a la page appelante.
 ///
 /// `destination` sert uniquement au message de confirmation ; tout le rangement
 /// est deja resolu dans `options`.
+///
+/// `file` l'emporte sur `magnet` : quand un fichier `.torrent` a ete choisi,
+/// `magnet` est vide.
 typedef MagnetRequest = ({
   String magnet,
+  TorrentFile? file,
   TorrentDestination destination,
   AddTorrentOptions options,
 });
+
+/// Fichier `.torrent` lu en memoire. Quelques dizaines de kilo-octets en
+/// pratique : inutile de le relire depuis le disque au moment de l'envoi.
+typedef TorrentFile = ({String name, Uint8List bytes});
 
 /// Reconnait un lien magnet ou une URL de fichier torrent.
 final RegExp magnetPattern = RegExp(
@@ -54,6 +65,11 @@ class _AddMagnetSheetState extends State<_AddMagnetSheet> {
   final _magnetController = TextEditingController();
   final _searchController = TextEditingController();
   final _folderController = TextEditingController();
+
+  /// Fichier `.torrent` choisi a la place d'un lien. Tant qu'il est present, le
+  /// champ du lien est masque et n'est donc plus valide.
+  TorrentFile? _file;
+  String? _fileError;
 
   Timer? _debounce;
   List<MediaMatch> _results = const [];
@@ -96,6 +112,41 @@ class _AddMagnetSheetState extends State<_AddMagnetSheet> {
       return;
     }
     _magnetController.text = text;
+  }
+
+  Future<void> _pickFile() async {
+    final l10n = AppLocalizations.of(context)!;
+    // Filtre par extension sur ordinateur seulement : le selecteur Android ne
+    // connait pas le type MIME des .torrent et griserait le fichier, et iOS
+    // refuse un filtre sans identifiant de type. Le contenu est verifie
+    // ci-dessous dans tous les cas.
+    final desktop = const {
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+      TargetPlatform.macOS,
+    }.contains(defaultTargetPlatform);
+    final picked = await openFile(
+      acceptedTypeGroups: desktop
+          ? const [
+              XTypeGroup(label: '.torrent', extensions: ['torrent'])
+            ]
+          : const [],
+    );
+    if (picked == null) {
+      return;
+    }
+    final bytes = await picked.readAsBytes();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      if (looksLikeTorrentFile(bytes)) {
+        _file = (name: picked.name, bytes: bytes);
+        _fileError = null;
+      } else {
+        _fileError = l10n.invalid_torrent_file;
+      }
+    });
   }
 
   void _onSearchChanged(String value) {
@@ -162,8 +213,10 @@ class _AddMagnetSheetState extends State<_AddMagnetSheet> {
     }
 
     final destination = _destination;
+    final file = _file;
     Navigator.pop(context, (
-      magnet: _magnetController.text.trim(),
+      magnet: file == null ? _magnetController.text.trim() : '',
+      file: file,
       destination: destination,
       options: resolveAddOptions(
         destination: destination,
@@ -192,6 +245,9 @@ class _AddMagnetSheetState extends State<_AddMagnetSheet> {
               Text(l10n.add_magnet,
                   style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
               const SizedBox(height: 16),
+              if (_file != null)
+                _fileTile(context, l10n, _file!)
+              else ...[
               TextFormField(
                 controller: _magnetController,
                 maxLines: 2,
@@ -221,6 +277,22 @@ class _AddMagnetSheetState extends State<_AddMagnetSheet> {
                   return magnetPattern.hasMatch(text) ? null : l10n.please_enter_a_valid_magnet;
                 },
               ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: _pickFile,
+                icon: const Icon(Icons.attach_file),
+                label: Text(l10n.pick_torrent_file),
+              ),
+              if (_fileError != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(_fileError!,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: Theme.of(context).colorScheme.error)),
+                ),
+              ],
               const SizedBox(height: 16),
               TextFormField(
                 controller: _searchController,
@@ -280,6 +352,22 @@ class _AddMagnetSheetState extends State<_AddMagnetSheet> {
       ),
     );
   }
+
+  /// Remplace le champ du lien une fois un fichier choisi. La croix revient au
+  /// champ, dont le contenu eventuel a ete conserve.
+  Widget _fileTile(BuildContext context, AppLocalizations l10n, TorrentFile file) => ListTile(
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: Theme.of(context).colorScheme.outline),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        leading: const Icon(Icons.description_outlined),
+        title: Text(file.name, maxLines: 2, overflow: TextOverflow.ellipsis),
+        trailing: IconButton(
+          icon: const Icon(Icons.close),
+          tooltip: l10n.remove_torrent_file,
+          onPressed: () => setState(() => _file = null),
+        ),
+      );
 
   /// Bouton segmente a trois valeurs, toujours visible.
   ///
