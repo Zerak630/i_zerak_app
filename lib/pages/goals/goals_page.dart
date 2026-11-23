@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/commute_dao.dart';
 import 'package:i_zerak_app/models/companion_dao.dart';
+import 'package:i_zerak_app/models/game_dao.dart';
 import 'package:i_zerak_app/models/payback_dao.dart';
+import 'package:i_zerak_app/models/sport_dao.dart' show SportLedger;
 import 'package:i_zerak_app/models/subscription_dao.dart' show Subscription, SubscriptionFrequency;
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
 import 'package:i_zerak_app/pages/commute/widgets/goal_sheets.dart';
+import 'package:i_zerak_app/pages/goals/widgets/game_contract_card.dart';
 import 'package:i_zerak_app/pages/subscriptions/widgets/subscription_ui.dart'
     show SubscriptionAvatar;
 import 'package:i_zerak_app/services/commute_price_service.dart';
+import 'package:i_zerak_app/services/gaming/gaming_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_sport.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 
@@ -31,15 +36,23 @@ class GoalsPage extends StatefulWidget {
     ICommute? store,
     ISubscriptions? subscriptions,
     CommutePriceService? prices,
+    GamingService? games,
+    ISport? sport,
     DateTime Function()? clock,
   })  : store = store ?? getIt<ICommute>(),
         subscriptions = subscriptions ?? getIt<ISubscriptions>(),
         prices = prices ?? getIt<CommutePriceService>(),
+        games = games ?? (getIt.isRegistered<GamingService>() ? getIt<GamingService>() : null),
+        sport = sport ?? (getIt.isRegistered<ISport>() ? getIt<ISport>() : null),
         clock = clock ?? DateTime.now;
 
   final ICommute store;
   final ISubscriptions subscriptions;
   final CommutePriceService prices;
+
+  /// Le contrat jeu contre sport. Sans eux, sa carte n'apparait pas.
+  final GamingService? games;
+  final ISport? sport;
   final DateTime Function() clock;
 
   @override
@@ -53,17 +66,28 @@ class _GoalsPageState extends State<GoalsPage> {
   ResolvedPrice? _price;
   var _window = RateWindow.recent;
   var _loading = true;
+  GameContractLedger? _games;
 
   DateTime get _today => dateOnly(widget.clock());
 
   @override
   void initState() {
     super.initState();
+    widget.games?.revision.addListener(_reload);
     _load();
+  }
+
+  @override
+  void dispose() {
+    widget.games?.revision.removeListener(_reload);
+    super.dispose();
   }
 
   Future<void> _load() async {
     await _reload();
+    // Sans attendre le prix : son service peut rester sans reponse. Le Pi peut
+    // l'etre aussi, la carte part donc de la derniere copie.
+    widget.games?.refresh();
     // Le prix ne sert qu'a traduire un reste en trajets : la page s'affiche
     // sans l'attendre.
     final price = await widget.prices.resolve(_settings.fuel, day: _today);
@@ -72,11 +96,17 @@ class _GoalsPageState extends State<GoalsPage> {
     }
   }
 
+  Future<void> _pullToRefresh() async {
+    await widget.games?.refresh();
+    await _reload();
+  }
+
   Future<void> _reload() async {
     final settings = await widget.store.readSettings();
     final days = await widget.store.getDays();
     final goals = await widget.store.getGoals();
     final subscriptions = await widget.subscriptions.getAll();
+    final games = await _readGames(days);
     if (!mounted) {
       return;
     }
@@ -84,8 +114,41 @@ class _GoalsPageState extends State<GoalsPage> {
       _settings = settings;
       _ledger = CommuteLedger(days, goals);
       _subscriptions = subscriptions;
+      _games = games;
       _loading = false;
     });
+  }
+
+  Future<GameContractLedger?> _readGames(List<CommuteDay> days) async {
+    final games = widget.games;
+    final sport = widget.sport;
+    if (games == null || sport == null) {
+      return null;
+    }
+    final report = await games.read();
+    if (!report.isConfigured) {
+      return null;
+    }
+    return GameContractLedger(
+      report: report,
+      settings: await games.readSettings(),
+      sport: SportLedger(
+        sports: await sport.getSports(),
+        plan: await sport.getPlan(),
+        sessions: await sport.getSessions(),
+        today: _today,
+      ),
+      commute: days,
+    );
+  }
+
+  Future<void> _editContract(GameContractSettings current) async {
+    final rules = await showGameContractSheet(context, current);
+    if (rules == null) {
+      return;
+    }
+    await widget.games?.saveSettings(current.edited(rules, _today));
+    await _reload();
   }
 
   double get _tripValue => _price == null ? 0 : _settings.tripValue(_price!.pricePerLitre);
@@ -177,10 +240,20 @@ class _GoalsPageState extends State<GoalsPage> {
     );
 
     return RefreshIndicator(
-      onRefresh: _reload,
+      onRefresh: _pullToRefresh,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
         children: [
+          if (_games case final GameContractLedger games) ...[
+            GameContractCard(
+              report: games.report,
+              settings: games.settings,
+              contract: games.contractOf(_today),
+              streak: games.streakAt(_today),
+              onSettings: () => _editContract(games.settings),
+            ),
+            const SizedBox(height: 12),
+          ],
           _PaybackCard(
             payback: history.first,
             tripValue: _tripValue,

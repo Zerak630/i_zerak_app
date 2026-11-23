@@ -9,6 +9,7 @@
 library;
 
 import 'package:i_zerak_app/models/commute_dao.dart';
+import 'package:i_zerak_app/models/game_dao.dart';
 import 'package:i_zerak_app/models/payback_dao.dart';
 import 'package:i_zerak_app/models/screen_time_dao.dart';
 import 'package:i_zerak_app/models/sport_dao.dart';
@@ -93,9 +94,14 @@ class Recap {
     required this.bySport,
     required this.planned,
     required this.plannedDone,
+    this.games,
   });
 
   final RecapRange range;
+
+  /// Le jeu et son contrat : pour une semaine seulement, puisqu'il se compte
+  /// a la semaine. Nul tant que rien n'est configure sur le Pi.
+  final GameRecap? games;
 
   final double fuelSaved;
   final int bikeDays;
@@ -139,6 +145,7 @@ Recap buildRecap(
   required Iterable<Subscription> subscriptions,
   required ScreenTimeLedger? screenTime,
   required SportLedger sport,
+  GameContractLedger? games,
 }) {
   var fuel = 0.0;
   var bikeDays = 0;
@@ -197,6 +204,7 @@ Recap buildRecap(
     bySport: sport.totalsBySport(from: range.start, to: range.end),
     planned: planned,
     plannedDone: plannedDone,
+    games: range.period == RecapPeriod.week ? games?.recapOf(range.start) : null,
   );
 }
 

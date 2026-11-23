@@ -47,3 +47,23 @@ storage:
   - path: /srv/nas1
     label: Disque Emby
     quota_bytes: 800000000000
+
+# Temps de jeu, facultatif. Une source sans tous ses champs reste inactive. Les
+# cles restent ici : l'application ne recoit que les durees.
+#
+# gaming:
+#   timezone: Europe/Paris
+#   poll_minutes: 60
+#   steam:
+#     # https://steamcommunity.com/dev/apikey
+#     api_key: "CLE_STEAM"
+#     # SteamID64, 17 chiffres. Les « details de jeu » du profil doivent etre
+#     # publics.
+#     steam_id: "76561198000000000"
+#   riot:
+#     # Une cle d'application personnelle : celle de developpement expire au
+#     # bout de 24 heures. https://developer.riotgames.com
+#     api_key: "CLE_RIOT"
+#     game_name: "Pseudo"
+#     tag_line: "EUW"
+#     region: europe

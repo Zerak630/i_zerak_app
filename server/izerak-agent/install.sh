@@ -79,7 +79,10 @@ fi
 echo "==> Unite systemd"
 install -o root -g root -m 0644 "${SOURCE_DIR}/izerak-agent.service" "${UNIT}"
 systemctl daemon-reload
-systemctl enable --now izerak-agent.service
+systemctl enable izerak-agent.service
+# restart et non « enable --now » : sur un agent deja actif, ce dernier ne fait
+# rien et l'ancien code continuerait de tourner.
+systemctl restart izerak-agent.service
 
 echo
 echo "==> Termine."

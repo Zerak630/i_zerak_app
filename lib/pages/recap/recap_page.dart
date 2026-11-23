@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/commute_dao.dart' show dateOnly;
+import 'package:i_zerak_app/models/game_dao.dart' show GameTitle;
 import 'package:i_zerak_app/models/recap_dao.dart';
 import 'package:i_zerak_app/models/sport_dao.dart' show Sport;
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart' show CommuteFormat;
@@ -37,6 +38,7 @@ class _RecapPageState extends State<RecapPage> {
   void initState() {
     super.initState();
     _load();
+    _refreshGames();
     widget.service.readSettings().then((settings) {
       if (mounted) {
         setState(() => _settings = settings);
@@ -58,6 +60,12 @@ class _RecapPageState extends State<RecapPage> {
       _previous = recaps.last;
       _sports = sports;
     });
+  }
+
+  Future<void> _refreshGames() async {
+    if (await widget.service.refreshGames() && mounted) {
+      await _load();
+    }
   }
 
   void _show(RecapRange range) {
@@ -150,6 +158,12 @@ class _RecapPageState extends State<RecapPage> {
               const SizedBox(height: 10),
             ],
             _SportCard(recap: recap, previous: _previous, sports: _sports),
+            // Le contrat ne depend que de la semaine d'avant : il reste affiche
+            // quand la copie locale ne connait pas encore celle-ci.
+            if (recap.games?.played != null || recap.games?.contract != null) ...[
+              const SizedBox(height: 10),
+              _GamesCard(recap: recap, previous: _previous, today: _today),
+            ],
           ],
           if (settings != null) ...[
             const SizedBox(height: 24),
@@ -416,6 +430,82 @@ class _SportCard extends StatelessWidget {
                 writer(recap.freeTime!.regainedMinutes),
                 writer(recap.sportMinutes),
               ),
+              style: theme.textTheme.bodySmall?.copyWith(color: scheme.onPrimaryContainer),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _GamesCard extends StatelessWidget {
+  const _GamesCard({required this.recap, required this.previous, required this.today});
+
+  final Recap recap;
+  final Recap? previous;
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final writer = _minutes(l10n);
+    final week = recap.games!.played;
+    // Une semaine sans releve n'est pas une semaine sans jeu.
+    final played = week != null && (week.complete || week.minutes > 0) ? week : null;
+    final before = previous?.games?.played;
+    final text = RecapWriter(l10n, Localizations.localeOf(context).toLanguageTag(), dateOnlyNow: today);
+    final contract = text.contractLine(recap);
+    final next = text.nextLine(recap);
+    final detail = played == null
+        ? l10n.recap_game_unmeasured
+        : [
+            if (!played.complete) l10n.recap_game_partial_short,
+            if (played.lolGames > 0) l10n.recap_game_lol(played.lolGames),
+          ].join(' · ');
+    final games = played?.games ?? const <GameTitle>[];
+
+    return _RecapCard(
+      icon: Icons.sports_esports,
+      title: l10n.recap_games_title,
+      value: played == null ? '—' : writer(played.minutes),
+      color: scheme.primary,
+      detail: detail.isEmpty ? null : detail,
+      trend: played != null && before != null && before.complete
+          ? _trend(l10n, writer, played.minutes, before.minutes)
+          : null,
+      children: [
+        if (games.isNotEmpty) const SizedBox(height: 8),
+        for (final game in games.take(5))
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: Row(children: [
+              Expanded(
+                child: Text(
+                  game.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ),
+              Text(
+                writer(game.minutes),
+                style: theme.textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
+              ),
+            ]),
+          ),
+        if (contract != null || next != null) ...[
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            decoration: BoxDecoration(
+              color: scheme.primaryContainer.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              [if (contract != null) contract, if (next != null) next].join('\n'),
               style: theme.textTheme.bodySmall?.copyWith(color: scheme.onPrimaryContainer),
             ),
           ),

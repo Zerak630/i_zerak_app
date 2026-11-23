@@ -11,9 +11,21 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import org.json.JSONObject
+import java.net.URL
+import java.security.MessageDigest
+import java.security.cert.CertificateException
+import java.security.cert.X509Certificate
 import java.util.Calendar
 import java.util.TimeZone
+import java.util.concurrent.atomic.AtomicReference
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.X509TrustManager
+import kotlin.concurrent.thread
 
 /**
  * Le bilan de la semaine (chaque dimanche soir) et du mois (le dernier jour).
@@ -32,6 +44,8 @@ object RecapReport {
     private const val CHANNEL_ID = "recap_report"
     private const val WEEK_NOTIFICATION_ID = 4301
     private const val MONTH_NOTIFICATION_ID = 4302
+    private const val TAG = "RecapReport"
+    private const val LIVE_DEADLINE_MS = 12_000L
 
     fun configure(context: Context, config: Map<*, *>?) {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -135,14 +149,104 @@ object RecapReport {
         val today = Calendar.getInstance()
         val day = epochDay(today)
         if (config.optBoolean("weekly", true) && today.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-            entry(config, "week", day)?.let { notify(context, it, WEEK_NOTIFICATION_ID) }
+            entry(config, "week", day)?.let {
+                notify(context, it, WEEK_NOTIFICATION_ID, liveText(it) ?: it.optString("text"))
+            }
         }
         if (config.optBoolean("monthly", true) && isLastDayOfMonth(today)) {
-            entry(config, "month", day)?.let { notify(context, it, MONTH_NOTIFICATION_ID) }
+            entry(config, "month", day)?.let {
+                notify(context, it, MONTH_NOTIFICATION_ID, it.optString("text"))
+            }
         }
     }
 
-    private fun notify(context: Context, entry: JSONObject, id: Int) {
+    /**
+     * Le bilan complete du temps de jeu releve a l'instant sur le Pi. Nul si
+     * le Pi ne repond pas a temps ou que sa semaine n'est pas mesuree : la
+     * notification garde alors le texte prepare, qui dit « au dernier releve ».
+     *
+     * Dans un fil a part, avec une limite globale : les delais de connexion et
+     * de lecture ne couvrent pas la resolution DNS.
+     */
+    private fun liveText(entry: JSONObject): String? {
+        val live = entry.optJSONObject("live") ?: return null
+        val result = AtomicReference<String?>()
+        val worker = thread(isDaemon = true) {
+            try {
+                result.set(renderLive(live))
+            } catch (error: Exception) {
+                Log.d(TAG, "Temps de jeu indisponible : ${error.javaClass.simpleName}")
+            }
+        }
+        worker.join(LIVE_DEADLINE_MS)
+        return result.get()
+    }
+
+    private fun renderLive(live: JSONObject): String? {
+        val week = fetchWeek(live) ?: return null
+        if (!week.optBoolean("measured", false)) {
+            return null
+        }
+        val played = week.getInt("minutes")
+        return if (played <= 0) {
+            live.getString("none")
+        } else {
+            live.getString("template")
+                .replace("{played}", duration(played))
+                .replace("{next}", duration(target(played, live.getInt("ratio"), live.getInt("cap"))))
+        }
+    }
+
+    /** Meme calcul que GameContractSettings.targetFor. */
+    private fun target(played: Int, ratio: Int, cap: Int): Int {
+        val step = ratio * 5
+        return minOf(((played + step - 1) / step) * 5, cap)
+    }
+
+    /** Meme ecriture que `free_minutes` et `free_hours`, en francais comme en anglais. */
+    private fun duration(minutes: Int): String =
+        if (minutes < 60) "$minutes min" else "${minutes / 60} h ${(minutes % 60).toString().padStart(2, '0')}"
+
+    private fun fetchWeek(live: JSONObject): JSONObject? {
+        val connection = URL(live.getString("url")).openConnection() as? HttpsURLConnection ?: return null
+        try {
+            connection.sslSocketFactory = pinnedFactory(live.getString("pin"))
+            // L'empreinte designe deja le certificat exact : comme cote Dart, le
+            // nom d'hote (adresse locale ou Tailscale) n'a rien a y ajouter.
+            connection.hostnameVerifier = HostnameVerifier { _, _ -> true }
+            connection.connectTimeout = 4000
+            connection.readTimeout = 4000
+            connection.setRequestProperty("Authorization", "Bearer ${live.getString("token")}")
+            connection.setRequestProperty("Accept", "application/json")
+            if (connection.responseCode != 200) {
+                return null
+            }
+            return JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    /** N'accepte que le certificat dont l'empreinte SHA-256 est epinglee. */
+    private fun pinnedFactory(pin: String): SSLSocketFactory {
+        val trust = object : X509TrustManager {
+            override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) =
+                throw CertificateException("Pas de certificat client")
+
+            override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {
+                val digest = MessageDigest.getInstance("SHA-256").digest(chain[0].encoded)
+                val actual = digest.joinToString("") { "%02x".format(it) }
+                if (!MessageDigest.isEqual(actual.toByteArray(), pin.toByteArray())) {
+                    throw CertificateException("Certificat non epingle")
+                }
+            }
+
+            override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
+        }
+        return SSLContext.getInstance("TLS").apply { init(null, arrayOf(trust), null) }.socketFactory
+    }
+
+    private fun notify(context: Context, entry: JSONObject, id: Int, text: String) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             manager.createNotificationChannel(
@@ -162,7 +266,6 @@ object RecapReport {
             @Suppress("DEPRECATION")
             Notification.Builder(context)
         }
-        val text = entry.optString("text")
         val notification = builder
             .setSmallIcon(R.drawable.ic_stat_hourglass)
             .setContentTitle(entry.optString("title"))
@@ -180,10 +283,18 @@ class RecapReportReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             RecapReport.ACTION -> {
-                try {
-                    RecapReport.post(context)
-                } finally {
-                    RecapReport.schedule(context)
+                // Avant le reseau : si le processus meurt pendant l'appel au
+                // Pi, les bilans suivants restent programmes.
+                RecapReport.schedule(context)
+                val pending = goAsync()
+                thread {
+                    try {
+                        RecapReport.post(context)
+                    } catch (error: Exception) {
+                        Log.w("RecapReport", "Bilan non notifie", error)
+                    } finally {
+                        pending.finish()
+                    }
                 }
             }
             Intent.ACTION_BOOT_COMPLETED, Intent.ACTION_MY_PACKAGE_REPLACED ->

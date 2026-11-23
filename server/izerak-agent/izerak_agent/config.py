@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import yaml
 
@@ -49,6 +50,34 @@ class VolumeEntry:
 
 
 @dataclass(frozen=True)
+class GamingConfig:
+    """Le releve du temps de jeu. Une source sans ses champs reste inactive."""
+
+    # repr=False : une configuration journalisee ne doit pas emporter les cles.
+    steam_api_key: str = field(default="", repr=False)
+    steam_id: str = ""
+    riot_api_key: str = field(default="", repr=False)
+    riot_game_name: str = ""
+    riot_tag_line: str = ""
+    riot_region: str = "europe"
+    timezone: str = "Europe/Paris"
+    state_path: str = "/var/lib/izerak-agent/gaming.json"
+    poll_minutes: int = 60
+
+    @property
+    def steam_enabled(self) -> bool:
+        return bool(self.steam_api_key and self.steam_id)
+
+    @property
+    def lol_enabled(self) -> bool:
+        return bool(self.riot_api_key and self.riot_game_name and self.riot_tag_line)
+
+    @property
+    def enabled(self) -> bool:
+        return self.steam_enabled or self.lol_enabled
+
+
+@dataclass(frozen=True)
 class AgentConfig:
     token: str
     bind_host: str = "0.0.0.0"
@@ -57,6 +86,7 @@ class AgentConfig:
     tls_private_key: str | None = None
     services: list[ServiceEntry] = field(default_factory=list)
     storage: list[VolumeEntry] = field(default_factory=list)
+    gaming: GamingConfig = field(default_factory=GamingConfig)
 
     def entry_for(self, name: str) -> ServiceEntry | None:
         for entry in self.services:
@@ -118,6 +148,44 @@ def _service_entry(item: dict) -> ServiceEntry:
     )
 
 
+def _gaming(raw: object) -> GamingConfig:
+    if raw is None:
+        return GamingConfig()
+    if not isinstance(raw, dict):
+        raise ConfigError("La section gaming doit etre un mapping YAML")
+    steam = raw.get("steam") or {}
+    riot = raw.get("riot") or {}
+    if not isinstance(steam, dict) or not isinstance(riot, dict):
+        raise ConfigError("gaming.steam et gaming.riot doivent etre des mappings YAML")
+
+    region = str(riot.get("region") or "europe")
+    # La region entre dans le nom d'hote qui recoit la cle Riot.
+    if region not in ("europe", "americas", "asia", "sea"):
+        raise ConfigError(f"gaming.riot.region invalide : {region!r}")
+    poll_minutes = raw.get("poll_minutes", 60)
+    if isinstance(poll_minutes, bool) or not isinstance(poll_minutes, int) or poll_minutes < 15:
+        raise ConfigError("gaming.poll_minutes doit etre un entier d'au moins 15")
+
+    timezone = str(raw.get("timezone") or "Europe/Paris")
+    try:
+        ZoneInfo(timezone)
+    except (KeyError, ValueError, OSError) as error:
+        raise ConfigError(f"gaming.timezone invalide : {timezone!r}") from error
+
+    return GamingConfig(
+        steam_api_key=str(steam.get("api_key") or "").strip(),
+        # Entre guillemets ou non dans le YAML : un SteamID est un entier.
+        steam_id=str(steam.get("steam_id") or "").strip(),
+        riot_api_key=str(riot.get("api_key") or "").strip(),
+        riot_game_name=str(riot.get("game_name") or "").strip(),
+        riot_tag_line=str(riot.get("tag_line") or "").strip(),
+        riot_region=region,
+        timezone=timezone,
+        state_path=str(raw.get("state_path") or "/var/lib/izerak-agent/gaming.json"),
+        poll_minutes=poll_minutes,
+    )
+
+
 def load(path: Path | None = None) -> AgentConfig:
     config_path = path or Path(os.environ.get("IZERAK_AGENT_CONFIG", DEFAULT_CONFIG_PATH))
     if not config_path.is_file():
@@ -158,4 +226,5 @@ def load(path: Path | None = None) -> AgentConfig:
         tls_private_key=raw.get("tls_private_key"),
         services=services,
         storage=storage,
+        gaming=_gaming(raw.get("gaming")),
     )

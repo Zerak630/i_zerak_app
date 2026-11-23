@@ -74,6 +74,8 @@ class HomePageState extends State<HomePage> {
         // De retour au premier plan, l'autre appareil a pu ecrire entre-temps.
         widget.sync?.syncNow();
         _syncWidgets();
+        // Le Pi a pu relever du jeu : le bilan du dimanche doit le savoir.
+        widget.recap?.refreshGames();
       },
       // Les widgets ne se voient que l'application quittee : c'est le moment
       // de leur transmettre ce qui a change.
