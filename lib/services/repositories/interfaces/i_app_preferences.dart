@@ -1,4 +1,5 @@
 import 'package:i_zerak_app/models/app_tab.dart';
+import 'package:i_zerak_app/models/game_dao.dart' show GameContractSettings, GamingReport;
 import 'package:i_zerak_app/models/recap_dao.dart' show RecapSettings;
 
 /// Les preferences d'affichage de l'application, sans rapport avec un onglet
@@ -15,4 +16,14 @@ abstract class IAppPreferences {
   Future<RecapSettings> readRecapSettings();
 
   Future<void> saveRecapSettings(RecapSettings settings);
+
+  /// Le dernier releve du temps de jeu recu du Pi.
+  Future<GamingReport> readGamingReport();
+
+  Future<void> saveGamingReport(GamingReport report);
+
+  /// Les regles du contrat jeu contre sport.
+  Future<GameContractSettings> readGameContract();
+
+  Future<void> saveGameContract(GameContractSettings settings);
 }

@@ -13,11 +13,12 @@ from __future__ import annotations
 import hmac
 import time
 from collections import deque
+from datetime import date, timedelta
 from typing import Annotated, Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 
-from izerak_agent import metrics, storage
+from izerak_agent import gaming, metrics, storage
 from izerak_agent.config import AgentConfig, ServiceEntry, load
 from izerak_agent.systemd import ServiceAction, apply, status
 
@@ -98,6 +99,42 @@ def services(_: Authenticated, settings: AgentConfig = Depends(config)) -> dict:
     return {"services": [_describe(entry) for entry in settings.services]}
 
 
+@app.get("/api/v1/gaming")
+def gaming_report(_: Authenticated, settings: AgentConfig = Depends(config)) -> dict:
+    try:
+        return gaming.report(settings.gaming, settings.token)
+    except gaming.GamingStateError as error:
+        # Pas de rapport vide : l'application garderait « 0 h » pour vrai.
+        raise HTTPException(status_code=503, detail="Releves illisibles") from error
+
+
+@app.get("/api/v1/gaming/week")
+def gaming_week(
+    monday: str,
+    authorization: Annotated[Optional[str], Header()] = None,
+    settings: AgentConfig = Depends(config),
+) -> dict:
+    """Le total d'une semaine, pour la notification du dimanche.
+
+    Seule route ouverte au jeton derive : il ne doit rien permettre d'autre.
+    """
+    presented = (authorization or "").removeprefix("Bearer ").strip()
+    # En octets : compare_digest leve sur une chaine non ASCII.
+    if not hmac.compare_digest(presented.encode(), gaming.notify_token(settings.token).encode()):
+        raise HTTPException(status_code=401, detail="Jeton invalide")
+    try:
+        day = date.fromisoformat(monday)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail="Date invalide") from error
+    # La semaine et son lundi suivant doivent rester dans le calendrier.
+    if day.weekday() != 0 or day > date.max - timedelta(days=14):
+        raise HTTPException(status_code=422, detail="Un lundi est attendu")
+    try:
+        return gaming.week(settings.gaming, day)
+    except gaming.GamingStateError as error:
+        raise HTTPException(status_code=503, detail="Releves illisibles") from error
+
+
 def _describe(entry: ServiceEntry) -> dict:
     return {
         **status(entry.name, entry.unit).to_dict(),
@@ -144,6 +181,7 @@ def main() -> None:
     import uvicorn
 
     settings = config()
+    gaming.start(settings.gaming)
     uvicorn.run(
         app,
         host=settings.bind_host,

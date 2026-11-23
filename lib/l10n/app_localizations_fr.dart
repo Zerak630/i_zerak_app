@@ -909,7 +909,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commute_snack_remote => 'Télétravail enregistré';
 
   @override
-  String get commute_could_bike => 'Est-ce que tu aurais pu prendre le vélo à la place ?';
+  String get commute_could_bike =>
+      'Est-ce que tu aurais pu prendre le vélo à la place ?';
 
   @override
   String get commute_could_bike_yes => 'Oui';
@@ -2657,4 +2658,150 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sport_period_all => 'Tout';
+
+  @override
+  String recap_game(String minutes) {
+    return '$minutes de jeu';
+  }
+
+  @override
+  String recap_game_partial(String minutes) {
+    return '$minutes de jeu au dernier relevé';
+  }
+
+  @override
+  String get recap_game_none => 'Pas de jeu cette semaine';
+
+  @override
+  String recap_game_lol(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count parties',
+      one: '1 partie',
+    );
+    return 'LoL $_temp0';
+  }
+
+  @override
+  String recap_game_steam(String minutes) {
+    return 'Steam $minutes';
+  }
+
+  @override
+  String get recap_games_title => 'Jeu';
+
+  @override
+  String recap_contract_kept(String done, String target) {
+    return 'Contrat tenu : $done sur $target';
+  }
+
+  @override
+  String recap_contract_missed(String done, String target) {
+    return 'Contrat manqué : $done sur $target';
+  }
+
+  @override
+  String recap_contract_open(String done, String target) {
+    return 'Contrat en cours : $done sur $target';
+  }
+
+  @override
+  String recap_contract_streak(int count) {
+    return '$count semaines d’affilée';
+  }
+
+  @override
+  String recap_contract_next(String minutes) {
+    return 'La semaine prochaine : $minutes de sport';
+  }
+
+  @override
+  String get goals_game_title => 'Contrat de la semaine';
+
+  @override
+  String goals_game_played(String minutes) {
+    return 'Semaine dernière : $minutes de jeu';
+  }
+
+  @override
+  String goals_game_target(String minutes) {
+    return 'À compenser : $minutes de sport';
+  }
+
+  @override
+  String recap_contract_next_live(String minutes) {
+    return 'Pour l’instant, la semaine prochaine : $minutes de sport';
+  }
+
+  @override
+  String get recap_game_unmeasured => 'Pas de relevé pour cette semaine';
+
+  @override
+  String get recap_game_partial_short => 'Total partiel';
+
+  @override
+  String get goals_game_rules_hint =>
+      'Les nouvelles règles s’appliquent à partir de lundi prochain.';
+
+  @override
+  String goals_game_remaining(String minutes) {
+    return 'Encore $minutes d’ici dimanche soir';
+  }
+
+  @override
+  String get goals_game_kept => 'Contrat tenu cette semaine';
+
+  @override
+  String goals_game_split(String sport, String bike) {
+    return 'Séances $sport · vélo $bike';
+  }
+
+  @override
+  String goals_game_streak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count semaines tenues',
+      one: '1 semaine tenue',
+    );
+    return 'Série : $_temp0';
+  }
+
+  @override
+  String get goals_game_nothing =>
+      'Pas de jeu la semaine dernière : rien à compenser.';
+
+  @override
+  String get goals_game_measuring =>
+      'Pas de contrat cette semaine : la semaine dernière n’a pas pu être mesurée en entier.';
+
+  @override
+  String get goals_game_off => 'Le contrat est désactivé.';
+
+  @override
+  String goals_game_error(String sources) {
+    return 'Dernier relevé en échec : $sources';
+  }
+
+  @override
+  String get goals_game_settings => 'Règles du contrat';
+
+  @override
+  String get goals_game_enabled => 'Compenser le jeu par du sport';
+
+  @override
+  String goals_game_ratio(int hours) {
+    return '1 h de sport pour $hours h de jeu';
+  }
+
+  @override
+  String goals_game_cap(String minutes) {
+    return 'Plafond : $minutes de sport par semaine';
+  }
+
+  @override
+  String goals_game_bike(String minutes) {
+    return 'Une journée à vélo compte pour $minutes';
+  }
 }

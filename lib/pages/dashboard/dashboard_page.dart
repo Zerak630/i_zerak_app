@@ -141,9 +141,15 @@ class _DashboardPageState extends State<DashboardPage> {
     if (mounted) {
       setState(() => _loading = false);
     }
-    await Future.wait([_loadPrice(), _loadSystem(), _loadTorrents(), _loadFreeTime()]);
+    // A part : le service des carburants peut rester sans reponse, ou repondre
+    // n'importe quoi, et le bilan n'a pas a l'attendre.
+    final price = _loadPrice().catchError((Object error) {
+      debugPrint('Prix du carburant indisponible : $error');
+    });
+    await Future.wait([_loadSystem(), _loadTorrents(), _loadFreeTime()]);
     // Apres le temps libre : sa synchro fige les journees que le bilan lit.
     await _loadRecap();
+    await price;
   }
 
   Future<void> _loadLocal() async {
@@ -188,6 +194,13 @@ class _DashboardPageState extends State<DashboardPage> {
       if (mounted) {
         setState(() => _recap = recap);
       }
+      // Apres l'affichage : le Pi peut mettre plusieurs secondes a repondre.
+      if (await service.refreshGames()) {
+        final fresh = await service.recapOf(RecapRange.weekOf(_today));
+        if (mounted) {
+          setState(() => _recap = fresh);
+        }
+      }
     } catch (error) {
       debugPrint('Bilan indisponible : $error');
     }
@@ -211,6 +224,7 @@ class _DashboardPageState extends State<DashboardPage> {
       if (writer.bikeLine(recap) case final String line) (Icons.pedal_bike, line),
       if (writer.freeLine(recap) case final String line) (Icons.hourglass_bottom, line),
       (Icons.fitness_center, writer.sportLine(recap)),
+      if (writer.gameLine(recap) case final String line) (Icons.sports_esports, line),
     ];
 
     return Card(

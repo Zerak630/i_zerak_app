@@ -2628,4 +2628,148 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sport_period_all => 'All';
+
+  @override
+  String recap_game(String minutes) {
+    return '$minutes of gaming';
+  }
+
+  @override
+  String recap_game_partial(String minutes) {
+    return '$minutes of gaming at the last reading';
+  }
+
+  @override
+  String get recap_game_none => 'No gaming this week';
+
+  @override
+  String recap_game_lol(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count games',
+      one: '1 game',
+    );
+    return 'LoL $_temp0';
+  }
+
+  @override
+  String recap_game_steam(String minutes) {
+    return 'Steam $minutes';
+  }
+
+  @override
+  String get recap_games_title => 'Gaming';
+
+  @override
+  String recap_contract_kept(String done, String target) {
+    return 'Deal kept: $done of $target';
+  }
+
+  @override
+  String recap_contract_missed(String done, String target) {
+    return 'Deal missed: $done of $target';
+  }
+
+  @override
+  String recap_contract_open(String done, String target) {
+    return 'Deal in progress: $done of $target';
+  }
+
+  @override
+  String recap_contract_streak(int count) {
+    return '$count weeks in a row';
+  }
+
+  @override
+  String recap_contract_next(String minutes) {
+    return 'Next week: $minutes of sport';
+  }
+
+  @override
+  String get goals_game_title => 'This week\'s deal';
+
+  @override
+  String goals_game_played(String minutes) {
+    return 'Last week: $minutes of gaming';
+  }
+
+  @override
+  String goals_game_target(String minutes) {
+    return 'To make up: $minutes of sport';
+  }
+
+  @override
+  String recap_contract_next_live(String minutes) {
+    return 'So far, next week: $minutes of sport';
+  }
+
+  @override
+  String get recap_game_unmeasured => 'No reading for this week';
+
+  @override
+  String get recap_game_partial_short => 'Partial total';
+
+  @override
+  String get goals_game_rules_hint => 'New rules apply from next Monday.';
+
+  @override
+  String goals_game_remaining(String minutes) {
+    return '$minutes left by Sunday night';
+  }
+
+  @override
+  String get goals_game_kept => 'Deal kept this week';
+
+  @override
+  String goals_game_split(String sport, String bike) {
+    return 'Sessions $sport · bike $bike';
+  }
+
+  @override
+  String goals_game_streak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks kept',
+      one: '1 week kept',
+    );
+    return 'Streak: $_temp0';
+  }
+
+  @override
+  String get goals_game_nothing => 'No gaming last week: nothing to make up.';
+
+  @override
+  String get goals_game_measuring =>
+      'No deal this week: last week could not be fully measured.';
+
+  @override
+  String get goals_game_off => 'The deal is turned off.';
+
+  @override
+  String goals_game_error(String sources) {
+    return 'Last reading failed: $sources';
+  }
+
+  @override
+  String get goals_game_settings => 'Deal rules';
+
+  @override
+  String get goals_game_enabled => 'Make up for gaming with sport';
+
+  @override
+  String goals_game_ratio(int hours) {
+    return '1 h of sport for $hours h of gaming';
+  }
+
+  @override
+  String goals_game_cap(String minutes) {
+    return 'Cap: $minutes of sport per week';
+  }
+
+  @override
+  String goals_game_bike(String minutes) {
+    return 'A day by bike counts for $minutes';
+  }
 }

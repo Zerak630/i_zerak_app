@@ -34,6 +34,9 @@ ProtectHome=yes
 PrivateTmp=yes
 ProtectControlGroups=yes
 ReadOnlyPaths=/etc/izerak-agent
+# Le seul endroit ou l'agent ecrit : les releves du temps de jeu.
+StateDirectory=izerak-agent
+StateDirectoryMode=0750
 
 [Install]
 WantedBy=multi-user.target

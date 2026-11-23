@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:i_zerak_app/models/agent_dao.dart';
+import 'package:i_zerak_app/models/game_dao.dart';
 import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_exceptions.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_http_client_factory.dart';
@@ -100,6 +101,14 @@ class AgentService {
       ServiceStatus.listFromBody((await _get('services')).body);
 
   Future<String> health() async => (await _get('health')).body;
+
+  Future<GamingReport> gaming() async {
+    final report = GamingReport.tryDecode((await _get('gaming')).body);
+    if (report == null) {
+      throw const QbHttpException(200, 'Reponse inattendue de l\'agent');
+    }
+    return report;
+  }
 
   /// Verifie une configuration d'agent qui n'est pas encore enregistree.
   ///

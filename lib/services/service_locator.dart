@@ -6,6 +6,7 @@ import 'package:i_zerak_app/services/agent/agent_service.dart';
 import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/models/subscription_dao.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
+import 'package:i_zerak_app/services/gaming/gaming_service.dart';
 import 'package:i_zerak_app/services/gas_service.dart';
 import 'package:i_zerak_app/services/home_widgets/home_widgets_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
@@ -134,7 +135,16 @@ Future<void> setupServiceLocator() async {
         sport: getIt<ISport>(),
         preferences: getIt<IAppPreferences>(),
         screenTime: getIt<IScreenTime>(),
+        games: getIt<GamingService>(),
+        server: getIt<IServerConfig>(),
         bridge: AndroidRecapBridge(),
+      ));
+
+  // Le temps de jeu vient de l'agent du Pi ; le contrat, lui, se calcule ici.
+  getIt.registerLazySingleton<GamingService>(() => GamingService(
+        fetch: () => getIt<AgentService>().gaming(),
+        preferences: getIt<IAppPreferences>(),
+        origin: () async => (await getIt<IServerConfig>().read())?.agentBaseUri.toString(),
       ));
 
   getIt.registerLazySingleton<ICredentials>(() => const SecureCredentialsStore());

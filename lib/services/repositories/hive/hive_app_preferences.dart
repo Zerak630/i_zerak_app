@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:hive/hive.dart';
 import 'package:i_zerak_app/models/app_tab.dart';
+import 'package:i_zerak_app/models/game_dao.dart' show GameContractSettings, GamingReport;
 import 'package:i_zerak_app/models/recap_dao.dart' show RecapSettings;
 import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
 
@@ -16,6 +17,8 @@ class HiveAppPreferences implements IAppPreferences {
 
   static const String _tabsKey = 'pinned_tabs';
   static const String _recapKey = 'recap';
+  static const String _gamingKey = 'gaming_report';
+  static const String _contractKey = 'game_contract';
 
   @override
   Future<TabLayout> readTabs() async {
@@ -58,6 +61,37 @@ class HiveAppPreferences implements IAppPreferences {
   @override
   Future<void> saveRecapSettings(RecapSettings settings) async {
     await _box.put(_recapKey, json.encode(settings.toJson()));
+    await _box.flush();
+  }
+
+  @override
+  Future<GamingReport> readGamingReport() async {
+    final raw = _box.get(_gamingKey);
+    return raw == null ? const GamingReport() : GamingReport.decode(raw);
+  }
+
+  @override
+  Future<void> saveGamingReport(GamingReport report) async {
+    await _box.put(_gamingKey, report.encode());
+    await _box.flush();
+  }
+
+  @override
+  Future<GameContractSettings> readGameContract() async {
+    final raw = _box.get(_contractKey);
+    if (raw == null) {
+      return const GameContractSettings();
+    }
+    try {
+      return GameContractSettings.fromJson(json.decode(raw));
+    } on FormatException {
+      return const GameContractSettings();
+    }
+  }
+
+  @override
+  Future<void> saveGameContract(GameContractSettings settings) async {
+    await _box.put(_contractKey, json.encode(settings.toJson()));
     await _box.flush();
   }
 }

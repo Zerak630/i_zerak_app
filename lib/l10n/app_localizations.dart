@@ -4088,6 +4088,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All'**
   String get sport_period_all;
+
+  /// No description provided for @recap_game.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} of gaming'**
+  String recap_game(String minutes);
+
+  /// No description provided for @recap_game_partial.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} of gaming at the last reading'**
+  String recap_game_partial(String minutes);
+
+  /// No description provided for @recap_game_none.
+  ///
+  /// In en, this message translates to:
+  /// **'No gaming this week'**
+  String get recap_game_none;
+
+  /// No description provided for @recap_game_lol.
+  ///
+  /// In en, this message translates to:
+  /// **'LoL {count, plural, =1{1 game} other{{count} games}}'**
+  String recap_game_lol(int count);
+
+  /// No description provided for @recap_game_steam.
+  ///
+  /// In en, this message translates to:
+  /// **'Steam {minutes}'**
+  String recap_game_steam(String minutes);
+
+  /// No description provided for @recap_games_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Gaming'**
+  String get recap_games_title;
+
+  /// No description provided for @recap_contract_kept.
+  ///
+  /// In en, this message translates to:
+  /// **'Deal kept: {done} of {target}'**
+  String recap_contract_kept(String done, String target);
+
+  /// No description provided for @recap_contract_missed.
+  ///
+  /// In en, this message translates to:
+  /// **'Deal missed: {done} of {target}'**
+  String recap_contract_missed(String done, String target);
+
+  /// No description provided for @recap_contract_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Deal in progress: {done} of {target}'**
+  String recap_contract_open(String done, String target);
+
+  /// No description provided for @recap_contract_streak.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} weeks in a row'**
+  String recap_contract_streak(int count);
+
+  /// No description provided for @recap_contract_next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next week: {minutes} of sport'**
+  String recap_contract_next(String minutes);
+
+  /// No description provided for @goals_game_title.
+  ///
+  /// In en, this message translates to:
+  /// **'This week\'s deal'**
+  String get goals_game_title;
+
+  /// No description provided for @goals_game_played.
+  ///
+  /// In en, this message translates to:
+  /// **'Last week: {minutes} of gaming'**
+  String goals_game_played(String minutes);
+
+  /// No description provided for @goals_game_target.
+  ///
+  /// In en, this message translates to:
+  /// **'To make up: {minutes} of sport'**
+  String goals_game_target(String minutes);
+
+  /// No description provided for @recap_contract_next_live.
+  ///
+  /// In en, this message translates to:
+  /// **'So far, next week: {minutes} of sport'**
+  String recap_contract_next_live(String minutes);
+
+  /// No description provided for @recap_game_unmeasured.
+  ///
+  /// In en, this message translates to:
+  /// **'No reading for this week'**
+  String get recap_game_unmeasured;
+
+  /// No description provided for @recap_game_partial_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial total'**
+  String get recap_game_partial_short;
+
+  /// No description provided for @goals_game_rules_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'New rules apply from next Monday.'**
+  String get goals_game_rules_hint;
+
+  /// No description provided for @goals_game_remaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} left by Sunday night'**
+  String goals_game_remaining(String minutes);
+
+  /// No description provided for @goals_game_kept.
+  ///
+  /// In en, this message translates to:
+  /// **'Deal kept this week'**
+  String get goals_game_kept;
+
+  /// No description provided for @goals_game_split.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions {sport} · bike {bike}'**
+  String goals_game_split(String sport, String bike);
+
+  /// No description provided for @goals_game_streak.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak: {count, plural, =1{1 week kept} other{{count} weeks kept}}'**
+  String goals_game_streak(int count);
+
+  /// No description provided for @goals_game_nothing.
+  ///
+  /// In en, this message translates to:
+  /// **'No gaming last week: nothing to make up.'**
+  String get goals_game_nothing;
+
+  /// No description provided for @goals_game_measuring.
+  ///
+  /// In en, this message translates to:
+  /// **'No deal this week: last week could not be fully measured.'**
+  String get goals_game_measuring;
+
+  /// No description provided for @goals_game_off.
+  ///
+  /// In en, this message translates to:
+  /// **'The deal is turned off.'**
+  String get goals_game_off;
+
+  /// No description provided for @goals_game_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Last reading failed: {sources}'**
+  String goals_game_error(String sources);
+
+  /// No description provided for @goals_game_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Deal rules'**
+  String get goals_game_settings;
+
+  /// No description provided for @goals_game_enabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Make up for gaming with sport'**
+  String get goals_game_enabled;
+
+  /// No description provided for @goals_game_ratio.
+  ///
+  /// In en, this message translates to:
+  /// **'1 h of sport for {hours} h of gaming'**
+  String goals_game_ratio(int hours);
+
+  /// No description provided for @goals_game_cap.
+  ///
+  /// In en, this message translates to:
+  /// **'Cap: {minutes} of sport per week'**
+  String goals_game_cap(String minutes);
+
+  /// No description provided for @goals_game_bike.
+  ///
+  /// In en, this message translates to:
+  /// **'A day by bike counts for {minutes}'**
+  String goals_game_bike(String minutes);
 }
 
 class _AppLocalizationsDelegate
