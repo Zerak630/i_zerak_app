@@ -46,6 +46,10 @@ LOL = "lol"
 _STEAM_URL = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
 _HTTP_TIMEOUT_SECONDS = 15
 
+# Le pare-feu devant l'API Riot rejette l'en-tete par defaut d'urllib
+# (« Python-urllib/x.y ») par un 403, que rien ne distingue d'une cle refusee.
+_USER_AGENT = "izerak-agent/1.0"
+
 # Garde-fou du calcul par difference : un jeu qui reapparait apres un retrait
 # de la bibliotheque ne doit pas verser tout son cumul sur la journee.
 _STEAM_MARGIN_MINUTES = 12 * 60
@@ -103,7 +107,9 @@ _opener = urllib.request.build_opener(_NoRedirect)
 
 
 def fetch_json(url: str, headers: dict) -> object:
-    request = urllib.request.Request(url, headers={"Accept": "application/json", **headers})
+    request = urllib.request.Request(
+        url, headers={"Accept": "application/json", "User-Agent": _USER_AGENT, **headers}
+    )
     try:
         with _opener.open(request, timeout=_HTTP_TIMEOUT_SECONDS) as response:
             return json.loads(response.read().decode("utf-8"))
