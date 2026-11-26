@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/agent_dao.dart';
+import 'package:i_zerak_app/models/settings_category.dart';
 import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/services/agent/agent_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_exceptions.dart';
@@ -116,7 +117,7 @@ class _SystemPageState extends State<SystemPage> {
   }
 
   Future<void> _openSettings() async {
-    await Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage()));
+    await openSettings(context, open: SettingsCategory.server);
     if (!mounted) {
       return;
     }

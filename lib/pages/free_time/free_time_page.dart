@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/screen_time_dao.dart';
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart' show CommuteFormat;
-import 'package:i_zerak_app/pages/free_time/free_time_settings_page.dart';
+import 'package:i_zerak_app/models/settings_category.dart';
+import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/pages/free_time/free_time_setup_page.dart';
 import 'package:i_zerak_app/pages/free_time/widgets/free_time_ui.dart';
 import 'package:i_zerak_app/services/screen_time/screen_time_service.dart';
@@ -71,10 +72,7 @@ class _FreeTimePageState extends State<FreeTimePage> {
   }
 
   Future<void> _openSettings() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => FreeTimeSettingsPage(service: widget.service)),
-    );
+    await openSettings(context, open: SettingsCategory.freeTime);
     await _sync();
   }
 

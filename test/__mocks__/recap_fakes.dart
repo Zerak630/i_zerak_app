@@ -1,6 +1,7 @@
 import 'package:i_zerak_app/models/app_tab.dart';
 import 'package:i_zerak_app/models/game_dao.dart';
 import 'package:i_zerak_app/models/recap_dao.dart';
+import 'package:i_zerak_app/models/settings_category.dart';
 import 'package:i_zerak_app/services/recap/recap_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
 
@@ -10,6 +11,7 @@ class MemoryPreferences implements IAppPreferences {
   RecapSettings recap = const RecapSettings();
   GamingReport gaming = const GamingReport();
   GameContractSettings contract = const GameContractSettings();
+  Set<SettingsCategory> expanded = {};
 
   @override
   Future<TabLayout> readTabs() async => tabs;
@@ -34,6 +36,12 @@ class MemoryPreferences implements IAppPreferences {
 
   @override
   Future<void> saveGameContract(GameContractSettings settings) async => contract = settings;
+
+  @override
+  Future<Set<SettingsCategory>> readExpandedSettings() async => {...expanded};
+
+  @override
+  Future<void> saveExpandedSettings(Set<SettingsCategory> value) async => expanded = {...value};
 }
 
 /// Un natif imaginaire : il garde ce qu'on lui transmet.

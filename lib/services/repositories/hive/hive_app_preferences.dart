@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 import 'package:i_zerak_app/models/app_tab.dart';
 import 'package:i_zerak_app/models/game_dao.dart' show GameContractSettings, GamingReport;
 import 'package:i_zerak_app/models/recap_dao.dart' show RecapSettings;
+import 'package:i_zerak_app/models/settings_category.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
 
 /// Preferences d'affichage, dans une `Box<String>` de JSON.
@@ -19,6 +20,7 @@ class HiveAppPreferences implements IAppPreferences {
   static const String _recapKey = 'recap';
   static const String _gamingKey = 'gaming_report';
   static const String _contractKey = 'game_contract';
+  static const String _expandedKey = 'settings_expanded';
 
   @override
   Future<TabLayout> readTabs() async {
@@ -92,6 +94,27 @@ class HiveAppPreferences implements IAppPreferences {
   @override
   Future<void> saveGameContract(GameContractSettings settings) async {
     await _box.put(_contractKey, json.encode(settings.toJson()));
+    await _box.flush();
+  }
+
+  @override
+  Future<Set<SettingsCategory>> readExpandedSettings() async {
+    final raw = _box.get(_expandedKey);
+    if (raw == null) {
+      return {};
+    }
+    try {
+      final decoded = json.decode(raw);
+      return decoded is List ? SettingsCategory.fromNames(decoded) : {};
+    } on FormatException {
+      // Au pire, tout se replie : rien de grave pour un ecran de reglages.
+      return {};
+    }
+  }
+
+  @override
+  Future<void> saveExpandedSettings(Set<SettingsCategory> expanded) async {
+    await _box.put(_expandedKey, json.encode(SettingsCategory.toNames(expanded)));
     await _box.flush();
   }
 }

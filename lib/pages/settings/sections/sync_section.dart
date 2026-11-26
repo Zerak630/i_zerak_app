@@ -21,11 +21,11 @@ String syncAgo(AppLocalizations l10n, DateTime then, DateTime now) {
   return l10n.sync_ago_days(elapsed.inDays);
 }
 
-/// La carte « Synchronisation » des reglages.
+/// La categorie « Synchronisation » des reglages.
 ///
 /// Elle vit a part du formulaire du Pi et s'applique d'elle-meme : le bouton
-/// « Enregistrer » de la page ne concerne que le serveur, et un dossier mal
-/// choisi doit pouvoir se corriger sans retoucher le reste.
+/// « Enregistrer » du serveur ne concerne que lui, et un dossier mal choisi
+/// doit pouvoir se corriger sans retoucher le reste.
 class SyncSection extends StatefulWidget {
   SyncSection({
     super.key,
@@ -122,28 +122,17 @@ class _SyncSectionState extends State<SyncSection> {
         ? _fields(context, l10n, muted)
         : [Text(l10n.sync_unsupported, style: muted)];
 
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(children: [
-              Icon(Icons.sync, size: 20, color: theme.colorScheme.primary),
-              const SizedBox(width: 8),
-              Expanded(child: Text(l10n.sync_section, style: theme.textTheme.titleMedium)),
-            ]),
-            const SizedBox(height: 4),
-            Text(l10n.sync_section_hint, style: muted),
-            const SizedBox(height: 16),
-            for (var i = 0; i < children.length; i++) ...[
-              children[i],
-              if (i < children.length - 1) const SizedBox(height: 12),
-            ],
-          ],
-        ),
-      ),
+    // Le titre et l'icone sont portes par la categorie qui l'accueille.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(l10n.sync_section_hint, style: muted),
+        const SizedBox(height: 16),
+        for (var i = 0; i < children.length; i++) ...[
+          children[i],
+          if (i < children.length - 1) const SizedBox(height: 12),
+        ],
+      ],
     );
   }
 

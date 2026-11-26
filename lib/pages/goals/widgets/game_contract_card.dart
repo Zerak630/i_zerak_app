@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/game_dao.dart';
-import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart' show CommuteSheet;
 import 'package:i_zerak_app/pages/sport/widgets/sport_ui.dart' show sportMinutes;
 
 /// Le contrat de la semaine : le jeu de la semaine passee, le sport qu'il
@@ -153,80 +152,5 @@ class GameContractCard extends StatelessWidget {
         ),
       ],
     ];
-  }
-}
-
-/// Les regles du contrat. Renvoie les nouvelles, ou rien si on referme.
-Future<GameContractSettings?> showGameContractSheet(
-  BuildContext context,
-  GameContractSettings settings,
-) =>
-    showModalBottomSheet<GameContractSettings>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (_) => _GameContractSheet(settings: settings),
-    );
-
-class _GameContractSheet extends StatefulWidget {
-  const _GameContractSheet({required this.settings});
-
-  final GameContractSettings settings;
-
-  @override
-  State<_GameContractSheet> createState() => _GameContractSheetState();
-}
-
-class _GameContractSheetState extends State<_GameContractSheet> {
-  late var _rules = widget.settings;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    return CommuteSheet(children: [
-      Text(l10n.goals_game_settings, style: theme.textTheme.titleLarge),
-      SwitchListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(l10n.goals_game_enabled),
-        value: _rules.enabled,
-        onChanged: (value) => setState(() => _rules = _rules.copyWith(enabled: value)),
-      ),
-      Text(l10n.goals_game_ratio(_rules.gameHoursPerSportHour)),
-      Slider(
-        value: _rules.gameHoursPerSportHour.clamp(1, 6).toDouble(),
-        min: 1,
-        max: 6,
-        divisions: 5,
-        onChanged: (value) =>
-            setState(() => _rules = _rules.copyWith(gameHoursPerSportHour: value.round())),
-      ),
-      Text(l10n.goals_game_cap(sportMinutes(l10n, _rules.capMinutes))),
-      Slider(
-        value: _rules.capMinutes.clamp(60, 720).toDouble(),
-        min: 60,
-        max: 720,
-        divisions: 22,
-        onChanged: (value) => setState(() => _rules = _rules.copyWith(capMinutes: value.round())),
-      ),
-      Text(l10n.goals_game_bike(sportMinutes(l10n, _rules.bikeMinutesPerDay))),
-      Slider(
-        value: _rules.bikeMinutesPerDay.clamp(0, 120).toDouble(),
-        max: 120,
-        divisions: 24,
-        onChanged: (value) =>
-            setState(() => _rules = _rules.copyWith(bikeMinutesPerDay: value.round())),
-      ),
-      Text(
-        l10n.goals_game_rules_hint,
-        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-      ),
-      const SizedBox(height: 8),
-      FilledButton(
-        onPressed: () => Navigator.pop(context, _rules),
-        child: Text(l10n.save),
-      ),
-    ]);
   }
 }

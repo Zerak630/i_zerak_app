@@ -39,7 +39,7 @@ void main() {
           amount: 1.2,
           pricePerLitre: 1.7,
           priceSource: PriceSource.live,
-          reasonId: CarReason.lazy,
+          reasonId: 'lazy',
           bucket: CarBucket.missed,
         ),
       ],

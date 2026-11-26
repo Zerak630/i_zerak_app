@@ -6,6 +6,8 @@ import 'package:i_zerak_app/models/screen_time_dao.dart';
 import 'package:i_zerak_app/models/sport_dao.dart';
 import 'package:i_zerak_app/pages/recap/recap_page.dart';
 import 'package:i_zerak_app/services/recap/recap_service.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
+import 'package:i_zerak_app/services/service_locator.dart';
 
 import '../../__mocks__/commute_fakes.dart';
 import '../../__mocks__/recap_fakes.dart';
@@ -57,10 +59,12 @@ void main() {
     ]);
   });
 
+  late RecapService service;
+
   Future<void> open(WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(420, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    final service = RecapService(
+    service = RecapService(
       commute: MemoryCommute(
         settings: const CommuteSettings(distanceKm: 12.4),
         days: [bike(DateTime(2026, 11, 17), 3.2), bike(DateTime(2026, 11, 2), 3.2)],
@@ -108,9 +112,17 @@ void main() {
     expect(find.text('Aucune séance'), findsOneWidget);
   });
 
-  testWidgets('les notifications se reglent depuis le bilan', (tester) async {
+  testWidgets('le bilan mene aux reglages de ses notifications', (tester) async {
     await open(tester);
+    // L'ecran des reglages trouve ses services dans le localisateur.
+    getIt
+      ..registerSingleton<IAppPreferences>(preferences)
+      ..registerSingleton<RecapService>(service);
+    addTearDown(getIt.reset);
 
+    expect(find.text('Bilan du mois'), findsNothing, reason: 'une seule source : les reglages');
+    await tester.tap(find.text('Régler les notifications de bilan'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Bilan du mois'));
     await tester.pumpAndSettle();
 

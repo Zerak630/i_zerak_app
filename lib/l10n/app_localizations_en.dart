@@ -761,13 +761,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commute_setup_action => 'Set up';
 
   @override
-  String get commute_settings_title => 'Commute';
-
-  @override
-  String get commute_settings_entry_hint =>
-      'Distance, fuel use and reasons for taking the car';
-
-  @override
   String get commute_section_trip => 'The trip';
 
   @override
@@ -805,43 +798,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commute_price_never_rule => 'No price ever seen';
 
   @override
-  String get commute_section_reasons => 'Reasons for taking the car';
-
-  @override
   String get commute_bucket_essential => 'Required expense';
 
   @override
   String get commute_bucket_missed => 'Missed saving';
-
-  @override
-  String get commute_add_reason => 'Add a reason';
-
-  @override
-  String get commute_reason_name => 'Reason';
-
-  @override
-  String get commute_rename_reason => 'Rename reason';
-
-  @override
-  String get commute_rename_reason_hint =>
-      'Leave empty to restore the original name';
-
-  @override
-  String commute_reason_uses(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Used on $count days',
-      one: 'Used on 1 day',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get commute_reason_actions => 'Reason actions';
-
-  @override
-  String get commute_reason_in_use => 'Delete (already used)';
 
   @override
   String get commute_trip_value_today => 'One trip is worth today';
@@ -851,15 +811,6 @@ class AppLocalizationsEn extends AppLocalizations {
       String distance, String consumption, String price) {
     return '$distance km × $consumption L/100 km × $price/L';
   }
-
-  @override
-  String get reason_sport => 'Evening sport';
-
-  @override
-  String get reason_shopping => 'Shopping';
-
-  @override
-  String get reason_lazy => 'Couldn\'t be bothered';
 
   @override
   String get commute_why_car => 'Why the car?';
@@ -2997,4 +2948,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String game_stats_lp_week(String lp) {
     return '$lp LP this week';
   }
+
+  @override
+  String get settings_commute => 'Commute and bike';
+
+  @override
+  String get settings_commute_hint =>
+      'Distance, consumption, fuel, refunded subscriptions';
+
+  @override
+  String get settings_free_time => 'Free time';
+
+  @override
+  String get settings_free_time_hint => 'Tracked apps, quota decrease, floor';
+
+  @override
+  String get settings_free_time_not_ready =>
+      'Free time isn’t set up yet: pick your apps and measure your starting average.';
+
+  @override
+  String get settings_free_time_setup => 'Set up';
+
+  @override
+  String get settings_games => 'Games';
+
+  @override
+  String get settings_games_hint => 'The games-for-sport contract';
+
+  @override
+  String get settings_notifications => 'Notifications and reminders';
+
+  @override
+  String get settings_notifications_hint => 'What the app sends you, and when';
+
+  @override
+  String get settings_notifications_none =>
+      'No notifications to set on this device.';
+
+  @override
+  String get settings_server => 'Server and Pi';
+
+  @override
+  String get settings_server_hint => 'Address, agent, qBittorrent, Emby, TMDB';
+
+  @override
+  String get settings_sync_hint => 'The folder shared with your other devices';
+
+  @override
+  String get settings_display => 'Display';
+
+  @override
+  String get settings_display_hint => 'The bottom bar tabs';
+
+  @override
+  String get settings_display_tabs => 'Bottom bar';
+
+  @override
+  String settings_display_tabs_hint(int count) {
+    return 'At most $count tabs. The others stay in the “More” menu.';
+  }
+
+  @override
+  String get recap_notify_settings => 'Recap notification settings';
 }

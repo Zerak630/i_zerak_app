@@ -2,37 +2,52 @@ import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/commute_dao.dart';
 import 'package:i_zerak_app/models/gas_station_dao.dart';
+import 'package:i_zerak_app/models/payback_dao.dart' show paybackSubscriptions;
+import 'package:i_zerak_app/models/subscription_dao.dart' show Subscription, SubscriptionFrequency;
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
 import 'package:i_zerak_app/pages/gas_stations/widgets/fuel_label.dart';
+import 'package:i_zerak_app/pages/settings/widgets/settings_ui.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 
-/// Reglages du trajet domicile-travail : distance, consommation et carburant.
+/// La categorie « Trajet et velo » : distance, consommation et carburant,
+/// puis les abonnements que le velo rembourse.
 ///
-/// La cagnotte d'un trajet en voiture ne se regle plus ici : elle se decide a
+/// La cagnotte d'un trajet en voiture ne se regle pas ici : elle se decide a
 /// chaque trajet, en repondant a « le velo etait-il possible ? ».
 ///
 /// Rien de ce qui change ici ne touche aux journees deja enregistrees : leur
 /// montant et leur cagnotte ont ete figes le jour meme.
-class CommuteSettingsPage extends StatefulWidget {
-  CommuteSettingsPage({super.key, ICommute? store, CommutePriceService? prices})
-      : store = store ?? getIt<ICommute>(),
-        prices = prices ?? getIt<CommutePriceService>();
+class CommuteSection extends StatefulWidget {
+  CommuteSection({
+    super.key,
+    ICommute? store,
+    CommutePriceService? prices,
+    ISubscriptions? subscriptions,
+  })  : store = store ?? getIt<ICommute>(),
+        prices = prices ?? getIt<CommutePriceService>(),
+        subscriptions = subscriptions ??
+            (getIt.isRegistered<ISubscriptions>() ? getIt<ISubscriptions>() : null);
 
   final ICommute store;
   final CommutePriceService prices;
 
+  /// Sans elles, le choix des abonnements rembourses n'apparait pas.
+  final ISubscriptions? subscriptions;
+
   @override
-  State<CommuteSettingsPage> createState() => _CommuteSettingsPageState();
+  State<CommuteSection> createState() => _CommuteSectionState();
 }
 
-class _CommuteSettingsPageState extends State<CommuteSettingsPage> {
+class _CommuteSectionState extends State<CommuteSection> {
   final _formKey = GlobalKey<FormState>();
   final _distance = TextEditingController();
   final _consumption = TextEditingController();
 
   CommuteSettings _settings = const CommuteSettings();
+  List<Subscription> _subscriptions = const [];
 
   ResolvedPrice? _price;
   bool _loading = true;
@@ -57,11 +72,13 @@ class _CommuteSettingsPageState extends State<CommuteSettingsPage> {
 
   Future<void> _load() async {
     final settings = await widget.store.readSettings();
+    final subscriptions = await widget.subscriptions?.getAll() ?? const <Subscription>[];
     if (!mounted) {
       return;
     }
     setState(() {
       _settings = settings;
+      _subscriptions = paybackSubscriptions(subscriptions);
       _distance.text = settings.distanceKm == null ? '' : _plain(settings.distanceKm!);
       _consumption.text = _plain(settings.consumption);
       _loading = false;
@@ -95,12 +112,35 @@ class _CommuteSettingsPageState extends State<CommuteSettingsPage> {
       return;
     }
     setState(() => _saving = true);
-    await widget.store.saveSettings(_settings.copyWith(
+    // Relu avant d'ecrire : les abonnements coches entre-temps sont deja
+    // enregistres, et ne doivent pas etre ecrases par la copie de l'ecran.
+    final stored = await widget.store.readSettings();
+    final next = stored.copyWith(
       distanceKm: parseDecimal(_distance.text),
       consumption: parseDecimal(_consumption.text),
-    ));
+      fuel: _settings.fuel,
+    );
+    await widget.store.saveSettings(next);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _settings = next;
+      _saving = false;
+    });
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.settings_saved)));
+  }
+
+  /// Coche ou decoche un abonnement. Enregistre tout de suite, sans toucher
+  /// aux champs du trajet en cours de saisie.
+  Future<void> _togglePayback(String id, bool kept) async {
+    final stored = await widget.store.readSettings();
+    final excluded = {...stored.paybackExcluded};
+    kept ? excluded.remove(id) : excluded.add(id);
+    await widget.store.saveSettings(stored.copyWith(paybackExcluded: excluded));
     if (mounted) {
-      Navigator.pop(context);
+      setState(() => _settings = _settings.copyWith(paybackExcluded: excluded));
     }
   }
 
@@ -112,71 +152,93 @@ class _CommuteSettingsPageState extends State<CommuteSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    if (_loading) {
+      return const SettingsLoading();
+    }
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.commute_settings_title)),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : Form(
-              key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-                children: [
-                  _SectionTitle(l10n.commute_section_trip),
-                  TextFormField(
-                    controller: _distance,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      labelText: l10n.commute_distance,
-                      helperText: l10n.commute_distance_help,
-                      suffixText: 'km',
-                      border: const OutlineInputBorder(),
-                    ),
-                    validator: _positive,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _consumption,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      labelText: l10n.commute_consumption,
-                      helperText: l10n.commute_consumption_help,
-                      suffixText: 'L/100 km',
-                      border: const OutlineInputBorder(),
-                    ),
-                    validator: _positive,
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<FuelType>(
-                    initialValue: _settings.fuel,
-                    decoration: InputDecoration(
-                      labelText: l10n.commute_fuel,
-                      border: const OutlineInputBorder(),
-                    ),
-                    items: [
-                      for (final fuel in FuelType.values)
-                        DropdownMenuItem(value: fuel, child: Text(fuelLabel(l10n, fuel))),
-                    ],
-                    onChanged: (fuel) {
-                      if (fuel != null) {
-                        _selectFuel(fuel);
-                      }
-                    },
-                  ),
-                  _SectionTitle(l10n.commute_section_price),
-                  _priceRules(context, l10n),
-                  const SizedBox(height: 24),
-                  _tripValue(context, l10n),
-                  const SizedBox(height: 24),
-                  FilledButton.icon(
-                    onPressed: _saving ? null : _save,
-                    icon: const Icon(Icons.save_outlined),
-                    label: Text(l10n.save),
-                  ),
-                ],
-              ),
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SettingsSubtitle(l10n.commute_section_trip, first: true),
+          TextFormField(
+            controller: _distance,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: l10n.commute_distance,
+              helperText: l10n.commute_distance_help,
+              suffixText: 'km',
+              border: const OutlineInputBorder(),
             ),
+            validator: _positive,
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _consumption,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: l10n.commute_consumption,
+              helperText: l10n.commute_consumption_help,
+              suffixText: 'L/100 km',
+              border: const OutlineInputBorder(),
+            ),
+            validator: _positive,
+          ),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<FuelType>(
+            initialValue: _settings.fuel,
+            decoration: InputDecoration(
+              labelText: l10n.commute_fuel,
+              border: const OutlineInputBorder(),
+            ),
+            items: [
+              for (final fuel in FuelType.values)
+                DropdownMenuItem(value: fuel, child: Text(fuelLabel(l10n, fuel))),
+            ],
+            onChanged: (fuel) {
+              if (fuel != null) {
+                _selectFuel(fuel);
+              }
+            },
+          ),
+          SettingsSubtitle(l10n.commute_section_price),
+          _priceRules(context, l10n),
+          const SizedBox(height: 16),
+          _tripValue(context, l10n),
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: _saving ? null : _save,
+            icon: const Icon(Icons.save_outlined),
+            label: Text(l10n.save),
+          ),
+          if (_subscriptions.isNotEmpty) ..._payback(context, l10n),
+        ],
+      ),
     );
+  }
+
+  /// Les abonnements que le velo rembourse, coches par defaut.
+  List<Widget> _payback(BuildContext context, AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    final format = CommuteFormat(context);
+    return [
+      SettingsSubtitle(l10n.payback_choose),
+      Text(
+        l10n.payback_choose_hint,
+        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+      ),
+      for (final subscription in _subscriptions)
+        if (subscription.id case final String id)
+          CheckboxListTile(
+            contentPadding: EdgeInsets.zero,
+            value: !_settings.paybackExcluded.contains(id),
+            title: Text(subscription.name),
+            subtitle: Text(l10n.payback_per_month(
+                format.euros(roundCents(subscription.amountIn(SubscriptionFrequency.monthly))))),
+            onChanged: (kept) => _togglePayback(id, kept ?? false),
+          ),
+    ];
   }
 
   Widget _priceRules(BuildContext context, AppLocalizations l10n) {
@@ -195,8 +257,8 @@ class _CommuteSettingsPageState extends State<CommuteSettingsPage> {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration:
-          BoxDecoration(color: scheme.surfaceContainer, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+          color: scheme.surfaceContainerHigh, borderRadius: BorderRadius.circular(16)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Icon(Icons.local_gas_station, size: 20, color: scheme.onSurfaceVariant),
@@ -245,27 +307,6 @@ class _CommuteSettingsPageState extends State<CommuteSettingsPage> {
           style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
         ),
       ]),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(top: 24, bottom: 12),
-      child: Text(
-        text.toUpperCase(),
-        style: theme.textTheme.labelMedium?.copyWith(
-          letterSpacing: 0.9,
-          color: theme.colorScheme.primary,
-        ),
-      ),
     );
   }
 }

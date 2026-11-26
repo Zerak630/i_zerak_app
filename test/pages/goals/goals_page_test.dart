@@ -5,8 +5,13 @@ import 'package:i_zerak_app/models/commute_dao.dart';
 import 'package:i_zerak_app/models/gas_station_dao.dart';
 import 'package:i_zerak_app/pages/goals/goals_page.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
+import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
+import 'package:i_zerak_app/services/service_locator.dart';
 
 import '../../__mocks__/commute_fakes.dart';
+import '../../__mocks__/recap_fakes.dart';
 import '../../__mocks__/subscription_fakes.dart';
 
 Widget wrap(Widget child) => MaterialApp(
@@ -102,23 +107,34 @@ void main() {
     expect(find.text('LES MOIS PRÉCÉDENTS'), findsOneWidget);
   });
 
-  testWidgets('un abonnement decoche n est plus rembourse', (tester) async {
+  testWidgets('le choix des abonnements mene aux reglages, et un decoche n est plus rembourse',
+      (tester) async {
     subscriptions = MemorySubscriptions([sub('Spotify', 10.99), sub('Loyer', 700)]);
     store = MemoryCommute(
       settings: const CommuteSettings(distanceKm: 12.4, consumption: 5.2),
       days: history(3, amount: 5),
     );
+    // L'ecran des reglages trouve ses services dans le localisateur.
+    getIt
+      ..registerSingleton<IAppPreferences>(MemoryPreferences())
+      ..registerSingleton<ICommute>(store)
+      ..registerSingleton<ISubscriptions>(subscriptions)
+      ..registerSingleton<CommutePriceService>(page().prices);
+    addTearDown(getIt.reset);
     await open(tester);
     expect(find.text('1 abonnement remboursé sur 2'), findsOneWidget);
 
     await tester.tap(find.text('Choisir les abonnements'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(CheckboxListTile, 'Loyer'));
+    expect(find.text('Réglages'), findsOneWidget);
+    final loyer = find.widgetWithText(CheckboxListTile, 'Loyer');
+    await tester.ensureVisible(loyer);
+    await tester.tap(loyer);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Enregistrer'));
-    await tester.pumpAndSettle();
+    expect(store.settings.paybackExcluded, {'Loyer'}, reason: 'enregistre sans bouton');
 
-    expect(store.settings.paybackExcluded, {'Loyer'});
+    await tester.tap(find.byTooltip('Retour'));
+    await tester.pumpAndSettle();
     expect(find.text('1 abonnement remboursé sur 1'), findsOneWidget);
   });
 
