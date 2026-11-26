@@ -2804,4 +2804,226 @@ class AppLocalizationsFr extends AppLocalizations {
   String goals_game_bike(String minutes) {
     return 'Une journée à vélo compte pour $minutes';
   }
+
+  @override
+  String get game_stats_title => 'Temps de jeu';
+
+  @override
+  String get game_stats_open => 'Statistiques de jeu';
+
+  @override
+  String get game_stats_tab_all => 'Tout';
+
+  @override
+  String game_stats_updated(String ago) {
+    return 'Relevé par le Pi il y a $ago';
+  }
+
+  @override
+  String game_stats_updated_on(String date) {
+    return 'Dernier relevé du Pi le $date';
+  }
+
+  @override
+  String get game_stats_never => 'Pas encore de relevé';
+
+  @override
+  String get game_stats_refresh => 'Actualiser';
+
+  @override
+  String game_stats_week(String date) {
+    return 'Semaine du $date';
+  }
+
+  @override
+  String get game_stats_this_week => 'Cette semaine';
+
+  @override
+  String get game_stats_previous_week => 'Semaine précédente';
+
+  @override
+  String get game_stats_next_week => 'Semaine suivante';
+
+  @override
+  String game_stats_delta_less(String minutes) {
+    return '$minutes de moins que la précédente';
+  }
+
+  @override
+  String game_stats_delta_more(String minutes) {
+    return '$minutes de plus que la précédente';
+  }
+
+  @override
+  String get game_stats_delta_same => 'Autant que la précédente';
+
+  @override
+  String game_stats_share(String source, String minutes) {
+    return '$source · $minutes';
+  }
+
+  @override
+  String game_stats_weeks_title(int count) {
+    return '$count dernières semaines';
+  }
+
+  @override
+  String game_stats_average(String minutes) {
+    return 'moyenne $minutes';
+  }
+
+  @override
+  String get game_stats_in_progress => 'en cours';
+
+  @override
+  String get game_stats_partial =>
+      'La semaine reste provisoire tant qu’elle n’est pas finie sans relevé manquant. Un relevé manqué ne compte jamais comme 0 h.';
+
+  @override
+  String game_stats_steam_games(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jeux lancés',
+      one: '1 jeu lancé',
+      zero: 'Aucun jeu lancé',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String game_stats_lol_games(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count parties',
+      one: '1 partie',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get game_stats_by_day => 'Jour par jour';
+
+  @override
+  String get game_stats_lifetime => 'Depuis toujours';
+
+  @override
+  String game_stats_hours(int hours) {
+    return '$hours h';
+  }
+
+  @override
+  String get game_stats_steam_hint =>
+      'Steam ne date pas les sessions : le temps d’un jour est l’écart entre deux relevés du Pi.';
+
+  @override
+  String get game_stats_games => 'Parties';
+
+  @override
+  String get game_stats_wins => 'Victoires';
+
+  @override
+  String get game_stats_time => 'Temps';
+
+  @override
+  String get game_stats_average_length => 'Durée moyenne';
+
+  @override
+  String get game_stats_matches_title => 'Parties de la semaine';
+
+  @override
+  String game_stats_filter(String label, int count) {
+    return '$label · $count';
+  }
+
+  @override
+  String get game_stats_filter_all => 'Toutes';
+
+  @override
+  String game_stats_queue(String queue) {
+    String _temp0 = intl.Intl.selectLogic(
+      queue,
+      {
+        'ranked': 'Classé',
+        'aram': 'ARAM',
+        'normal': 'Normale',
+        'arena': 'Arène',
+        'other': 'Autre',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get game_stats_queue_solo => 'Classé solo';
+
+  @override
+  String get game_stats_queue_flex => 'Classé flexible';
+
+  @override
+  String get game_stats_win => 'Victoire';
+
+  @override
+  String get game_stats_loss => 'Défaite';
+
+  @override
+  String get game_stats_win_short => 'V';
+
+  @override
+  String get game_stats_loss_short => 'D';
+
+  @override
+  String game_stats_no_detail(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count parties comptées sans détail, avant que l’agent le garde.',
+      one: '1 partie comptée sans détail, avant que l’agent le garde.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get game_stats_no_matches => 'Aucune partie cette semaine.';
+
+  @override
+  String get game_stats_no_steam => 'Aucun jeu Steam cette semaine.';
+
+  @override
+  String get game_stats_rank_title => 'Classé solo';
+
+  @override
+  String game_stats_tier(String tier) {
+    String _temp0 = intl.Intl.selectLogic(
+      tier,
+      {
+        'IRON': 'Fer',
+        'BRONZE': 'Bronze',
+        'SILVER': 'Argent',
+        'GOLD': 'Or',
+        'PLATINUM': 'Platine',
+        'EMERALD': 'Émeraude',
+        'DIAMOND': 'Diamant',
+        'MASTER': 'Maître',
+        'GRANDMASTER': 'Grand maître',
+        'CHALLENGER': 'Challenger',
+        'other': '$tier',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String game_stats_lp(int lp) {
+    return '$lp LP';
+  }
+
+  @override
+  String get game_stats_unranked => 'Pas classé cette saison';
+
+  @override
+  String game_stats_lp_week(String lp) {
+    return '$lp LP cette semaine';
+  }
 }

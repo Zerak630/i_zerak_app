@@ -147,6 +147,16 @@ Points d'attention :
   reste attend le suivant.
 - Changer de compte (SteamID ou Riot ID) repart d'une base neuve : comparer les
   cumuls de deux comptes inventerait du temps de jeu.
+- Pour l'ecran de statistiques, l'agent garde aussi l'icone de chaque jeu
+  Steam (deja dans la reponse de Steam) et le detail de chaque partie LoL :
+  champion, KDA, file (`queueId`). Seules les parties relevees apres la mise a
+  jour ont ce detail.
+- Le **rang** se lit avec la meme cle, sur le serveur de jeu (`euw1`…) que
+  nomment les parties elles-memes : rien a configurer, mais pas de rang avant
+  une premiere partie relevee. Une requete de plus par releve.
+- La version de **Data Dragon** (portraits des champions) est lue sans cle a
+  chaque releve. Le rang et cette version sont des a-cotes : leur panne ne
+  fait jamais echouer le releve, l'ecran garde les dernieres valeurs.
 
 Les releves sont gardes 120 jours dans `/var/lib/izerak-agent/gaming.json`
 (`StateDirectory` de l'unite systemd, seul endroit ou l'agent ecrit), en
@@ -182,7 +192,7 @@ Toutes les routes exigent l'en-tete `Authorization: Bearer <jeton>`, sauf
 | GET | `/api/v1/storage` | etat des volumes surveilles |
 | GET | `/api/v1/services` | etat des services autorises, et leur interface web (`web`, ou `null`) |
 | POST | `/api/v1/services/{nom}/{start\|stop\|restart}` | etat apres action |
-| GET | `/api/v1/gaming` | sources actives, erreurs, dix semaines de jeu (Steam par jeu, LoL en parties et victoires), jeton de notification ; 503 si les releves sont illisibles |
+| GET | `/api/v1/gaming` | sources actives, erreurs, rang classe solo (`lol_rank`), jeton de notification, et dix semaines de jeu : jour par jour (`days`), Steam par jeu avec icone et cumul (`games`), parties LoL en detail (`matches`) et LP gagnes (`lp_change`) ; 503 si les releves sont illisibles |
 | GET | `/api/v1/gaming/week?monday=AAAA-MM-JJ` | total d'une semaine et `measured` ; **seule route** ouverte au jeton derive `notify_token`, utilise par la notification du dimanche application fermee |
 
 ```bash

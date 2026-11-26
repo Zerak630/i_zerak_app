@@ -25,7 +25,8 @@ Il n'y a **aucun back-end intermédiaire**. L'application parle directement à c
        │                          └──────▶ API Riot    parties de LoL
        │  HTTPS publics
        ├───────────────▶ TMDB               recherche de titres, identifiant IMDb
-       └───────────────▶ data.economie.gouv.fr   prix des carburants
+       ├───────────────▶ data.economie.gouv.fr   prix des carburants
+       └───────────────▶ CDN Steam, Data Dragon  icônes des jeux, portraits des champions
 ```
 
 Une couche intermédiaire n'apporterait rien : il n'y a ni utilisateurs multiples, ni logique métier
@@ -51,7 +52,7 @@ doit l'être dans les deux langues.
 
 ```bash
 flutter analyze   # doit rester sans avertissement
-flutter test      # 498 tests
+flutter test      # 546 tests
 ```
 
 Les versions release se construisent **sans élagage des icônes** :
@@ -129,6 +130,26 @@ Le calcul est dans `lib/models/game_dao.dart` (`GameContractLedger`), et repris 
 faite des deux côtés. Application fermée, le natif n'a pas accès au stockage sécurisé : il joint
 l'agent avec un **jeton dérivé** (`notify_token`), qui n'ouvre que la route `/api/v1/gaming/week`
 et ne donne aucun pouvoir sur les services.
+
+### L'écran Temps de jeu
+
+Il s'ouvre depuis la carte du contrat (icône de statistiques) et depuis la carte Jeu du bilan
+(`lib/pages/gaming/game_stats_page.dart`). Trois onglets, sur la semaine choisie (chevrons, ou un
+appui sur une barre) :
+
+- **Tout** : le total, l'écart avec la semaine d'avant, la part Steam/LoL, dix semaines en barres
+  (la semaine en cours en contour : provisoire) et, ouvert depuis Objectifs, le contrat de la
+  semaine ;
+- **Steam** : chaque jeu avec son icône et sa part, le temps jour par jour (un tiret pour un jour
+  sans relevé, jamais 0) et le cumul de chaque jeu depuis toujours ;
+- **LoL** : parties, victoires, temps et durée moyenne ; la liste des parties avec le portrait du
+  champion, la file (classé, ARAM…) qui sert aussi de filtre, et le KDA ; le rang en classé solo
+  et les LP de la semaine.
+
+Les icônes et portraits sont chargés par le téléphone directement sur les CDN publics de Steam et
+de Data Dragon. L'application n'accepte une image que de ces deux hôtes, en HTTPS ; sinon, ou en
+attendant le chargement, elle affiche l'initiale. Les parties relevées avant que l'agent garde le
+détail sont comptées, mais sans ligne : l'écran le dit.
 
 ## Bilan de la semaine et du mois
 

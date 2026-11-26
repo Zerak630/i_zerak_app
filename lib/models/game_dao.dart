@@ -15,20 +15,231 @@ import 'package:i_zerak_app/models/sport_dao.dart' show SportLedger, dayOfWeek, 
 
 int _asInt(Object? raw) => raw is num ? raw.toInt() : 0;
 
+int? _asIntOrNull(Object? raw) => raw is num ? raw.toInt() : null;
+
+/// Les seuls hotes d'ou l'application accepte de charger une image de jeu.
+///
+/// L'agent compose les adresses, mais un rapport n'est qu'un texte : une
+/// adresse ailleurs ne serait jamais chargee.
+const _imageHosts = {'media.steampowered.com', 'ddragon.leagueoflegends.com'};
+
+String? _imageUrl(Object? raw) {
+  if (raw is! String) {
+    return null;
+  }
+  final uri = Uri.tryParse(raw);
+  if (uri == null || uri.scheme != 'https' || !_imageHosts.contains(uri.host)) {
+    return null;
+  }
+  return raw;
+}
+
 /// Un jeu Steam et son temps sur la semaine.
 class GameTitle {
-  const GameTitle({required this.name, required this.minutes});
+  const GameTitle({
+    required this.name,
+    required this.minutes,
+    this.appId,
+    this.lifetimeMinutes,
+    this.icon,
+  });
 
   final String name;
   final int minutes;
+  final String? appId;
 
-  Map<String, dynamic> toJson() => {'name': name, 'minutes': minutes};
+  /// Le cumul Steam depuis toujours, tel que releve.
+  final int? lifetimeMinutes;
+
+  /// L'icone du jeu, sur le CDN de Steam.
+  final String? icon;
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'minutes': minutes,
+        if (appId != null) 'appid': appId,
+        if (lifetimeMinutes != null) 'lifetime_minutes': lifetimeMinutes,
+        if (icon != null) 'icon': icon,
+      };
 
   static GameTitle? fromJson(Object? raw) {
     if (raw is! Map || raw['name'] is! String) {
       return null;
     }
-    return GameTitle(name: raw['name'] as String, minutes: _asInt(raw['minutes']));
+    return GameTitle(
+      name: raw['name'] as String,
+      minutes: _asInt(raw['minutes']),
+      appId: raw['appid'] is String ? raw['appid'] as String : null,
+      lifetimeMinutes: _asIntOrNull(raw['lifetime_minutes']),
+      icon: _imageUrl(raw['icon']),
+    );
+  }
+}
+
+/// Un jour de la semaine, source par source.
+class GameDay {
+  const GameDay({
+    required this.day,
+    this.steamMinutes = 0,
+    this.lolMinutes = 0,
+    this.measured = const [],
+  });
+
+  final DateTime day;
+  final int steamMinutes;
+  final int lolMinutes;
+
+  /// Les sources qui ont releve ce jour-la. Vide : on ne sait pas, ce n'est
+  /// pas 0 h.
+  final List<String> measured;
+
+  int get minutes => steamMinutes + lolMinutes;
+
+  Map<String, dynamic> toJson() => {
+        'day': dayKey(day),
+        'steam_minutes': steamMinutes,
+        'lol_minutes': lolMinutes,
+        'measured': measured,
+      };
+
+  static GameDay? fromJson(Object? raw) {
+    if (raw is! Map) {
+      return null;
+    }
+    final day = parseDayKey('${raw['day']}');
+    if (day == null) {
+      return null;
+    }
+    return GameDay(
+      day: day,
+      steamMinutes: _asInt(raw['steam_minutes']),
+      lolMinutes: _asInt(raw['lol_minutes']),
+      measured: [
+        if (raw['measured'] case final List<dynamic> list)
+          for (final source in list)
+            if (source is String) source,
+      ],
+    );
+  }
+}
+
+/// Le genre de partie LoL, tel que l'ecran le regroupe.
+enum LolQueue {
+  ranked,
+  aram,
+  normal,
+  arena,
+  other;
+
+  /// D'apres le `queueId` de Riot.
+  static LolQueue of(int? id) => switch (id) {
+        420 || 440 => LolQueue.ranked,
+        450 || 100 || 720 => LolQueue.aram,
+        400 || 430 || 480 || 490 => LolQueue.normal,
+        1700 || 1710 => LolQueue.arena,
+        _ => LolQueue.other,
+      };
+}
+
+/// Une partie de LoL.
+class LolMatch {
+  const LolMatch({
+    required this.minutes,
+    required this.win,
+    this.start,
+    this.champion,
+    this.kills,
+    this.deaths,
+    this.assists,
+    this.queueId,
+    this.portrait,
+  });
+
+  final DateTime? start;
+  final int minutes;
+  final bool win;
+  final String? champion;
+  final int? kills;
+  final int? deaths;
+  final int? assists;
+  final int? queueId;
+
+  /// Le portrait du champion, sur Data Dragon.
+  final String? portrait;
+
+  LolQueue get queue => LolQueue.of(queueId);
+
+  /// Le classe solo, seul a faire bouger le rang affiche.
+  bool get isSoloRanked => queueId == 420;
+
+  bool get hasKda => kills != null && deaths != null && assists != null;
+
+  Map<String, dynamic> toJson() => {
+        if (start != null) 'start': start!.millisecondsSinceEpoch ~/ 1000,
+        'minutes': minutes,
+        'win': win,
+        if (champion != null) 'champion': champion,
+        if (kills != null) 'kills': kills,
+        if (deaths != null) 'deaths': deaths,
+        if (assists != null) 'assists': assists,
+        if (queueId != null) 'queue': queueId,
+        if (portrait != null) 'portrait': portrait,
+      };
+
+  static LolMatch? fromJson(Object? raw) {
+    if (raw is! Map) {
+      return null;
+    }
+    final start = _asIntOrNull(raw['start']);
+    return LolMatch(
+      start: start == null ? null : DateTime.fromMillisecondsSinceEpoch(start * 1000),
+      minutes: _asInt(raw['minutes']),
+      win: raw['win'] == true,
+      champion: raw['champion'] is String ? raw['champion'] as String : null,
+      kills: _asIntOrNull(raw['kills']),
+      deaths: _asIntOrNull(raw['deaths']),
+      assists: _asIntOrNull(raw['assists']),
+      queueId: _asIntOrNull(raw['queue']),
+      portrait: _imageUrl(raw['portrait']),
+    );
+  }
+}
+
+/// Le rang en classe solo.
+class LolRank {
+  const LolRank({this.tier, this.division, this.lp = 0, this.wins = 0, this.losses = 0});
+
+  /// `GOLD`, `DIAMOND`… Nul : pas classe cette saison.
+  final String? tier;
+  final String? division;
+  final int lp;
+  final int wins;
+  final int losses;
+
+  bool get isRanked => tier != null;
+
+  /// Les trois derniers paliers n'ont pas de division.
+  bool get hasDivision => !const {'MASTER', 'GRANDMASTER', 'CHALLENGER'}.contains(tier);
+
+  Map<String, dynamic> toJson() => {
+        'tier': tier,
+        if (division != null) 'division': division,
+        'lp': lp,
+        'wins': wins,
+        'losses': losses,
+      };
+
+  static LolRank? fromJson(Object? raw) {
+    if (raw is! Map) {
+      return null;
+    }
+    return LolRank(
+      tier: raw['tier'] is String ? raw['tier'] as String : null,
+      division: raw['division'] is String ? raw['division'] as String : null,
+      lp: _asInt(raw['lp']),
+      wins: _asInt(raw['wins']),
+      losses: _asInt(raw['losses']),
+    );
   }
 }
 
@@ -43,6 +254,9 @@ class GameWeek {
     this.lolGames = 0,
     this.lolWins = 0,
     this.games = const [],
+    this.days = const [],
+    this.matches = const [],
+    this.lpChange,
   });
 
   final DateTime monday;
@@ -60,6 +274,19 @@ class GameWeek {
   /// Du plus joue au moins joue.
   final List<GameTitle> games;
 
+  /// Du lundi au dimanche. Vide avec un agent qui ne les publie pas encore.
+  final List<GameDay> days;
+
+  /// De la plus recente a la plus ancienne. Seules celles que l'agent a
+  /// relevees en detail : il peut y en avoir moins que [lolGames].
+  final List<LolMatch> matches;
+
+  /// Les LP gagnes en classe solo, nul d'une division a l'autre.
+  final int? lpChange;
+
+  /// Les parties comptees sans detail, relevees avant que l'agent le garde.
+  int get matchesWithoutDetail => lolGames > matches.length ? lolGames - matches.length : 0;
+
   Map<String, dynamic> toJson() => {
         'monday': dayKey(monday),
         'minutes': minutes,
@@ -69,6 +296,9 @@ class GameWeek {
         'lol_games': lolGames,
         'lol_wins': lolWins,
         'games': [for (final game in games) game.toJson()],
+        'days': [for (final day in days) day.toJson()],
+        'matches': [for (final match in matches) match.toJson()],
+        if (lpChange != null) 'lp_change': lpChange,
       };
 
   static GameWeek? fromJson(Object? raw) {
@@ -92,6 +322,17 @@ class GameWeek {
           for (final item in list)
             if (GameTitle.fromJson(item) case final GameTitle game) game,
       ],
+      days: [
+        if (raw['days'] case final List<dynamic> list)
+          for (final item in list)
+            if (GameDay.fromJson(item) case final GameDay day) day,
+      ],
+      matches: [
+        if (raw['matches'] case final List<dynamic> list)
+          for (final item in list)
+            if (LolMatch.fromJson(item) case final LolMatch match) match,
+      ],
+      lpChange: _asIntOrNull(raw['lp_change']),
     );
   }
 }
@@ -105,10 +346,14 @@ class GamingReport {
     this.updatedAt,
     this.notifyToken,
     this.origin,
+    this.lolRank,
   });
 
   /// L'agent qui a fourni ce releve : il ne vaut pas pour un autre serveur.
   final String? origin;
+
+  /// Nul tant que l'agent ne l'a pas lu (ou sans LoL).
+  final LolRank? lolRank;
 
   GamingReport withOrigin(String? value) => GamingReport(
         sources: sources,
@@ -117,6 +362,7 @@ class GamingReport {
         updatedAt: updatedAt,
         notifyToken: notifyToken,
         origin: value,
+        lolRank: lolRank,
       );
 
   /// Les sources configurees sur le Pi : `steam`, `lol`.
@@ -151,6 +397,7 @@ class GamingReport {
         if (updatedAt != null) 'updated_at': updatedAt!.millisecondsSinceEpoch ~/ 1000,
         if (notifyToken != null) 'notify_token': notifyToken,
         if (origin != null) 'origin': origin,
+        if (lolRank != null) 'lol_rank': lolRank!.toJson(),
       });
 
   /// Relecture de la copie locale : abimee, elle vaut « rien de configure ».
@@ -191,6 +438,7 @@ class GamingReport {
           : null,
       notifyToken: raw['notify_token'] is String ? raw['notify_token'] as String : null,
       origin: raw['origin'] is String ? raw['origin'] as String : null,
+      lolRank: LolRank.fromJson(raw['lol_rank']),
     );
   }
 }
