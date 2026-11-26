@@ -50,7 +50,10 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   Future<void> _load() async {
     final freeTime = await widget.screenTime?.store.readSettings();
     final recap = await widget.recap?.readSettings();
-    final reminders = await widget.reminders?.readSettings();
+    // Hors Android, pas de rappels : le bloc ne s'affiche pas.
+    final service = widget.reminders;
+    final reminders =
+        service != null && service.isSupported ? await service.readSettings() : null;
     if (mounted) {
       setState(() {
         _freeTime = freeTime;

@@ -88,6 +88,10 @@ class ReminderService {
   /// dans le volet quelques jours doit encore pouvoir disparaitre.
   static const int _lookbackDays = 14;
 
+  /// Faux hors Android : les rappels n'y partent pas, leurs reglages n'ont
+  /// rien a y faire.
+  bool get isSupported => bridge.isSupported;
+
   Future<ReminderSettings> readSettings() => preferences.readReminderSettings();
 
   Future<void> saveSettings(ReminderSettings settings) async {

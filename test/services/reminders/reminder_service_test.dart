@@ -8,35 +8,8 @@ import 'package:i_zerak_app/services/reminders/reminder_service.dart';
 
 import '../../__mocks__/commute_fakes.dart';
 import '../../__mocks__/recap_fakes.dart';
+import '../../__mocks__/reminder_fakes.dart';
 import '../../__mocks__/sport_fakes.dart';
-
-/// Un natif imaginaire : il garde ce qu'on lui transmet, et rend les
-/// reponses donnees depuis les notifications.
-class FakeReminderBridge implements IReminderBridge {
-  bool supported = true;
-  final List<Map<String, Object?>> configs = [];
-  List<String> pending = [];
-  int notificationRequests = 0;
-
-  @override
-  bool get isSupported => supported;
-
-  @override
-  Future<void> configure(Map<String, Object?> config) async => configs.add(config);
-
-  @override
-  Future<List<String>> takePendingSlotAnswers() async {
-    final answers = pending;
-    pending = [];
-    return answers;
-  }
-
-  @override
-  Future<bool> requestNotifications() async {
-    notificationRequests++;
-    return true;
-  }
-}
 
 void main() {
   // Jeudi 26 novembre 2026, 12 h.
