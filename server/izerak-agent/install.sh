@@ -39,6 +39,14 @@ if getent group izerak-cert >/dev/null; then
   echo "    ${SERVICE_USER} ajoute au groupe izerak-cert"
 fi
 
+# `vcgencmd get_throttled` (etat d'alimentation) passe par /dev/vcio_gencmd,
+# reserve au groupe video (root:video 0660 depuis Raspberry Pi OS Trixie).
+# Sans ce groupe, l'agent signale le bridage comme indisponible.
+if getent group video >/dev/null; then
+  usermod -aG video "${SERVICE_USER}"
+  echo "    ${SERVICE_USER} ajoute au groupe video"
+fi
+
 echo "==> Code et environnement virtuel"
 install -d -o root -g root -m 0755 "${PREFIX}"
 cp -r "${SOURCE_DIR}/izerak_agent" "${SOURCE_DIR}/pyproject.toml" "${PREFIX}/"
