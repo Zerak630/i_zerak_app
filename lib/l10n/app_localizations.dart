@@ -4598,6 +4598,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recap notification settings'**
   String get recap_notify_settings;
+
+  /// No description provided for @reminder_commute_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Bike or car today?'**
+  String get reminder_commute_title;
+
+  /// No description provided for @reminder_commute_text.
+  ///
+  /// In en, this message translates to:
+  /// **'Log your day: by bike, {amount} goes into the pot.'**
+  String reminder_commute_text(String amount);
+
+  /// No description provided for @reminder_commute_bike.
+  ///
+  /// In en, this message translates to:
+  /// **'By bike'**
+  String get reminder_commute_bike;
+
+  /// No description provided for @reminder_commute_car.
+  ///
+  /// In en, this message translates to:
+  /// **'By car'**
+  String get reminder_commute_car;
+
+  /// No description provided for @reminder_sport_title.
+  ///
+  /// In en, this message translates to:
+  /// **'{sport} · {minutes} min'**
+  String reminder_sport_title(String sport, int minutes);
+
+  /// No description provided for @reminder_sport_text.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned today. Did you do it?'**
+  String get reminder_sport_text;
+
+  /// No description provided for @reminder_sport_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get reminder_sport_done;
+
+  /// No description provided for @reminder_sport_skipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Not done'**
+  String get reminder_sport_skipped;
+
+  /// No description provided for @reminders_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get reminders_title;
+
+  /// No description provided for @reminders_commute.
+  ///
+  /// In en, this message translates to:
+  /// **'Commute'**
+  String get reminders_commute;
+
+  /// No description provided for @reminders_commute_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday to Friday, if the day isn’t logged yet'**
+  String get reminders_commute_hint;
+
+  /// No description provided for @reminders_sport.
+  ///
+  /// In en, this message translates to:
+  /// **'Workout plan'**
+  String get reminders_sport;
+
+  /// No description provided for @reminders_sport_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'On planned days, for each session without an answer'**
+  String get reminders_sport_hint;
+
+  /// No description provided for @reminders_time.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get reminders_time;
+
+  /// No description provided for @reminders_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer straight from the notification: the app records it next time it opens. A reminder doesn’t go off if the day was already logged the last time iZerak was opened.'**
+  String get reminders_hint;
 }
 
 class _AppLocalizationsDelegate

@@ -36,6 +36,19 @@ class MainActivity : FlutterActivity() {
             .setMethodCallHandler(::onScreenTimeCall)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "izerak/home_widgets")
             .setMethodCallHandler(::onHomeWidgetsCall)
+        // Rappels du soir (cf. Reminders.kt et ReminderService cote Dart).
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "izerak/reminders")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "configure" -> {
+                        Reminders.configure(this, call.arguments as? Map<*, *>)
+                        result.success(null)
+                    }
+                    "takePendingSlotAnswers" -> result.success(Reminders.takePendingSlotAnswers(this))
+                    "requestNotifications" -> requestNotifications(result)
+                    else -> result.notImplemented()
+                }
+            }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, storageChannel)
             .setMethodCallHandler { call, result ->
                 when (call.method) {

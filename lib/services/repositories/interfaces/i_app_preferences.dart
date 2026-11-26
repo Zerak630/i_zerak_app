@@ -2,6 +2,7 @@ import 'package:i_zerak_app/models/app_tab.dart';
 import 'package:i_zerak_app/models/game_dao.dart' show GameContractSettings, GamingReport;
 import 'package:i_zerak_app/models/recap_dao.dart' show RecapSettings;
 import 'package:i_zerak_app/models/settings_category.dart';
+import 'package:i_zerak_app/models/reminder_dao.dart' show ReminderSettings;
 
 /// Les preferences d'affichage de l'application, sans rapport avec un onglet
 /// en particulier.
@@ -17,6 +18,11 @@ abstract class IAppPreferences {
   Future<RecapSettings> readRecapSettings();
 
   Future<void> saveRecapSettings(RecapSettings settings);
+
+  /// Les rappels du soir (trajet, sport). Propres a l'appareil, eux aussi.
+  Future<ReminderSettings> readReminderSettings();
+
+  Future<void> saveReminderSettings(ReminderSettings settings);
 
   /// Le dernier releve du temps de jeu recu du Pi.
   Future<GamingReport> readGamingReport();

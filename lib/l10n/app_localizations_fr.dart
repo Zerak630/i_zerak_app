@@ -3045,4 +3045,56 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get recap_notify_settings => 'Régler les notifications de bilan';
+
+  @override
+  String get reminder_commute_title => 'Vélo ou voiture aujourd’hui ?';
+
+  @override
+  String reminder_commute_text(String amount) {
+    return 'Note ta journée : à vélo, $amount vont dans ta cagnotte.';
+  }
+
+  @override
+  String get reminder_commute_bike => 'À vélo';
+
+  @override
+  String get reminder_commute_car => 'En voiture';
+
+  @override
+  String reminder_sport_title(String sport, int minutes) {
+    return '$sport · $minutes min';
+  }
+
+  @override
+  String get reminder_sport_text => 'Prévu aujourd’hui. Tu l’as faite ?';
+
+  @override
+  String get reminder_sport_done => 'Faite';
+
+  @override
+  String get reminder_sport_skipped => 'Pas faite';
+
+  @override
+  String get reminders_title => 'Rappels';
+
+  @override
+  String get reminders_commute => 'Trajet';
+
+  @override
+  String get reminders_commute_hint =>
+      'Du lundi au vendredi, si la journée n’est pas encore saisie';
+
+  @override
+  String get reminders_sport => 'Programme de sport';
+
+  @override
+  String get reminders_sport_hint =>
+      'Les jours prévus, pour chaque séance sans réponse';
+
+  @override
+  String get reminders_time => 'Heure';
+
+  @override
+  String get reminders_hint =>
+      'Réponds directement depuis la notification : l’appli l’enregistre à sa prochaine ouverture. Un rappel ne part pas si la journée était déjà saisie à la dernière ouverture d’iZerak.';
 }

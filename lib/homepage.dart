@@ -19,6 +19,7 @@ import 'package:i_zerak_app/pages/torrents/torrents_page.dart';
 import 'package:i_zerak_app/services/home_widgets/home_widgets_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
 import 'package:i_zerak_app/services/recap/recap_service.dart';
+import 'package:i_zerak_app/services/reminders/reminder_service.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 import 'package:i_zerak_app/services/sync/sync_service.dart';
 import 'package:i_zerak_app/utils/wide_layout.dart';
@@ -29,8 +30,11 @@ class HomePage extends StatefulWidget {
       IAppPreferences? preferences,
       SyncService? sync,
       HomeWidgetsService? widgets,
-      RecapService? recap})
+      RecapService? recap,
+      ReminderService? reminders})
       : preferences = preferences ?? getIt<IAppPreferences>(),
+        reminders = reminders ??
+            (getIt.isRegistered<ReminderService>() ? getIt<ReminderService>() : null),
         recap = recap ?? (getIt.isRegistered<RecapService>() ? getIt<RecapService>() : null),
         sync = sync ?? (getIt.isRegistered<SyncService>() ? getIt<SyncService>() : null),
         widgets = widgets ??
@@ -48,6 +52,10 @@ class HomePage extends StatefulWidget {
   /// Le bilan, dont les notifications partent application fermee. Nul dans
   /// les tests qui n'en ont pas besoin.
   final RecapService? recap;
+
+  /// Les rappels du soir (trajet, sport). Nul dans les tests qui n'en ont pas
+  /// besoin.
+  final ReminderService? reminders;
 
   @override
   HomePageState createState() => HomePageState();
@@ -85,9 +93,11 @@ class HomePageState extends State<HomePage> {
         // Meme moment pour le bilan : il ne partira que l'application
         // quittee, et doit emporter ce qui vient d'etre saisi.
         widget.recap?.push();
+        // Et pour les rappels du soir : ils ne partent que si rien n'est saisi.
+        widget.reminders?.push();
       },
     );
-    _loadTabs().then((_) => _syncWidgets());
+    _loadTabs().then((_) => _syncWidgets()).then((_) => widget.reminders?.start());
   }
 
   @override
@@ -96,30 +106,40 @@ class HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  /// Rapatrie ce qui a ete fait depuis les widgets.
+  /// Rapatrie ce qui a ete fait depuis les widgets et les rappels.
   Future<void> _syncWidgets() async {
     final widgets = widget.widgets;
-    if (widgets == null) {
-      return;
-    }
-    final imported = await widgets.importPendingBikeDays();
-    final action = await widgets.takeLaunchAction();
+    final reminders = widget.reminders;
+    // « Velo » depuis un rappel passe par le meme chemin que le widget.
+    final bikeDays = await widgets?.importPendingBikeDays() ?? 0;
+    final slots = await reminders?.importPendingAnswers() ?? 0;
+    final action = await widgets?.takeLaunchAction();
     if (!mounted) {
       return;
     }
-    if (imported > 0 || action == 'car' || action == 'free_time') {
+    final tab = switch (action) {
+      'car' || 'commute' => AppTab.commute,
+      // L'icone du widget Temps libre ouvre directement l'onglet.
+      'free_time' => AppTab.freeTime,
+      'sport' => AppTab.sport,
+      _ => null,
+    };
+    if (bikeDays > 0 || slots > 0 || tab != null) {
       setState(() {
         _generation++;
+        if (tab != null) {
+          _current = tab;
+        }
         if (action == 'car') {
-          _current = AppTab.commute;
           _askCar = true;
-        } else if (action == 'free_time') {
-          // L'icone du widget Temps libre ouvre directement l'onglet.
-          _current = AppTab.freeTime;
         }
       });
     }
-    await widgets.refresh();
+    await widgets?.refresh();
+    // Les rappels doivent savoir que ces journees et ces seances sont saisies.
+    if (bikeDays > 0 || slots > 0) {
+      await reminders?.push();
+    }
   }
 
   /// La page ouverte, reconstruite de zero quand une importation ou un widget a

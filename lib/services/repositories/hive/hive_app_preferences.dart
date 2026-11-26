@@ -5,6 +5,7 @@ import 'package:i_zerak_app/models/app_tab.dart';
 import 'package:i_zerak_app/models/game_dao.dart' show GameContractSettings, GamingReport;
 import 'package:i_zerak_app/models/recap_dao.dart' show RecapSettings;
 import 'package:i_zerak_app/models/settings_category.dart';
+import 'package:i_zerak_app/models/reminder_dao.dart' show ReminderSettings;
 import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
 
 /// Preferences d'affichage, dans une `Box<String>` de JSON.
@@ -18,6 +19,7 @@ class HiveAppPreferences implements IAppPreferences {
 
   static const String _tabsKey = 'pinned_tabs';
   static const String _recapKey = 'recap';
+  static const String _remindersKey = 'reminders';
   static const String _gamingKey = 'gaming_report';
   static const String _contractKey = 'game_contract';
   static const String _expandedKey = 'settings_expanded';
@@ -63,6 +65,25 @@ class HiveAppPreferences implements IAppPreferences {
   @override
   Future<void> saveRecapSettings(RecapSettings settings) async {
     await _box.put(_recapKey, json.encode(settings.toJson()));
+    await _box.flush();
+  }
+
+  @override
+  Future<ReminderSettings> readReminderSettings() async {
+    final raw = _box.get(_remindersKey);
+    if (raw == null) {
+      return const ReminderSettings();
+    }
+    try {
+      return ReminderSettings.fromJson(json.decode(raw));
+    } on FormatException {
+      return const ReminderSettings();
+    }
+  }
+
+  @override
+  Future<void> saveReminderSettings(ReminderSettings settings) async {
+    await _box.put(_remindersKey, json.encode(settings.toJson()));
     await _box.flush();
   }
 

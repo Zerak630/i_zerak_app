@@ -3010,4 +3010,56 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recap_notify_settings => 'Recap notification settings';
+
+  @override
+  String get reminder_commute_title => 'Bike or car today?';
+
+  @override
+  String reminder_commute_text(String amount) {
+    return 'Log your day: by bike, $amount goes into the pot.';
+  }
+
+  @override
+  String get reminder_commute_bike => 'By bike';
+
+  @override
+  String get reminder_commute_car => 'By car';
+
+  @override
+  String reminder_sport_title(String sport, int minutes) {
+    return '$sport · $minutes min';
+  }
+
+  @override
+  String get reminder_sport_text => 'Planned today. Did you do it?';
+
+  @override
+  String get reminder_sport_done => 'Done';
+
+  @override
+  String get reminder_sport_skipped => 'Not done';
+
+  @override
+  String get reminders_title => 'Reminders';
+
+  @override
+  String get reminders_commute => 'Commute';
+
+  @override
+  String get reminders_commute_hint =>
+      'Monday to Friday, if the day isn’t logged yet';
+
+  @override
+  String get reminders_sport => 'Workout plan';
+
+  @override
+  String get reminders_sport_hint =>
+      'On planned days, for each session without an answer';
+
+  @override
+  String get reminders_time => 'Time';
+
+  @override
+  String get reminders_hint =>
+      'Answer straight from the notification: the app records it next time it opens. A reminder doesn’t go off if the day was already logged the last time iZerak was opened.';
 }

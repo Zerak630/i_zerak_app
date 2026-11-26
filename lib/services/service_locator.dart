@@ -11,6 +11,7 @@ import 'package:i_zerak_app/services/gas_service.dart';
 import 'package:i_zerak_app/services/home_widgets/home_widgets_service.dart';
 import 'package:i_zerak_app/services/qbittorrent/qb_service.dart';
 import 'package:i_zerak_app/services/recap/recap_service.dart';
+import 'package:i_zerak_app/services/reminders/reminder_service.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_app_preferences.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_commute_repository.dart';
 import 'package:i_zerak_app/services/repositories/hive/hive_gas_station_repository.dart';
@@ -138,6 +139,15 @@ Future<void> setupServiceLocator() async {
         games: getIt<GamingService>(),
         server: getIt<IServerConfig>(),
         bridge: AndroidRecapBridge(),
+      ));
+
+  // Les rappels du soir, trajet et sport : ils ne stockent que leurs
+  // reglages, propres a l'appareil.
+  getIt.registerLazySingleton<ReminderService>(() => ReminderService(
+        commute: getIt<ICommute>(),
+        sport: getIt<ISport>(),
+        preferences: getIt<IAppPreferences>(),
+        bridge: AndroidReminderBridge(),
       ));
 
   // Le temps de jeu vient de l'agent du Pi ; le contrat, lui, se calcule ici.
