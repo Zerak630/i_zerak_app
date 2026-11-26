@@ -766,13 +766,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commute_setup_action => 'Régler';
 
   @override
-  String get commute_settings_title => 'Trajet domicile-travail';
-
-  @override
-  String get commute_settings_entry_hint =>
-      'Distance, consommation et raisons de prendre la voiture';
-
-  @override
   String get commute_section_trip => 'Le trajet';
 
   @override
@@ -799,7 +792,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get commute_price_rule =>
-      'Le plus bas parmi vos stations suivies, relevé le jour du trajet puis conservé tel quel.';
+      'Le plus bas parmi tes stations suivies, relevé le jour du trajet puis conservé tel quel.';
 
   @override
   String get commute_price_unreachable_rule => 'Stations injoignables';
@@ -811,43 +804,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get commute_price_never_rule => 'Aucun prix jamais relevé';
 
   @override
-  String get commute_section_reasons => 'Raisons de prendre la voiture';
-
-  @override
   String get commute_bucket_essential => 'Dépense obligatoire';
 
   @override
   String get commute_bucket_missed => 'Économie loupée';
-
-  @override
-  String get commute_add_reason => 'Ajouter une raison';
-
-  @override
-  String get commute_reason_name => 'Raison';
-
-  @override
-  String get commute_rename_reason => 'Renommer la raison';
-
-  @override
-  String get commute_rename_reason_hint =>
-      'Laisser vide pour revenir au nom d’origine';
-
-  @override
-  String commute_reason_uses(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Utilisée par $count jours',
-      one: 'Utilisée par 1 jour',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get commute_reason_actions => 'Actions sur la raison';
-
-  @override
-  String get commute_reason_in_use => 'Supprimer (déjà utilisée)';
 
   @override
   String get commute_trip_value_today => 'Un trajet vaut aujourd’hui';
@@ -857,15 +817,6 @@ class AppLocalizationsFr extends AppLocalizations {
       String distance, String consumption, String price) {
     return '$distance km × $consumption L/100 km × $price/L';
   }
-
-  @override
-  String get reason_sport => 'Sport le soir';
-
-  @override
-  String get reason_shopping => 'Courses';
-
-  @override
-  String get reason_lazy => 'Flemme';
 
   @override
   String get commute_why_car => 'Pourquoi la voiture ?';
@@ -1766,7 +1717,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sync_section_hint =>
-      'Chaque appareil écrit son propre fichier dans un dossier que Syncthing partage, par exemple celui de votre coffre Obsidian. Les identifiants ne sont jamais copiés.';
+      'Chaque appareil écrit son propre fichier dans un dossier que Syncthing partage, par exemple celui de ton coffre Obsidian. Les identifiants ne sont jamais copiés.';
 
   @override
   String get sync_unsupported => 'Non disponible dans le navigateur';
@@ -3029,4 +2980,69 @@ class AppLocalizationsFr extends AppLocalizations {
   String game_stats_lp_week(String lp) {
     return '$lp LP cette semaine';
   }
+
+  @override
+  String get settings_commute => 'Trajet et vélo';
+
+  @override
+  String get settings_commute_hint =>
+      'Distance, consommation, carburant, abonnements remboursés';
+
+  @override
+  String get settings_free_time => 'Temps libre';
+
+  @override
+  String get settings_free_time_hint =>
+      'Applis suivies, baisse du quota, plancher';
+
+  @override
+  String get settings_free_time_not_ready =>
+      'Le Temps libre n’est pas encore en route : choisis tes applis et mesure ta moyenne de départ.';
+
+  @override
+  String get settings_free_time_setup => 'Mettre en route';
+
+  @override
+  String get settings_games => 'Jeux';
+
+  @override
+  String get settings_games_hint => 'Le contrat jeu contre sport';
+
+  @override
+  String get settings_notifications => 'Notifications et rappels';
+
+  @override
+  String get settings_notifications_hint =>
+      'Ce que l’appli t’envoie, et à quelle heure';
+
+  @override
+  String get settings_notifications_none =>
+      'Aucune notification à régler sur cet appareil.';
+
+  @override
+  String get settings_server => 'Serveur et Pi';
+
+  @override
+  String get settings_server_hint => 'Adresse, agent, qBittorrent, Emby, TMDB';
+
+  @override
+  String get settings_sync_hint =>
+      'Le dossier partagé avec tes autres appareils';
+
+  @override
+  String get settings_display => 'Affichage';
+
+  @override
+  String get settings_display_hint => 'Les onglets de la barre du bas';
+
+  @override
+  String get settings_display_tabs => 'Barre du bas';
+
+  @override
+  String settings_display_tabs_hint(int count) {
+    return '$count onglets au maximum. Les autres restent dans le menu « Plus ».';
+  }
+
+  @override
+  String get recap_notify_settings => 'Régler les notifications de bilan';
 }

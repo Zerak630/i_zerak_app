@@ -6,6 +6,7 @@ import 'package:i_zerak_app/models/commute_dao.dart' hide dateOnly, roundCents;
 import 'package:i_zerak_app/models/commute_dao.dart' as commute show dateOnly;
 import 'package:i_zerak_app/models/companion_dao.dart';
 import 'package:i_zerak_app/models/screen_time_dao.dart' show ScreenTimeLedger;
+import 'package:i_zerak_app/models/settings_category.dart';
 import 'package:i_zerak_app/models/subscription_dao.dart';
 import 'package:i_zerak_app/models/torrent_state.dart' show TorrentActivity;
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart'
@@ -24,6 +25,7 @@ import 'package:i_zerak_app/services/recap/recap_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_sport.dart';
 import 'package:i_zerak_app/models/recap_dao.dart';
 import 'package:i_zerak_app/pages/recap/recap_page.dart';
+import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_commute.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_gas_stations.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_subscriptions.dart';
@@ -569,7 +571,16 @@ class _DashboardPageState extends State<DashboardPage> {
         child: ListTile(
           leading: const Icon(Icons.pedal_bike),
           title: Text(l10n.home_setup_commute),
-          subtitle: Text(l10n.commute_settings_entry_hint),
+          subtitle: Text(l10n.settings_commute_hint),
+          trailing: const Icon(Icons.chevron_right),
+          // Raccourci vers la categorie Trajet et velo des reglages.
+          onTap: () async {
+            await openSettings(context, open: SettingsCategory.commute);
+            await _loadLocal();
+            await _loadPrice().catchError((Object error) {
+              debugPrint('Prix du carburant indisponible : $error');
+            });
+          },
         ),
       );
     }

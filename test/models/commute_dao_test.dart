@@ -19,7 +19,7 @@ CommuteDay _car(int day, CarBucket bucket, {double amount = 1.09}) => CommuteDay
       amount: amount,
       pricePerLitre: 1.689,
       priceSource: PriceSource.live,
-      reasonId: bucket == CarBucket.missed ? CarReason.lazy : CarReason.sport,
+      reasonId: bucket == CarBucket.missed ? 'lazy' : 'sport',
       bucket: bucket,
     );
 
@@ -160,31 +160,6 @@ void main() {
     });
   });
 
-  group('raisons', () {
-    test('les usages se comptent par raison, les jours a velo n en ont pas', () {
-      final uses = reasonUses(
-          [_bike(1), _car(2, CarBucket.missed), _car(3, CarBucket.missed), _car(4, CarBucket.essential)]);
-
-      expect(uses, {CarReason.lazy: 2, CarReason.sport: 1});
-    });
-
-    test('une raison livree renommee reste une raison livree', () {
-      final renamed = CarReason.defaults.last.withLabel('Pas motivé');
-
-      expect(renamed.isBuiltIn, isTrue);
-      expect(renamed.label, 'Pas motivé');
-      expect(renamed.withLabel(null).label, isNull);
-    });
-
-    test('le renommage survit a la relecture', () {
-      final settings = CommuteSettings(reasons: [CarReason.defaults.first.withLabel('Escalade')]);
-      final read = CommuteSettings.fromJson(settings.toJson());
-
-      expect(read.reasons.single.id, CarReason.sport);
-      expect(read.reasons.single.label, 'Escalade');
-    });
-  });
-
   group('persistance', () {
     test('un jour se relit a l identique', () {
       final day = CommuteDay.car(
@@ -208,12 +183,21 @@ void main() {
 
       expect(settings.consumption, 5.2);
       expect(settings.fuel, FuelType.gazole);
-      expect(settings.reasons.length, 3);
     });
 
-    test('une liste de raisons videe par l utilisateur reste vide', () {
-      final settings = CommuteSettings.fromJson(const CommuteSettings(reasons: []).toJson());
-      expect(settings.reasons, isEmpty);
+    test('des reglages d avant, avec leurs raisons, se relisent sans elles', () {
+      final settings = CommuteSettings.fromJson({
+        'distance_km': 12.4,
+        'fuel': 'gazole',
+        'reasons': [
+          {'id': 'lazy', 'bucket': 'missed'},
+        ],
+        'payback_excluded': ['loyer'],
+      });
+
+      expect(settings.distanceKm, 12.4);
+      expect(settings.paybackExcluded, {'loyer'});
+      expect(settings.toJson().containsKey('reasons'), isFalse);
     });
 
     test('un objectif se relit a l identique', () {

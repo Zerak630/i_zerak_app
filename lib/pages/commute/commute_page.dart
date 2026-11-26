@@ -3,7 +3,8 @@ import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/commute_dao.dart';
 import 'package:i_zerak_app/models/companion_dao.dart';
 import 'package:i_zerak_app/pages/commute/commute_history_page.dart';
-import 'package:i_zerak_app/pages/commute/commute_settings_page.dart';
+import 'package:i_zerak_app/models/settings_category.dart';
+import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/pages/commute/regularity_page.dart';
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
 import 'package:i_zerak_app/pages/commute/widgets/could_bike_sheet.dart';
@@ -188,12 +189,7 @@ class _CommutePageState extends State<CommutePage> {
       );
 
   Future<void> _openSettings() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => CommuteSettingsPage(store: widget.store, prices: widget.prices),
-      ),
-    );
+    await openSettings(context, open: SettingsCategory.commute);
     final fuel = _settings.fuel;
     await _reload();
     // Un autre carburant, un autre prix.

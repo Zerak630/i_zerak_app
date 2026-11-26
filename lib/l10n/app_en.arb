@@ -358,8 +358,6 @@
 	"commute_setup_title": "Set up your commute",
 	"commute_setup_hint": "Enter the round-trip distance: every bike trip will count the fuel saved.",
 	"commute_setup_action": "Set up",
-	"commute_settings_title": "Commute",
-	"commute_settings_entry_hint": "Distance, fuel use and reasons for taking the car",
 	"commute_section_trip": "The trip",
 	"commute_distance": "Round-trip distance",
 	"commute_distance_help": "Door to door, there and back.",
@@ -372,21 +370,8 @@
 	"commute_price_unreachable_rule": "Stations unreachable",
 	"commute_price_unreachable_value": "last price seen",
 	"commute_price_never_rule": "No price ever seen",
-	"commute_section_reasons": "Reasons for taking the car",
 	"commute_bucket_essential": "Required expense",
 	"commute_bucket_missed": "Missed saving",
-	"commute_add_reason": "Add a reason",
-	"commute_reason_name": "Reason",
-	"commute_rename_reason": "Rename reason",
-	"commute_rename_reason_hint": "Leave empty to restore the original name",
-	"commute_reason_uses": "{count, plural, =1{Used on 1 day} other{Used on {count} days}}",
-	"@commute_reason_uses": {
-		"placeholders": {
-			"count": { "type": "int" }
-		}
-	},
-	"commute_reason_actions": "Reason actions",
-	"commute_reason_in_use": "Delete (already used)",
 	"commute_trip_value_today": "One trip is worth today",
 	"commute_trip_formula": "{distance} km × {consumption} L/100 km × {price}/L",
 	"@commute_trip_formula": {
@@ -396,9 +381,6 @@
 			"price": { "type": "String" }
 		}
 	},
-	"reason_sport": "Evening sport",
-	"reason_shopping": "Shopping",
-	"reason_lazy": "Couldn't be bothered",
 	"commute_why_car": "Why the car?",
 	"commute_why_car_detail": "{date} — this trip is worth {amount}",
 	"@commute_why_car_detail": {
@@ -1493,5 +1475,25 @@
 	"@game_stats_lp": {"placeholders": {"lp": {"type": "int"}}},
 	"game_stats_unranked": "Unranked this season",
 	"game_stats_lp_week": "{lp} LP this week",
-	"@game_stats_lp_week": {"placeholders": {"lp": {"type": "String"}}}
+	"@game_stats_lp_week": {"placeholders": {"lp": {"type": "String"}}},
+	"settings_commute": "Commute and bike",
+	"settings_commute_hint": "Distance, consumption, fuel, refunded subscriptions",
+	"settings_free_time": "Free time",
+	"settings_free_time_hint": "Tracked apps, quota decrease, floor",
+	"settings_free_time_not_ready": "Free time isn’t set up yet: pick your apps and measure your starting average.",
+	"settings_free_time_setup": "Set up",
+	"settings_games": "Games",
+	"settings_games_hint": "The games-for-sport contract",
+	"settings_notifications": "Notifications and reminders",
+	"settings_notifications_hint": "What the app sends you, and when",
+	"settings_notifications_none": "No notifications to set on this device.",
+	"settings_server": "Server and Pi",
+	"settings_server_hint": "Address, agent, qBittorrent, Emby, TMDB",
+	"settings_sync_hint": "The folder shared with your other devices",
+	"settings_display": "Display",
+	"settings_display_hint": "The bottom bar tabs",
+	"settings_display_tabs": "Bottom bar",
+	"settings_display_tabs_hint": "At most {count} tabs. The others stay in the “More” menu.",
+	"@settings_display_tabs_hint": {"placeholders": {"count": {"type": "int"}}},
+	"recap_notify_settings": "Recap notification settings"
 }

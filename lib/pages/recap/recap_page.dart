@@ -3,6 +3,8 @@ import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/commute_dao.dart' show dateOnly;
 import 'package:i_zerak_app/models/game_dao.dart' show GameTitle;
 import 'package:i_zerak_app/models/recap_dao.dart';
+import 'package:i_zerak_app/models/settings_category.dart';
+import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/models/sport_dao.dart' show Sport;
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart' show CommuteFormat;
 import 'package:i_zerak_app/pages/gaming/game_stats_page.dart';
@@ -32,7 +34,6 @@ class _RecapPageState extends State<RecapPage> {
   late RecapRange _range = RecapRange.weekOf(_today);
   Recap? _recap;
   Recap? _previous;
-  RecapSettings? _settings;
   List<Sport> _sports = const [];
 
   DateTime get _today => dateOnly((widget.clock ?? DateTime.now)());
@@ -43,9 +44,6 @@ class _RecapPageState extends State<RecapPage> {
     _load();
     _refreshGames();
     widget.service.readSettings().then((settings) {
-      if (mounted) {
-        setState(() => _settings = settings);
-      }
       if (settings.weekly || settings.monthly) {
         widget.service.ensureNotifications();
       }
@@ -79,25 +77,6 @@ class _RecapPageState extends State<RecapPage> {
     _load();
   }
 
-  Future<void> _saveSettings(RecapSettings settings) async {
-    setState(() => _settings = settings);
-    await widget.service.saveSettings(settings);
-  }
-
-  Future<void> _pickTime() async {
-    final settings = _settings;
-    if (settings == null) {
-      return;
-    }
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: settings.hour, minute: settings.minute),
-    );
-    if (time != null) {
-      await _saveSettings(settings.copyWith(hour: time.hour, minute: time.minute));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -105,7 +84,6 @@ class _RecapPageState extends State<RecapPage> {
     final scheme = theme.colorScheme;
     final recap = _recap;
     final current = _range.contains(_today);
-    final settings = _settings;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.recap_page_title)),
@@ -168,38 +146,15 @@ class _RecapPageState extends State<RecapPage> {
               _GamesCard(recap: recap, previous: _previous, today: _today),
             ],
           ],
-          if (settings != null) ...[
-            const SizedBox(height: 24),
-            Text(l10n.recap_notifications, style: theme.textTheme.titleSmall),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.recap_notify_weekly),
-              subtitle: Text(l10n.recap_notify_weekly_hint),
-              value: settings.weekly,
-              onChanged: (value) => _saveSettings(settings.copyWith(weekly: value)),
-            ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.recap_notify_monthly),
-              subtitle: Text(l10n.recap_notify_monthly_hint),
-              value: settings.monthly,
-              onChanged: (value) => _saveSettings(settings.copyWith(monthly: value)),
-            ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.free_settings_report_time),
-              trailing: Text(
-                TimeOfDay(hour: settings.hour, minute: settings.minute).format(context),
-                style: theme.textTheme.titleSmall,
-              ),
-              enabled: settings.weekly || settings.monthly,
-              onTap: _pickTime,
-            ),
-            Text(
-              l10n.recap_notify_hint,
-              style: theme.textTheme.labelSmall?.copyWith(color: scheme.outline, height: 1.4),
-            ),
-          ],
+          const SizedBox(height: 16),
+          // Raccourci : les notifications de bilan se reglent avec les autres.
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.notifications_outlined),
+            title: Text(l10n.recap_notify_settings),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => openSettings(context, open: SettingsCategory.notifications),
+          ),
         ],
       ),
     );

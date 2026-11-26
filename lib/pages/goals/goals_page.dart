@@ -4,12 +4,14 @@ import 'package:i_zerak_app/models/commute_dao.dart';
 import 'package:i_zerak_app/models/companion_dao.dart';
 import 'package:i_zerak_app/models/game_dao.dart';
 import 'package:i_zerak_app/models/payback_dao.dart';
+import 'package:i_zerak_app/models/settings_category.dart';
 import 'package:i_zerak_app/models/sport_dao.dart' show SportLedger;
-import 'package:i_zerak_app/models/subscription_dao.dart' show Subscription, SubscriptionFrequency;
+import 'package:i_zerak_app/models/subscription_dao.dart' show Subscription;
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
 import 'package:i_zerak_app/pages/commute/widgets/goal_sheets.dart';
 import 'package:i_zerak_app/pages/gaming/game_stats_page.dart';
 import 'package:i_zerak_app/pages/goals/widgets/game_contract_card.dart';
+import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/pages/subscriptions/widgets/subscription_ui.dart'
     show SubscriptionAvatar;
 import 'package:i_zerak_app/services/commute_price_service.dart';
@@ -143,12 +145,9 @@ class _GoalsPageState extends State<GoalsPage> {
     );
   }
 
-  Future<void> _editContract(GameContractSettings current) async {
-    final rules = await showGameContractSheet(context, current);
-    if (rules == null) {
-      return;
-    }
-    await widget.games?.saveSettings(current.edited(rules, _today));
+  /// Raccourci vers les reglages : les regles du contrat n'ont qu'un ecran.
+  Future<void> _openSettings(SettingsCategory category) async {
+    await openSettings(context, open: category);
     await _reload();
   }
 
@@ -205,23 +204,6 @@ class _GoalsPageState extends State<GoalsPage> {
     await _reload();
   }
 
-  Future<void> _chooseSubscriptions() async {
-    final excluded = await showModalBottomSheet<Set<String>>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (_) => _ChooseSubscriptionsSheet(
-        subscriptions: paybackSubscriptions(_subscriptions),
-        excluded: _settings.paybackExcluded,
-      ),
-    );
-    if (excluded == null) {
-      return;
-    }
-    await widget.store.saveSettings(_settings.copyWith(paybackExcluded: excluded));
-    await _reload();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -251,7 +233,7 @@ class _GoalsPageState extends State<GoalsPage> {
               settings: games.settings,
               contract: games.contractOf(_today),
               streak: games.streakAt(_today),
-              onSettings: () => _editContract(games.settings),
+              onSettings: () => _openSettings(SettingsCategory.games),
               onStats: widget.games == null
                   ? null
                   : () => Navigator.of(context).push(MaterialPageRoute<void>(
@@ -268,7 +250,7 @@ class _GoalsPageState extends State<GoalsPage> {
             payback: history.first,
             tripValue: _tripValue,
             hasSubscriptions: paybackSubscriptions(_subscriptions).isNotEmpty,
-            onChoose: _chooseSubscriptions,
+            onChoose: () => _openSettings(SettingsCategory.commute),
           ),
           if (history.skip(1).any((month) => month.saved > 0)) ...[
             const SizedBox(height: 10),
@@ -628,57 +610,6 @@ class _PaybackHistory extends StatelessWidget {
           ),
       ]),
     );
-  }
-}
-
-/// Le choix des abonnements que le velo rembourse. Renvoie les exclus.
-class _ChooseSubscriptionsSheet extends StatefulWidget {
-  const _ChooseSubscriptionsSheet({required this.subscriptions, required this.excluded});
-
-  final List<Subscription> subscriptions;
-  final Set<String> excluded;
-
-  @override
-  State<_ChooseSubscriptionsSheet> createState() => _ChooseSubscriptionsSheetState();
-}
-
-class _ChooseSubscriptionsSheetState extends State<_ChooseSubscriptionsSheet> {
-  late final Set<String> _excluded = {...widget.excluded};
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final format = CommuteFormat(context);
-    return CommuteSheet(children: [
-      Text(l10n.payback_choose, style: theme.textTheme.titleLarge),
-      const SizedBox(height: 4),
-      Text(
-        l10n.payback_choose_hint,
-        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-      ),
-      const SizedBox(height: 8),
-      for (final subscription in widget.subscriptions)
-        CheckboxListTile(
-          contentPadding: EdgeInsets.zero,
-          value: !_excluded.contains(subscription.id),
-          title: Text(subscription.name),
-          subtitle: Text(l10n.payback_per_month(
-              format.euros(roundCents(subscription.amountIn(SubscriptionFrequency.monthly))))),
-          onChanged: (kept) => setState(() {
-            final id = subscription.id;
-            if (id == null) {
-              return;
-            }
-            kept == true ? _excluded.remove(id) : _excluded.add(id);
-          }),
-        ),
-      const SizedBox(height: 12),
-      FilledButton(
-        onPressed: () => Navigator.pop(context, _excluded),
-        child: Text(l10n.save),
-      ),
-    ]);
   }
 }
 

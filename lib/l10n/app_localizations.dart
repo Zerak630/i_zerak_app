@@ -1418,18 +1418,6 @@ abstract class AppLocalizations {
   /// **'Set up'**
   String get commute_setup_action;
 
-  /// No description provided for @commute_settings_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Commute'**
-  String get commute_settings_title;
-
-  /// No description provided for @commute_settings_entry_hint.
-  ///
-  /// In en, this message translates to:
-  /// **'Distance, fuel use and reasons for taking the car'**
-  String get commute_settings_entry_hint;
-
   /// No description provided for @commute_section_trip.
   ///
   /// In en, this message translates to:
@@ -1502,12 +1490,6 @@ abstract class AppLocalizations {
   /// **'No price ever seen'**
   String get commute_price_never_rule;
 
-  /// No description provided for @commute_section_reasons.
-  ///
-  /// In en, this message translates to:
-  /// **'Reasons for taking the car'**
-  String get commute_section_reasons;
-
   /// No description provided for @commute_bucket_essential.
   ///
   /// In en, this message translates to:
@@ -1519,48 +1501,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Missed saving'**
   String get commute_bucket_missed;
-
-  /// No description provided for @commute_add_reason.
-  ///
-  /// In en, this message translates to:
-  /// **'Add a reason'**
-  String get commute_add_reason;
-
-  /// No description provided for @commute_reason_name.
-  ///
-  /// In en, this message translates to:
-  /// **'Reason'**
-  String get commute_reason_name;
-
-  /// No description provided for @commute_rename_reason.
-  ///
-  /// In en, this message translates to:
-  /// **'Rename reason'**
-  String get commute_rename_reason;
-
-  /// No description provided for @commute_rename_reason_hint.
-  ///
-  /// In en, this message translates to:
-  /// **'Leave empty to restore the original name'**
-  String get commute_rename_reason_hint;
-
-  /// No description provided for @commute_reason_uses.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{Used on 1 day} other{Used on {count} days}}'**
-  String commute_reason_uses(int count);
-
-  /// No description provided for @commute_reason_actions.
-  ///
-  /// In en, this message translates to:
-  /// **'Reason actions'**
-  String get commute_reason_actions;
-
-  /// No description provided for @commute_reason_in_use.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete (already used)'**
-  String get commute_reason_in_use;
 
   /// No description provided for @commute_trip_value_today.
   ///
@@ -1574,24 +1514,6 @@ abstract class AppLocalizations {
   /// **'{distance} km × {consumption} L/100 km × {price}/L'**
   String commute_trip_formula(
       String distance, String consumption, String price);
-
-  /// No description provided for @reason_sport.
-  ///
-  /// In en, this message translates to:
-  /// **'Evening sport'**
-  String get reason_sport;
-
-  /// No description provided for @reason_shopping.
-  ///
-  /// In en, this message translates to:
-  /// **'Shopping'**
-  String get reason_shopping;
-
-  /// No description provided for @reason_lazy.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t be bothered'**
-  String get reason_lazy;
 
   /// No description provided for @commute_why_car.
   ///
@@ -4562,6 +4484,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{lp} LP this week'**
   String game_stats_lp_week(String lp);
+
+  /// No description provided for @settings_commute.
+  ///
+  /// In en, this message translates to:
+  /// **'Commute and bike'**
+  String get settings_commute;
+
+  /// No description provided for @settings_commute_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance, consumption, fuel, refunded subscriptions'**
+  String get settings_commute_hint;
+
+  /// No description provided for @settings_free_time.
+  ///
+  /// In en, this message translates to:
+  /// **'Free time'**
+  String get settings_free_time;
+
+  /// No description provided for @settings_free_time_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracked apps, quota decrease, floor'**
+  String get settings_free_time_hint;
+
+  /// No description provided for @settings_free_time_not_ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Free time isn’t set up yet: pick your apps and measure your starting average.'**
+  String get settings_free_time_not_ready;
+
+  /// No description provided for @settings_free_time_setup.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up'**
+  String get settings_free_time_setup;
+
+  /// No description provided for @settings_games.
+  ///
+  /// In en, this message translates to:
+  /// **'Games'**
+  String get settings_games;
+
+  /// No description provided for @settings_games_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'The games-for-sport contract'**
+  String get settings_games_hint;
+
+  /// No description provided for @settings_notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications and reminders'**
+  String get settings_notifications;
+
+  /// No description provided for @settings_notifications_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'What the app sends you, and when'**
+  String get settings_notifications_hint;
+
+  /// No description provided for @settings_notifications_none.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications to set on this device.'**
+  String get settings_notifications_none;
+
+  /// No description provided for @settings_server.
+  ///
+  /// In en, this message translates to:
+  /// **'Server and Pi'**
+  String get settings_server;
+
+  /// No description provided for @settings_server_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Address, agent, qBittorrent, Emby, TMDB'**
+  String get settings_server_hint;
+
+  /// No description provided for @settings_sync_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'The folder shared with your other devices'**
+  String get settings_sync_hint;
+
+  /// No description provided for @settings_display.
+  ///
+  /// In en, this message translates to:
+  /// **'Display'**
+  String get settings_display;
+
+  /// No description provided for @settings_display_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'The bottom bar tabs'**
+  String get settings_display_hint;
+
+  /// No description provided for @settings_display_tabs.
+  ///
+  /// In en, this message translates to:
+  /// **'Bottom bar'**
+  String get settings_display_tabs;
+
+  /// No description provided for @settings_display_tabs_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'At most {count} tabs. The others stay in the “More” menu.'**
+  String settings_display_tabs_hint(int count);
+
+  /// No description provided for @recap_notify_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Recap notification settings'**
+  String get recap_notify_settings;
 }
 
 class _AppLocalizationsDelegate

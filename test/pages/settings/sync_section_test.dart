@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
-import 'package:i_zerak_app/pages/settings/sync_section.dart';
+import 'package:i_zerak_app/pages/settings/sections/sync_section.dart';
 import 'package:i_zerak_app/services/sync/storage_access.dart';
 import 'package:i_zerak_app/services/sync/sync_service.dart';
 

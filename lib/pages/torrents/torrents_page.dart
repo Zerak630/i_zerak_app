@@ -7,6 +7,7 @@ import 'package:i_zerak_app/models/server_config_dao.dart';
 import 'package:i_zerak_app/models/torrent_dao.dart';
 import 'package:i_zerak_app/models/torrent_destination.dart';
 import 'package:i_zerak_app/models/transfer_info_dao.dart';
+import 'package:i_zerak_app/models/settings_category.dart';
 import 'package:i_zerak_app/pages/settings/settings_page.dart';
 import 'package:i_zerak_app/pages/torrents/widgets/add_magnet_sheet.dart';
 import 'package:i_zerak_app/pages/torrents/widgets/delete_torrent_dialog.dart';
@@ -222,7 +223,7 @@ class _TorrentsPageState extends State<TorrentsPage> with WidgetsBindingObserver
 
   Future<void> _openSettings() async {
     _stopPolling();
-    await Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage()));
+    await openSettings(context, open: SettingsCategory.server);
     if (!mounted) {
       return;
     }

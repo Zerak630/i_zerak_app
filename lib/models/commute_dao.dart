@@ -115,77 +115,12 @@ class ResolvedPrice {
   final DateTime? observedOn;
 }
 
-/// Une raison de prendre la voiture, et la cagnotte qu'elle alimente.
-class CarReason {
-  const CarReason({required this.id, this.label, required this.bucket});
-
-  /// Stable dans le temps : c'est lui que retient un jour enregistre.
-  final String id;
-
-  /// Nul pour une raison livree avec l'application et jamais renommee, dont le
-  /// libelle passe alors par la localisation ; rempli sinon.
-  final String? label;
-
-  final CarBucket bucket;
-
-  /// L'une des trois raisons livrees, renommee ou non.
-  bool get isBuiltIn => id == sport || id == shopping || id == lazy;
-
-  static const String sport = 'sport';
-  static const String shopping = 'shopping';
-  static const String lazy = 'lazy';
-
-  static const List<CarReason> defaults = [
-    CarReason(id: sport, bucket: CarBucket.essential),
-    CarReason(id: shopping, bucket: CarBucket.essential),
-    CarReason(id: lazy, bucket: CarBucket.missed),
-  ];
-
-  CarReason withBucket(CarBucket bucket) => CarReason(id: id, label: label, bucket: bucket);
-
-  /// `null` rend a une raison livree son libelle localise d'origine.
-  CarReason withLabel(String? label) => CarReason(id: id, label: label, bucket: bucket);
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        if (label != null) 'label': label,
-        'bucket': bucket.name,
-      };
-
-  static CarReason? fromJson(Object? raw) {
-    if (raw is! Map || raw['id'] is! String) {
-      return null;
-    }
-    return CarReason(
-      id: raw['id'] as String,
-      label: _asString(raw['label']),
-      bucket: CarBucket.fromName(_asString(raw['bucket'])),
-    );
-  }
-}
-
-/// Nombre de journees enregistrees par raison.
-///
-/// Une raison utilisee ne se supprime pas : les journees qui la citent
-/// n'auraient plus de libelle a jour, et l'historique afficherait un
-/// identifiant.
-Map<String, int> reasonUses(Iterable<CommuteDay> days) {
-  final uses = <String, int>{};
-  for (final day in days) {
-    if (day.reasonId case final String id) {
-      uses[id] = (uses[id] ?? 0) + 1;
-    }
-  }
-  return uses;
-}
-
 /// Le trajet domicile-travail, tel que l'utilisateur l'a decrit.
 class CommuteSettings {
   const CommuteSettings({
     this.distanceKm,
     this.consumption = 5.2,
     this.fuel = FuelType.gazole,
-    this.reasons = CarReason.defaults,
     this.paybackExcluded = const {},
   });
 
@@ -198,7 +133,9 @@ class CommuteSettings {
 
   final FuelType fuel;
 
-  final List<CarReason> reasons;
+  // Les « raisons de prendre la voiture » ont disparu : la cagnotte d'un
+  // trajet se decide a chaque fois. Les reglages enregistres avant gardent
+  // une cle `reasons`, simplement ignoree a la relecture.
 
   /// Les abonnements que le velo ne rembourse pas : le loyer, une assurance —
   /// ce qu'on ne paie pas « en plus », et qu'aucun trajet ne couvrirait.
@@ -210,27 +147,16 @@ class CommuteSettings {
   double tripValue(double pricePerLitre) =>
       roundCents((distanceKm ?? 0) * consumption / 100 * pricePerLitre);
 
-  CarReason? reasonById(String id) {
-    for (final reason in reasons) {
-      if (reason.id == id) {
-        return reason;
-      }
-    }
-    return null;
-  }
-
   CommuteSettings copyWith({
     double? distanceKm,
     double? consumption,
     FuelType? fuel,
-    List<CarReason>? reasons,
     Set<String>? paybackExcluded,
   }) =>
       CommuteSettings(
         distanceKm: distanceKm ?? this.distanceKm,
         consumption: consumption ?? this.consumption,
         fuel: fuel ?? this.fuel,
-        reasons: reasons ?? this.reasons,
         paybackExcluded: paybackExcluded ?? this.paybackExcluded,
       );
 
@@ -238,7 +164,6 @@ class CommuteSettings {
         if (distanceKm != null) 'distance_km': distanceKm,
         'consumption': consumption,
         'fuel': fuel.name,
-        'reasons': [for (final reason in reasons) reason.toJson()],
         if (paybackExcluded.isNotEmpty) 'payback_excluded': [...paybackExcluded]..sort(),
       };
 
@@ -248,16 +173,10 @@ class CommuteSettings {
     if (raw is! Map) {
       return const CommuteSettings();
     }
-    final reasons = [
-      if (raw['reasons'] case final List<dynamic> list)
-        for (final item in list)
-          if (CarReason.fromJson(item) case final CarReason reason) reason,
-    ];
     return CommuteSettings(
       distanceKm: _asDouble(raw['distance_km']),
       consumption: _asDouble(raw['consumption']) ?? 5.2,
       fuel: FuelType.fromName(_asString(raw['fuel'])),
-      reasons: raw['reasons'] is List ? reasons : CarReason.defaults,
       paybackExcluded: {
         if (raw['payback_excluded'] case final List<dynamic> list)
           for (final id in list)

@@ -12,7 +12,7 @@ import 'package:i_zerak_app/pages/gas_stations/gas_station_page.dart';
 import 'package:i_zerak_app/pages/goals/goals_page.dart';
 import 'package:i_zerak_app/pages/more_sheet.dart';
 import 'package:i_zerak_app/pages/settings/settings_page.dart';
-import 'package:i_zerak_app/pages/settings/sync_section.dart' show syncAgo;
+import 'package:i_zerak_app/pages/settings/sections/sync_section.dart' show syncAgo;
 import 'package:i_zerak_app/pages/subscriptions/subscriptions.dart';
 import 'package:i_zerak_app/pages/system/system_page.dart';
 import 'package:i_zerak_app/pages/torrents/torrents_page.dart';
@@ -256,10 +256,15 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-  void _openSettings() => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const SettingsPage()),
-      );
+  Future<void> _openSettings() async {
+    await openSettings(context);
+    // Les epingles ont pu changer dans la categorie Affichage. L'onglet
+    // courant reste celui qu'on regardait, epingle ou non.
+    final layout = await widget.preferences.readTabs();
+    if (mounted) {
+      setState(() => _layout = layout);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

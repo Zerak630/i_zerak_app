@@ -1,6 +1,7 @@
 import 'package:i_zerak_app/models/app_tab.dart';
 import 'package:i_zerak_app/models/game_dao.dart' show GameContractSettings, GamingReport;
 import 'package:i_zerak_app/models/recap_dao.dart' show RecapSettings;
+import 'package:i_zerak_app/models/settings_category.dart';
 
 /// Les preferences d'affichage de l'application, sans rapport avec un onglet
 /// en particulier.
@@ -26,4 +27,11 @@ abstract class IAppPreferences {
   Future<GameContractSettings> readGameContract();
 
   Future<void> saveGameContract(GameContractSettings settings);
+
+  /// Les categories des Reglages laissees depliees. Vide tant que rien n'a
+  /// ete ouvert : l'ecran s'ouvre alors comme un sommaire. Propre a
+  /// l'appareil, comme la barre du bas.
+  Future<Set<SettingsCategory>> readExpandedSettings();
+
+  Future<void> saveExpandedSettings(Set<SettingsCategory> expanded);
 }
