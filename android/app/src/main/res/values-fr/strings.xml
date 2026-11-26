@@ -50,4 +50,5 @@
         <item quantity="other">%1$d abonnements sur %2$d</item>
     </plurals>
     <string name="recap_channel">Bilans de la semaine et du mois</string>
+    <string name="reminder_channel">Rappels du soir</string>
 </resources>

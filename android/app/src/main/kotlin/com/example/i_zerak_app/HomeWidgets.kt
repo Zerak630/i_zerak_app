@@ -35,6 +35,8 @@ object HomeWidgetStore {
     const val EXTRA_ACTION = "izerak_action"
     const val ACTION_CAR = "car"
     const val ACTION_FREE_TIME = "free_time"
+    const val ACTION_COMMUTE = "commute"
+    const val ACTION_SPORT = "sport"
 
     private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 

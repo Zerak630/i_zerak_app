@@ -749,5 +749,20 @@
 	"settings_display_hint": "Les onglets de la barre du bas",
 	"settings_display_tabs": "Barre du bas",
 	"settings_display_tabs_hint": "{count} onglets au maximum. Les autres restent dans le menu « Plus ».",
-	"recap_notify_settings": "Régler les notifications de bilan"
+	"recap_notify_settings": "Régler les notifications de bilan",
+	"reminder_commute_title": "Vélo ou voiture aujourd’hui ?",
+	"reminder_commute_text": "Note ta journée : à vélo, {amount} vont dans ta cagnotte.",
+	"reminder_commute_bike": "À vélo",
+	"reminder_commute_car": "En voiture",
+	"reminder_sport_title": "{sport} · {minutes} min",
+	"reminder_sport_text": "Prévu aujourd’hui. Tu l’as faite ?",
+	"reminder_sport_done": "Faite",
+	"reminder_sport_skipped": "Pas faite",
+	"reminders_title": "Rappels",
+	"reminders_commute": "Trajet",
+	"reminders_commute_hint": "Du lundi au vendredi, si la journée n’est pas encore saisie",
+	"reminders_sport": "Programme de sport",
+	"reminders_sport_hint": "Les jours prévus, pour chaque séance sans réponse",
+	"reminders_time": "Heure",
+	"reminders_hint": "Réponds directement depuis la notification : l’appli l’enregistre à sa prochaine ouverture. Un rappel ne part pas si la journée était déjà saisie à la dernière ouverture d’iZerak."
 }

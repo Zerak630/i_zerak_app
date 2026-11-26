@@ -1495,5 +1495,22 @@
 	"settings_display_tabs": "Bottom bar",
 	"settings_display_tabs_hint": "At most {count} tabs. The others stay in the “More” menu.",
 	"@settings_display_tabs_hint": {"placeholders": {"count": {"type": "int"}}},
-	"recap_notify_settings": "Recap notification settings"
+	"recap_notify_settings": "Recap notification settings",
+	"reminder_commute_title": "Bike or car today?",
+	"reminder_commute_text": "Log your day: by bike, {amount} goes into the pot.",
+	"@reminder_commute_text": {"placeholders": {"amount": {"type": "String"}}},
+	"reminder_commute_bike": "By bike",
+	"reminder_commute_car": "By car",
+	"reminder_sport_title": "{sport} · {minutes} min",
+	"@reminder_sport_title": {"placeholders": {"sport": {"type": "String"}, "minutes": {"type": "int"}}},
+	"reminder_sport_text": "Planned today. Did you do it?",
+	"reminder_sport_done": "Done",
+	"reminder_sport_skipped": "Not done",
+	"reminders_title": "Reminders",
+	"reminders_commute": "Commute",
+	"reminders_commute_hint": "Monday to Friday, if the day isn’t logged yet",
+	"reminders_sport": "Workout plan",
+	"reminders_sport_hint": "On planned days, for each session without an answer",
+	"reminders_time": "Time",
+	"reminders_hint": "Answer straight from the notification: the app records it next time it opens. A reminder doesn’t go off if the day was already logged the last time iZerak was opened."
 }

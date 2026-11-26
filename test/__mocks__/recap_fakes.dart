@@ -2,6 +2,7 @@ import 'package:i_zerak_app/models/app_tab.dart';
 import 'package:i_zerak_app/models/game_dao.dart';
 import 'package:i_zerak_app/models/recap_dao.dart';
 import 'package:i_zerak_app/models/settings_category.dart';
+import 'package:i_zerak_app/models/reminder_dao.dart';
 import 'package:i_zerak_app/services/recap/recap_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.dart';
 
@@ -9,6 +10,7 @@ import 'package:i_zerak_app/services/repositories/interfaces/i_app_preferences.d
 class MemoryPreferences implements IAppPreferences {
   TabLayout tabs = TabLayout.initial;
   RecapSettings recap = const RecapSettings();
+  ReminderSettings reminders = const ReminderSettings();
   GamingReport gaming = const GamingReport();
   GameContractSettings contract = const GameContractSettings();
   Set<SettingsCategory> expanded = {};
@@ -24,6 +26,12 @@ class MemoryPreferences implements IAppPreferences {
 
   @override
   Future<void> saveRecapSettings(RecapSettings settings) async => recap = settings;
+
+  @override
+  Future<ReminderSettings> readReminderSettings() async => reminders;
+
+  @override
+  Future<void> saveReminderSettings(ReminderSettings settings) async => reminders = settings;
 
   @override
   Future<GamingReport> readGamingReport() async => gaming;

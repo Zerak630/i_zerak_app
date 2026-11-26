@@ -52,4 +52,5 @@
         <item quantity="other">%1$d of %2$d subscriptions</item>
     </plurals>
     <string name="recap_channel">Weekly and monthly recaps</string>
+    <string name="reminder_channel">Evening reminders</string>
 </resources>

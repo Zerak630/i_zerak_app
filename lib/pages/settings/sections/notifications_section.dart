@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:i_zerak_app/l10n/app_localizations.dart';
 import 'package:i_zerak_app/models/recap_dao.dart';
+import 'package:i_zerak_app/models/reminder_dao.dart';
 import 'package:i_zerak_app/models/screen_time_dao.dart';
 import 'package:i_zerak_app/pages/settings/widgets/settings_ui.dart';
 import 'package:i_zerak_app/services/recap/recap_service.dart';
+import 'package:i_zerak_app/services/reminders/reminder_service.dart';
 import 'package:i_zerak_app/services/screen_time/screen_time_service.dart';
 import 'package:i_zerak_app/services/service_locator.dart';
 
@@ -15,13 +17,19 @@ import 'package:i_zerak_app/services/service_locator.dart';
 /// libre, les bilans dans les preferences — et chaque changement s'applique
 /// aussitot.
 class NotificationsSection extends StatefulWidget {
-  NotificationsSection({super.key, ScreenTimeService? screenTime, RecapService? recap})
+  NotificationsSection(
+      {super.key, ScreenTimeService? screenTime, RecapService? recap, ReminderService? reminders})
       : screenTime = screenTime ??
             (getIt.isRegistered<ScreenTimeService>() ? getIt<ScreenTimeService>() : null),
-        recap = recap ?? (getIt.isRegistered<RecapService>() ? getIt<RecapService>() : null);
+        recap = recap ?? (getIt.isRegistered<RecapService>() ? getIt<RecapService>() : null),
+        reminders = reminders ??
+            (getIt.isRegistered<ReminderService>() ? getIt<ReminderService>() : null);
 
   final ScreenTimeService? screenTime;
   final RecapService? recap;
+
+  /// Les rappels du soir, trajet et sport.
+  final ReminderService? reminders;
 
   @override
   State<NotificationsSection> createState() => _NotificationsSectionState();
@@ -30,6 +38,7 @@ class NotificationsSection extends StatefulWidget {
 class _NotificationsSectionState extends State<NotificationsSection> {
   ScreenTimeSettings? _freeTime;
   RecapSettings? _recap;
+  ReminderSettings? _reminders;
   bool _loading = true;
 
   @override
@@ -41,10 +50,12 @@ class _NotificationsSectionState extends State<NotificationsSection> {
   Future<void> _load() async {
     final freeTime = await widget.screenTime?.store.readSettings();
     final recap = await widget.recap?.readSettings();
+    final reminders = await widget.reminders?.readSettings();
     if (mounted) {
       setState(() {
         _freeTime = freeTime;
         _recap = recap;
+        _reminders = reminders;
         _loading = false;
       });
     }
@@ -72,6 +83,13 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     await service.sync();
   }
 
+  // --- Rappels du soir (trajet, sport) ---------------------------------------
+
+  Future<void> _saveReminders(ReminderSettings settings) async {
+    setState(() => _reminders = settings);
+    await widget.reminders!.saveSettings(settings);
+  }
+
   // --- Bilans de la semaine et du mois --------------------------------------
 
   Future<void> _saveRecap(RecapSettings settings) async {
@@ -91,8 +109,46 @@ class _NotificationsSectionState extends State<NotificationsSection> {
     final freeTime = _freeTime;
     final recap = _recap;
 
-    // Les rappels du soir (trajet, sport) prendront place en tete.
+    final reminders = _reminders;
     final groups = <List<Widget>>[
+      // Les rappels en tete : ce sont eux qui demandent une reponse.
+      if (reminders != null)
+        [
+          SettingsSubtitle(l10n.reminders_title),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            secondary: const Icon(Icons.pedal_bike),
+            title: Text(l10n.reminders_commute),
+            subtitle: Text(l10n.reminders_commute_hint),
+            value: reminders.commute,
+            onChanged: (value) => _saveReminders(reminders.copyWith(commute: value)),
+          ),
+          SettingsTimeTile(
+            title: l10n.reminders_time,
+            hour: reminders.commuteHour,
+            minute: reminders.commuteMinute,
+            enabled: reminders.commute,
+            onChanged: (time) => _saveReminders(
+                reminders.copyWith(commuteHour: time.hour, commuteMinute: time.minute)),
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            secondary: const Icon(Icons.fitness_center),
+            title: Text(l10n.reminders_sport),
+            subtitle: Text(l10n.reminders_sport_hint),
+            value: reminders.sport,
+            onChanged: (value) => _saveReminders(reminders.copyWith(sport: value)),
+          ),
+          SettingsTimeTile(
+            title: l10n.reminders_time,
+            hour: reminders.sportHour,
+            minute: reminders.sportMinute,
+            enabled: reminders.sport,
+            onChanged: (time) =>
+                _saveReminders(reminders.copyWith(sportHour: time.hour, sportMinute: time.minute)),
+          ),
+          Text(l10n.reminders_hint, style: hintStyle),
+        ],
       // Sans moyenne de depart, le bilan du soir n'aurait rien a dire.
       if (freeTime != null && freeTime.isConfigured)
         [
