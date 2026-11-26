@@ -5,6 +5,9 @@ import 'package:i_zerak_app/models/game_dao.dart' show GameTitle;
 import 'package:i_zerak_app/models/recap_dao.dart';
 import 'package:i_zerak_app/models/sport_dao.dart' show Sport;
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart' show CommuteFormat;
+import 'package:i_zerak_app/pages/gaming/game_stats_page.dart';
+import 'package:i_zerak_app/services/gaming/gaming_service.dart';
+import 'package:i_zerak_app/services/service_locator.dart';
 import 'package:i_zerak_app/pages/sport/widgets/sport_ui.dart';
 import 'package:i_zerak_app/services/recap/recap_service.dart';
 import 'package:i_zerak_app/services/repositories/interfaces/i_sport.dart';
@@ -510,6 +513,17 @@ class _GamesCard extends StatelessWidget {
             ),
           ),
         ],
+        if (getIt.isRegistered<GamingService>())
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                builder: (_) => GameStatsPage(),
+              )),
+              icon: const Icon(Icons.insights, size: 18),
+              label: Text(l10n.game_stats_open),
+            ),
+          ),
       ],
     );
   }

@@ -25,6 +25,7 @@ import http.client
 import json
 import logging
 import os
+import re
 import threading
 import time
 import urllib.error
@@ -69,6 +70,34 @@ _LOL_SETTLE_HOURS = 3
 
 _DAYS_KEPT = 120
 _WEEKS_REPORTED = 10
+
+# Les images viennent des CDN publics, sans cle : l'application les charge
+# elle-meme, l'agent ne fait que composer l'adresse.
+_STEAM_ICON_URL = "https://media.steampowered.com/steamcommunity/public/images/apps/{app}/{icon}.jpg"
+_STEAM_ICON = re.compile(r"[0-9a-f]{40}")
+_DDRAGON_VERSIONS_URL = "https://ddragon.leagueoflegends.com/api/versions.json"
+_DDRAGON_PORTRAIT_URL = "https://ddragon.leagueoflegends.com/cdn/{version}/img/champion/{champion}.png"
+_DDRAGON_VERSION = re.compile(r"\d{1,3}\.\d{1,3}\.\d{1,3}")
+_CHAMPION = re.compile(r"[A-Za-z0-9]{1,40}")
+
+# Le rang se lit sur le serveur de jeu, pas sur la region : son nom vient des
+# parties elles-memes. Il entre dans le nom d'hote qui recoit la cle Riot,
+# d'ou la liste fermee.
+_LOL_PLATFORMS = frozenset(
+    {
+        "br1", "eun1", "euw1", "jp1", "kr", "la1", "la2", "me1", "na1",
+        "oc1", "ph2", "ru", "sg2", "th2", "tr1", "tw2", "vn2",
+    }
+)
+_RANKED_SOLO = "RANKED_SOLO_5x5"
+_TIERS = frozenset(
+    {
+        "IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD",
+        "DIAMOND", "MASTER", "GRANDMASTER", "CHALLENGER",
+    }
+)
+_DIVISIONS = frozenset({"I", "II", "III", "IV"})
+_LOL_MATCHES_KEPT = 1500
 
 # Ce que l'etat enregistre ne peut pas dire, puisque c'est lui qui a echoue.
 _runtime_errors: dict = {}
@@ -170,8 +199,13 @@ def _valid_source(source: dict) -> bool:
         )
         and all(
             isinstance(source.get(field, ""), str)
-            for field in ("since", "tracked_from", "account")
+            for field in ("since", "tracked_from", "account", "platform", "ddragon")
         )
+        and isinstance(source.get("icons", {}), dict)
+        and isinstance(source.get("rank_history", {}), dict)
+        and isinstance(source.get("rank"), (dict, type(None)))
+        and isinstance(source.get("matches", []), list)
+        and all(isinstance(match, dict) for match in source.get("matches", []))
     )
 
 
@@ -294,6 +328,7 @@ def poll_steam(settings: GamingConfig, state: dict, now: datetime, fetch: Fetch 
     # temps credite sans le cumul qui empeche de le recompter.
     totals: dict = {}
     names = dict(source.get("names") or {})
+    icons = dict(source.get("icons") or {})
     credited: dict = {}
     for game in games:
         if not isinstance(game, dict) or not _is_count(game.get("appid")):
@@ -304,6 +339,11 @@ def poll_steam(settings: GamingConfig, state: dict, now: datetime, fetch: Fetch 
             continue
         if isinstance(game.get("name"), str):
             names[app] = game["name"]
+        # Une empreinte, pas une adresse : c'est l'agent qui compose l'URL, et
+        # rien d'autre qu'un hash ne doit pouvoir y entrer.
+        icon = game.get("img_icon_url")
+        if isinstance(icon, str) and _STEAM_ICON.fullmatch(icon):
+            icons[app] = icon
         if previous is None:
             totals[app] = total
         elif app in previous:
@@ -329,7 +369,7 @@ def poll_steam(settings: GamingConfig, state: dict, now: datetime, fetch: Fetch 
     played = _day(state, today)["steam"]
     for app, delta in credited.items():
         played[app] = played.get(app, 0) + delta
-    source.update(totals=totals, names=names, polled_at=now.timestamp())
+    source.update(totals=totals, names=names, icons=icons, polled_at=now.timestamp())
     _mark_measured(state, STEAM, today)
 
 
@@ -385,7 +425,7 @@ def poll_lol(settings: GamingConfig, state: dict, now: datetime, fetch: Fetch = 
                 raise
             log.warning("Partie LoL introuvable, ecartee")
             match = None
-        _record_match(state, settings, match, puuid)
+        _record_match(state, settings, match, puuid, match_id)
         # Partie par partie : une erreur sur la suivante ne doit pas faire
         # recompter celle-ci.
         seen.append(match_id)
@@ -396,8 +436,72 @@ def poll_lol(settings: GamingConfig, state: dict, now: datetime, fetch: Fetch = 
         source["synced_at"] = int(now.timestamp())
         _mark_measured(state, LOL, today)
 
+    # Des a-cotes : sans eux l'ecran perd le rang ou les portraits, jamais le
+    # temps de jeu. Leur panne ne fait donc pas echouer le releve.
+    _poll_rank(state, now, fetch, puuid, headers)
+    _poll_ddragon(state, fetch)
 
-def _record_match(state: dict, settings: GamingConfig, match: object, puuid: str) -> None:
+
+def _poll_rank(state: dict, now: datetime, fetch: Fetch, puuid: str, headers: dict) -> None:
+    source = state[LOL]
+    platform = source.get("platform")
+    if platform not in _LOL_PLATFORMS:
+        return
+    try:
+        entries = fetch(
+            f"https://{platform}.api.riotgames.com/lol/league/v4/entries/by-puuid/"
+            f"{urllib.parse.quote(puuid, safe='')}",
+            headers,
+        )
+    except GamingError as error:
+        log.warning("Rang LoL non actualise : %s", error.code)
+        return
+    if not isinstance(entries, list):
+        return
+    solo = next(
+        (e for e in entries if isinstance(e, dict) and e.get("queueType") == _RANKED_SOLO),
+        None,
+    )
+    if solo is None:
+        source["rank"] = {"tier": None, "at": int(now.timestamp())}
+        return
+    tier, division, lp = solo.get("tier"), solo.get("rank"), solo.get("leaguePoints")
+    if tier not in _TIERS or division not in _DIVISIONS or not _is_count(lp):
+        return
+    source["rank"] = {
+        "tier": tier,
+        "division": division,
+        "lp": lp,
+        "wins": solo["wins"] if _is_count(solo.get("wins")) else 0,
+        "losses": solo["losses"] if _is_count(solo.get("losses")) else 0,
+        "at": int(now.timestamp()),
+    }
+    source.setdefault("rank_history", {})[now.date().isoformat()] = {
+        "tier": tier,
+        "division": division,
+        "lp": lp,
+    }
+
+
+def _poll_ddragon(state: dict, fetch: Fetch) -> None:
+    """La version courante de Data Dragon, qui nomme le dossier des portraits."""
+    try:
+        versions = fetch(_DDRAGON_VERSIONS_URL, {})
+    except GamingError as error:
+        log.warning("Version Data Dragon non actualisee : %s", error.code)
+        return
+    if isinstance(versions, list) and versions and isinstance(versions[0], str):
+        if _DDRAGON_VERSION.fullmatch(versions[0]):
+            state[LOL]["ddragon"] = versions[0]
+
+
+def _count_or_none(value: object) -> Optional[int]:
+    return value if _is_count(value) else None
+
+
+def _record_match(
+    state: dict, settings: GamingConfig, match: object, puuid: str, match_id: str = ""
+) -> None:
     info = match.get("info") if isinstance(match, dict) else None
     participants = info.get("participants") if isinstance(info, dict) else None
     if not isinstance(participants, list):
@@ -419,11 +523,39 @@ def _record_match(state: dict, settings: GamingConfig, match: object, puuid: str
         when = datetime.fromtimestamp(started / 1000, ZoneInfo(settings.timezone))
     except (OverflowError, ValueError, OSError):
         return
-    day = _day(state, when.date().isoformat())
-    day["lol_minutes"] += round(seconds / 60)
+    key = when.date().isoformat()
+    minutes = round(seconds / 60)
+    won = player.get("win") is True
+    day = _day(state, key)
+    day["lol_minutes"] += minutes
     day["lol_games"] += 1
-    if player.get("win") is True:
+    if won:
         day["lol_wins"] += 1
+
+    source = state[LOL]
+    platform = info.get("platformId")
+    if isinstance(platform, str) and platform.lower() in _LOL_PLATFORMS:
+        source["platform"] = platform.lower()
+    champion = player.get("championName")
+    queue = info.get("queueId")
+    matches = source.setdefault("matches", [])
+    matches.append(
+        {
+            "id": match_id,
+            "day": key,
+            "start": int(started / 1000),
+            "minutes": minutes,
+            "win": won,
+            "champion": champion
+            if isinstance(champion, str) and _CHAMPION.fullmatch(champion)
+            else None,
+            "kills": _count_or_none(player.get("kills")),
+            "deaths": _count_or_none(player.get("deaths")),
+            "assists": _count_or_none(player.get("assists")),
+            "queue": _count_or_none(queue),
+        }
+    )
+    del matches[:-_LOL_MATCHES_KEPT]
 
 
 def _bind_account(state: dict, source: str, account: str, today: str) -> None:
@@ -466,6 +598,11 @@ def poll(settings: GamingConfig, state: dict, now: datetime, fetch: Fetch = fetc
     for source in (STEAM, LOL):
         if "broken" in state[source]:
             state[source]["broken"] = [key for key in state[source]["broken"] if key >= oldest]
+    lol = state[LOL]
+    if "matches" in lol:
+        lol["matches"] = [m for m in lol["matches"] if str(m.get("day", "")) >= oldest]
+    if "rank_history" in lol:
+        lol["rank_history"] = {k: v for k, v in lol["rank_history"].items() if k >= oldest}
 
 
 def _sources(settings: GamingConfig) -> list:
@@ -535,8 +672,19 @@ def week_summary(settings: GamingConfig, state: dict, monday: date) -> dict:
             followed.append(source)
 
     names = state[STEAM].get("names") or {}
+    icons = state[STEAM].get("icons") or {}
+    totals = state[STEAM].get("totals") or {}
     games = sorted(
-        ({"name": names.get(app, app), "minutes": minutes} for app, minutes in steam.items()),
+        (
+            {
+                "appid": app,
+                "name": names.get(app, app),
+                "minutes": minutes,
+                "lifetime_minutes": totals.get(app),
+                "icon": _STEAM_ICON_URL.format(app=app, icon=icons[app]) if app in icons else None,
+            }
+            for app, minutes in steam.items()
+        ),
         key=lambda game: -game["minutes"],
     )
     steam_minutes = sum(steam.values())
@@ -550,7 +698,70 @@ def week_summary(settings: GamingConfig, state: dict, monday: date) -> dict:
         "lol_games": lol_games,
         "lol_wins": lol_wins,
         "games": games,
+        "days": [_day_summary(state["days"].get(key), key) for key in keys],
+        "matches": _week_matches(state, keys),
+        "lp_change": _lp_change(state, keys),
     }
+
+
+def _day_summary(day: Optional[dict], key: str) -> dict:
+    if day is None:
+        return {"day": key, "steam_minutes": 0, "lol_minutes": 0, "measured": []}
+    return {
+        "day": key,
+        "steam_minutes": sum(day["steam"].values()),
+        "lol_minutes": day["lol_minutes"],
+        "measured": list(day["measured"]),
+    }
+
+
+def _week_matches(state: dict, keys: list) -> list:
+    """Les parties de la semaine, de la plus recente a la plus ancienne.
+
+    Seules celles relevees depuis que l'agent garde le detail : l'application
+    compare leur nombre a `lol_games` pour le dire.
+    """
+    lol = state[LOL]
+    version = lol.get("ddragon")
+    days = set(keys)
+    found = [m for m in lol.get("matches") or [] if m.get("day") in days]
+    found.sort(key=lambda m: m.get("start") or 0, reverse=True)
+    return [
+        {
+            "start": m.get("start"),
+            "minutes": m.get("minutes"),
+            "win": m.get("win") is True,
+            "champion": m.get("champion"),
+            "kills": m.get("kills"),
+            "deaths": m.get("deaths"),
+            "assists": m.get("assists"),
+            "queue": m.get("queue"),
+            "portrait": _DDRAGON_PORTRAIT_URL.format(version=version, champion=m["champion"])
+            if version and isinstance(m.get("champion"), str)
+            else None,
+        }
+        for m in found
+    ]
+
+
+def _lp_change(state: dict, keys: list) -> Optional[int]:
+    """Les LP gagnes ou perdus dans la semaine, tant que la division ne change pas.
+
+    D'une division a l'autre, la difference de LP ne veut plus rien dire.
+    """
+    history = state[LOL].get("rank_history") or {}
+    before = [k for k in history if k < keys[0]]
+    within = [k for k in history if keys[0] <= k <= keys[-1]]
+    if not before or not within:
+        return None
+    start, end = history[max(before)], history[max(within)]
+    if not isinstance(start, dict) or not isinstance(end, dict):
+        return None
+    if (start.get("tier"), start.get("division")) != (end.get("tier"), end.get("division")):
+        return None
+    if not _is_count(start.get("lp")) or not _is_count(end.get("lp")):
+        return None
+    return end["lp"] - start["lp"]
 
 
 def report(settings: GamingConfig, agent_token: str, today: Optional[date] = None) -> dict:
@@ -564,10 +775,21 @@ def report(settings: GamingConfig, agent_token: str, today: Optional[date] = Non
         "updated_at": state.get("updated_at"),
         "errors": {**(state.get("errors") or {}), **_runtime_errors},
         "notify_token": notify_token(agent_token),
+        "lol_rank": _rank(state) if settings.lol_enabled else None,
         "weeks": [
             week_summary(settings, state, monday - timedelta(days=7 * back))
             for back in range(_WEEKS_REPORTED)
         ],
+    }
+
+
+def _rank(state: dict) -> Optional[dict]:
+    """Le classe solo. Nul tant qu'il n'a pas ete lu ; `tier` nul : pas classe."""
+    rank = state[LOL].get("rank")
+    if not isinstance(rank, dict):
+        return None
+    return {
+        key: rank.get(key) for key in ("tier", "division", "lp", "wins", "losses", "at")
     }
 
 

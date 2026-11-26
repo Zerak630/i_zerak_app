@@ -8,6 +8,7 @@ import 'package:i_zerak_app/models/sport_dao.dart' show SportLedger;
 import 'package:i_zerak_app/models/subscription_dao.dart' show Subscription, SubscriptionFrequency;
 import 'package:i_zerak_app/pages/commute/widgets/commute_ui.dart';
 import 'package:i_zerak_app/pages/commute/widgets/goal_sheets.dart';
+import 'package:i_zerak_app/pages/gaming/game_stats_page.dart';
 import 'package:i_zerak_app/pages/goals/widgets/game_contract_card.dart';
 import 'package:i_zerak_app/pages/subscriptions/widgets/subscription_ui.dart'
     show SubscriptionAvatar;
@@ -251,6 +252,15 @@ class _GoalsPageState extends State<GoalsPage> {
               contract: games.contractOf(_today),
               streak: games.streakAt(_today),
               onSettings: () => _editContract(games.settings),
+              onStats: widget.games == null
+                  ? null
+                  : () => Navigator.of(context).push(MaterialPageRoute<void>(
+                        builder: (_) => GameStatsPage(
+                          service: widget.games,
+                          ledger: games,
+                          clock: widget.clock,
+                        ),
+                      )),
             ),
             const SizedBox(height: 12),
           ],

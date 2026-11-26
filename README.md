@@ -17,12 +17,16 @@ Il n'y a **aucun back-end intermédiaire**. L'application parle directement à c
   │         │───────────┼─▶│  qBittorrent │  WebUI, session SID            │
   │ iZerak  │  cert.    │  └──────────────┘                                │
   │ Android │  épinglé  │  ┌──────────────┐   :8081                        │
-  │         │───────────┼─▶│ izerak-agent │  /proc, systemctl, disque      │
-  └────┬────┘  + jeton  │  └──────────────┘                                │
-       │                └──────────────────────────────────────────────────┘
+  │         │───────────┼─▶│ izerak-agent │  /proc, systemctl, disque,     │
+  └────┬────┘  + jeton  │  └──────┬───────┘  temps de jeu                  │
+       │                └─────────┼────────────────────────────────────────┘
+       │                          │  HTTPS, toutes les heures
+       │                          ├──────▶ API Steam   cumul par jeu
+       │                          └──────▶ API Riot    parties de LoL
        │  HTTPS publics
        ├───────────────▶ TMDB               recherche de titres, identifiant IMDb
-       └───────────────▶ data.economie.gouv.fr   prix des carburants
+       ├───────────────▶ data.economie.gouv.fr   prix des carburants
+       └───────────────▶ CDN Steam, Data Dragon  icônes des jeux, portraits des champions
 ```
 
 Une couche intermédiaire n'apporterait rien : il n'y a ni utilisateurs multiples, ni logique métier
@@ -30,7 +34,9 @@ Une couche intermédiaire n'apporterait rien : il n'y a ni utilisateurs multiple
 il tient dans une trentaine de mégaoctets de mémoire là où une JVM en demanderait dix fois plus pour
 lire `/proc` et appeler `systemctl`.
 
-Les abonnements vivent uniquement dans Hive, sur l'appareil.
+Les abonnements vivent uniquement dans Hive, sur l'appareil. Le temps de jeu fait exception : c'est
+l'agent qui interroge Steam et Riot, parce qu'il faut une machine toujours allumée pour relever, et
+parce que les clés d'API n'ont ainsi jamais à quitter le Pi.
 
 ## Mise en route
 
@@ -46,7 +52,7 @@ doit l'être dans les deux langues.
 
 ```bash
 flutter analyze   # doit rester sans avertissement
-flutter test      # 498 tests
+flutter test      # 547 tests
 ```
 
 Les versions release se construisent **sans élagage des icônes** :
@@ -103,10 +109,53 @@ L'onglet montre la semaine jour par jour, les semaines tenues d'affilée (tout l
 moins une séance sans programme) et le temps passé sur chaque sport. Les données vivent dans la
 boîte Hive `sport`, une entrée par séance, synchronisée comme les trajets.
 
+## Temps de jeu : le contrat de sport
+
+L'agent du Pi relève le temps passé sur **Steam** et sur **League of Legends** (configuration :
+voir [le README de l'agent](server/izerak-agent/README.md#temps-de-jeu-steam-et-league-of-legends)).
+L'application lit ses relevés (`GET /api/v1/gaming`, dix semaines) et en garde une copie locale :
+le Pi n'est pas toujours joignable, depuis l'extérieur notamment.
+
+Le jeu d'une semaine fixe le **sport de la suivante**, dans une carte de l'onglet **Objectifs** :
+par défaut, 1 h de sport pour 3 h de jeu, arrondi aux 5 minutes supérieures et plafonné à 6 h. Une
+journée à vélo compte 1 h. La cible ne bouge plus une fois la semaine commencée, et les règles
+modifiées ne valent qu'à partir de la semaine suivante : un contrat garde celles de sa semaine.
+
+Une panne ne se lit **jamais comme 0 h de jeu**. Une semaine n'est définitive (`complete`), et ne
+fixe donc un contrat, qu'une fois le lundi suivant franchi sans trou dans les relevés ; sinon la
+carte le dit au lieu d'afficher une cible fausse.
+
+Le calcul est dans `lib/models/game_dao.dart` (`GameContractLedger`), et repris côté natif par
+`RecapReport.kt` pour la notification du dimanche : toute modification de `targetFor` doit être
+faite des deux côtés. Application fermée, le natif n'a pas accès au stockage sécurisé : il joint
+l'agent avec un **jeton dérivé** (`notify_token`), qui n'ouvre que la route `/api/v1/gaming/week`
+et ne donne aucun pouvoir sur les services.
+
+### L'écran Temps de jeu
+
+Il a son onglet **Jeux** dans la navigation (à épingler dans la barre ou dans « Plus »), et s'ouvre
+aussi depuis la carte du contrat (icône de statistiques) et depuis la carte Jeu du bilan
+(`lib/pages/gaming/game_stats_page.dart`). Trois onglets, sur la semaine choisie (chevrons, ou un
+appui sur une barre) :
+
+- **Tout** : le total, l'écart avec la semaine d'avant, la part Steam/LoL, dix semaines en barres
+  (la semaine en cours en contour : provisoire) et, ouvert depuis Objectifs, le contrat de la
+  semaine ;
+- **Steam** : chaque jeu avec son icône et sa part, le temps jour par jour (un tiret pour un jour
+  sans relevé, jamais 0) et le cumul de chaque jeu depuis toujours ;
+- **LoL** : parties, victoires, temps et durée moyenne ; la liste des parties avec le portrait du
+  champion, la file (classé, ARAM…) qui sert aussi de filtre, et le KDA ; le rang en classé solo
+  et les LP de la semaine.
+
+Les icônes et portraits sont chargés par le téléphone directement sur les CDN publics de Steam et
+de Data Dragon. L'application n'accepte une image que de ces deux hôtes, en HTTPS ; sinon, ou en
+attendant le chargement, elle affiche l'initiale. Les parties relevées avant que l'agent garde le
+détail sont comptées, mais sans ligne : l'écran le dit.
+
 ## Bilan de la semaine et du mois
 
 Le **bilan** met côte à côte, sans les additionner, l'essence économisée à vélo (et, au mois, les
-abonnements remboursés), le temps repris aux réseaux et le temps de sport, avec la période
+abonnements remboursés), le temps repris aux réseaux, le temps de sport et le temps de jeu, avec la période
 précédente pour comparer. Il s'ouvre depuis l'accueil (carte « Bilan de la semaine ») et depuis
 l'onglet Sport.
 
@@ -185,6 +234,9 @@ Android via `flutter_secure_storage`.
 | Jeton TMDB | clé personnelle gratuite sur themoviedb.org |
 
 Le jeton TMDB est facultatif : sans lui, le nom du dossier de destination se saisit à la main.
+
+Les clés Steam et Riot ne sont **pas** dans l'application : elles vivent dans
+`/etc/izerak-agent/config.yaml` sur le Pi, et l'agent ne transmet que des durées.
 
 L'API IMDb officielle n'est pas utilisée — elle n'a aucun accès public et n'est distribuée qu'aux
 entreprises via AWS Data Exchange. TMDB fournit l'identifiant IMDb via `/external_ids`, ce qui suffit

@@ -2,7 +2,8 @@
 
 Petit service HTTP a installer sur le Raspberry Pi. Il expose l'etat materiel de
 la machine, l'etat du disque externe de la bibliotheque Emby, et le pilotage
-d'un ensemble ferme de services systemd. L'application mobile ne parle qu'a lui :
+d'un ensemble ferme de services systemd, et, si on le configure, releve le temps
+de jeu sur Steam et League of Legends. L'application mobile ne parle qu'a lui :
 elle n'ouvre jamais de session SSH et ne touche jamais a systemd directement.
 
 ## Deploiement depuis le poste de developpement
@@ -119,9 +120,70 @@ Deux points meritent attention :
   capacite reelle du disque. C'est lui que l'application affiche, et c'est son
   depassement qui bloque l'ajout de nouveaux telechargements.
 
+## Temps de jeu (Steam et League of Legends)
+
+Facultatif : sans section `gaming`, ou sans tous les champs d'une source,
+celle-ci reste inactive et aucune requete ne part. Voir `config.example.yaml`.
+
+| Source | Champs | Ou les trouver |
+|---|---|---|
+| Steam | `api_key`, `steam_id` | cle sur https://steamcommunity.com/dev/apikey ; SteamID64 a 17 chiffres |
+| Riot | `api_key`, `game_name`, `tag_line`, `region` | cle sur https://developer.riotgames.com ; Riot ID `Pseudo#TAG` ; region `europe`, `americas`, `asia` ou `sea` |
+
+Points d'attention :
+
+- **Steam** : les « details de jeu » du profil doivent etre **publics**. Sinon
+  l'API repond 200 avec un objet vide, que l'agent signale en `profile_private`
+  plutot que de le lire comme « aucune heure jouee ».
+- **Riot** : utilisez une **cle d'application personnelle**. La cle de
+  developpement expire au bout de 24 heures et l'agent passerait en
+  `unauthorized` le lendemain.
+- Steam ne publie qu'un **cumul par jeu**, sans date : le temps d'une journee
+  est la difference entre deux releves. Riot publie chaque partie avec sa date
+  et sa duree ; une partie se range sous son jour de debut, et une partie
+  annulee par reddition anticipee ne compte pas.
+- `poll_minutes` (60 par defaut, 15 au minimum) regle la frequence. Riot limite
+  le debit des cles personnelles : 20 parties au plus sont lues par releve, le
+  reste attend le suivant.
+- Changer de compte (SteamID ou Riot ID) repart d'une base neuve : comparer les
+  cumuls de deux comptes inventerait du temps de jeu.
+- Pour l'ecran de statistiques, l'agent garde aussi l'icone de chaque jeu
+  Steam (deja dans la reponse de Steam) et le detail de chaque partie LoL :
+  champion, KDA, file (`queueId`). Seules les parties relevees apres la mise a
+  jour ont ce detail.
+- Le **rang** se lit avec la meme cle, sur le serveur de jeu (`euw1`…) que
+  nomment les parties elles-memes : rien a configurer, mais pas de rang avant
+  une premiere partie relevee. Une requete de plus par releve.
+- La version de **Data Dragon** (portraits des champions) est lue sans cle a
+  chaque releve. Le rang et cette version sont des a-cotes : leur panne ne
+  fait jamais echouer le releve, l'ecran garde les dernieres valeurs.
+
+Les releves sont gardes 120 jours dans `/var/lib/izerak-agent/gaming.json`
+(`StateDirectory` de l'unite systemd, seul endroit ou l'agent ecrit), en
+ecriture atomique. Un fichier illisible est renomme en
+`gaming.json.corrompu-<horodatage>` pour examen, jamais ecrase.
+
+Une panne ne se lit jamais comme 0 h : une journee sans reponse n'est pas
+marquee mesuree, et une semaine n'est `complete` qu'une fois le lundi suivant
+franchi sans trou dans les releves (lundi 3 h pour LoL, le temps qu'une partie
+du dimanche soir se termine).
+
+Les cles ne sortent jamais de l'agent : ni dans l'etat, ni dans les reponses,
+ni dans les journaux. Les erreurs sont reduites a un code :
+
+| Code | Signification |
+|---|---|
+| `unauthorized` | cle refusee ou expiree (401/403) |
+| `profile_private` | Steam : details de jeu prives |
+| `not_found` | Riot ID introuvable |
+| `rate_limited` | quota de l'API depasse ; se retente au releve suivant |
+| `unavailable` | API injoignable ou reponse inattendue |
+| `unexpected` | reponse d'une forme imprevue (voir le journal) |
+
 ## API
 
-Toutes les routes exigent l'en-tete `Authorization: Bearer <jeton>`.
+Toutes les routes exigent l'en-tete `Authorization: Bearer <jeton>`, sauf
+`/api/v1/gaming/week`.
 
 | Methode | Route | Reponse |
 |---|---|---|
@@ -130,6 +192,8 @@ Toutes les routes exigent l'en-tete `Authorization: Bearer <jeton>`.
 | GET | `/api/v1/storage` | etat des volumes surveilles |
 | GET | `/api/v1/services` | etat des services autorises, et leur interface web (`web`, ou `null`) |
 | POST | `/api/v1/services/{nom}/{start\|stop\|restart}` | etat apres action |
+| GET | `/api/v1/gaming` | sources actives, erreurs, rang classe solo (`lol_rank`), jeton de notification, et dix semaines de jeu : jour par jour (`days`), Steam par jeu avec icone et cumul (`games`), parties LoL en detail (`matches`) et LP gagnes (`lp_change`) ; 503 si les releves sont illisibles |
+| GET | `/api/v1/gaming/week?monday=AAAA-MM-JJ` | total d'une semaine et `measured` ; **seule route** ouverte au jeton derive `notify_token`, utilise par la notification du dimanche application fermee |
 
 ```bash
 curl -sk -H "Authorization: Bearer $TOKEN" https://localhost:8081/api/v1/storage | jq
@@ -200,3 +264,7 @@ journalctl -u izerak-agent -f
 | 502 sur une action | regle sudoers absente pour ce couple action/unite |
 | 502 « le uid effectif n'est pas 0 » | `NoNewPrivs: 1` sur le processus : une option de l'unite l'active implicitement |
 | Certificat refuse | empreinte epinglee obsolete apres regeneration du certificat ; a reapprouver dans les reglages |
+| LoL en `unauthorized` avec une cle valide | agent anterieur au correctif User-Agent : le pare-feu de Riot rejette `Python-urllib` ; redeployer |
+| LoL en `unauthorized` le lendemain | cle de developpement Riot (24 h) ; demander une cle personnelle |
+| Steam en `profile_private` | profil Steam → Confidentialite → Details de jeu : Public |
+| 503 sur `/api/v1/gaming` | `gaming.json` illisible ; le prochain releve le met de cote et repart de zero |

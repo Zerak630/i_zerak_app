@@ -3567,6 +3567,12 @@ abstract class AppLocalizations {
   /// **'Sport'**
   String get bb_sport;
 
+  /// No description provided for @bb_games.
+  ///
+  /// In en, this message translates to:
+  /// **'Games'**
+  String get bb_games;
+
   /// No description provided for @sport_unknown.
   ///
   /// In en, this message translates to:
@@ -4274,6 +4280,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A day by bike counts for {minutes}'**
   String goals_game_bike(String minutes);
+
+  /// No description provided for @game_stats_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Gaming time'**
+  String get game_stats_title;
+
+  /// No description provided for @game_stats_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Gaming stats'**
+  String get game_stats_open;
+
+  /// No description provided for @game_stats_tab_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get game_stats_tab_all;
+
+  /// No description provided for @game_stats_updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Read by the Pi {ago} ago'**
+  String game_stats_updated(String ago);
+
+  /// No description provided for @game_stats_updated_on.
+  ///
+  /// In en, this message translates to:
+  /// **'Last read by the Pi on {date}'**
+  String game_stats_updated_on(String date);
+
+  /// No description provided for @game_stats_never.
+  ///
+  /// In en, this message translates to:
+  /// **'No reading yet'**
+  String get game_stats_never;
+
+  /// No description provided for @game_stats_refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get game_stats_refresh;
+
+  /// No description provided for @game_stats_week.
+  ///
+  /// In en, this message translates to:
+  /// **'Week of {date}'**
+  String game_stats_week(String date);
+
+  /// No description provided for @game_stats_this_week.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get game_stats_this_week;
+
+  /// No description provided for @game_stats_previous_week.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous week'**
+  String get game_stats_previous_week;
+
+  /// No description provided for @game_stats_next_week.
+  ///
+  /// In en, this message translates to:
+  /// **'Next week'**
+  String get game_stats_next_week;
+
+  /// No description provided for @game_stats_delta_less.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} less than the week before'**
+  String game_stats_delta_less(String minutes);
+
+  /// No description provided for @game_stats_delta_more.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} more than the week before'**
+  String game_stats_delta_more(String minutes);
+
+  /// No description provided for @game_stats_delta_same.
+  ///
+  /// In en, this message translates to:
+  /// **'Same as the week before'**
+  String get game_stats_delta_same;
+
+  /// No description provided for @game_stats_share.
+  ///
+  /// In en, this message translates to:
+  /// **'{source} · {minutes}'**
+  String game_stats_share(String source, String minutes);
+
+  /// No description provided for @game_stats_weeks_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Last {count} weeks'**
+  String game_stats_weeks_title(int count);
+
+  /// No description provided for @game_stats_average.
+  ///
+  /// In en, this message translates to:
+  /// **'average {minutes}'**
+  String game_stats_average(String minutes);
+
+  /// No description provided for @game_stats_in_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get game_stats_in_progress;
+
+  /// No description provided for @game_stats_partial.
+  ///
+  /// In en, this message translates to:
+  /// **'This week is provisional until it ends with no reading missing. A missed reading never counts as 0 h.'**
+  String get game_stats_partial;
+
+  /// No description provided for @game_stats_steam_games.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No game launched} =1{1 game launched} other{{count} games launched}}'**
+  String game_stats_steam_games(int count);
+
+  /// No description provided for @game_stats_lol_games.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 game} other{{count} games}}'**
+  String game_stats_lol_games(int count);
+
+  /// No description provided for @game_stats_by_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Day by day'**
+  String get game_stats_by_day;
+
+  /// No description provided for @game_stats_lifetime.
+  ///
+  /// In en, this message translates to:
+  /// **'All time'**
+  String get game_stats_lifetime;
+
+  /// No description provided for @game_stats_hours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h'**
+  String game_stats_hours(int hours);
+
+  /// No description provided for @game_stats_steam_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Steam doesn\'t date sessions: a day\'s time is the gap between two readings by the Pi.'**
+  String get game_stats_steam_hint;
+
+  /// No description provided for @game_stats_games.
+  ///
+  /// In en, this message translates to:
+  /// **'Games'**
+  String get game_stats_games;
+
+  /// No description provided for @game_stats_wins.
+  ///
+  /// In en, this message translates to:
+  /// **'Wins'**
+  String get game_stats_wins;
+
+  /// No description provided for @game_stats_time.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get game_stats_time;
+
+  /// No description provided for @game_stats_average_length.
+  ///
+  /// In en, this message translates to:
+  /// **'Average length'**
+  String get game_stats_average_length;
+
+  /// No description provided for @game_stats_matches_title.
+  ///
+  /// In en, this message translates to:
+  /// **'This week\'s games'**
+  String get game_stats_matches_title;
+
+  /// No description provided for @game_stats_filter.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} · {count}'**
+  String game_stats_filter(String label, int count);
+
+  /// No description provided for @game_stats_filter_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get game_stats_filter_all;
+
+  /// No description provided for @game_stats_queue.
+  ///
+  /// In en, this message translates to:
+  /// **'{queue, select, ranked{Ranked} aram{ARAM} normal{Normal} arena{Arena} other{Other}}'**
+  String game_stats_queue(String queue);
+
+  /// No description provided for @game_stats_queue_solo.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranked solo'**
+  String get game_stats_queue_solo;
+
+  /// No description provided for @game_stats_queue_flex.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranked flex'**
+  String get game_stats_queue_flex;
+
+  /// No description provided for @game_stats_win.
+  ///
+  /// In en, this message translates to:
+  /// **'Win'**
+  String get game_stats_win;
+
+  /// No description provided for @game_stats_loss.
+  ///
+  /// In en, this message translates to:
+  /// **'Loss'**
+  String get game_stats_loss;
+
+  /// No description provided for @game_stats_win_short.
+  ///
+  /// In en, this message translates to:
+  /// **'W'**
+  String get game_stats_win_short;
+
+  /// No description provided for @game_stats_loss_short.
+  ///
+  /// In en, this message translates to:
+  /// **'L'**
+  String get game_stats_loss_short;
+
+  /// No description provided for @game_stats_no_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 game counted without detail, before the agent kept it.} other{{count} games counted without detail, before the agent kept it.}}'**
+  String game_stats_no_detail(int count);
+
+  /// No description provided for @game_stats_no_matches.
+  ///
+  /// In en, this message translates to:
+  /// **'No game this week.'**
+  String get game_stats_no_matches;
+
+  /// No description provided for @game_stats_no_steam.
+  ///
+  /// In en, this message translates to:
+  /// **'No Steam game this week.'**
+  String get game_stats_no_steam;
+
+  /// No description provided for @game_stats_rank_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranked solo'**
+  String get game_stats_rank_title;
+
+  /// No description provided for @game_stats_tier.
+  ///
+  /// In en, this message translates to:
+  /// **'{tier, select, IRON{Iron} BRONZE{Bronze} SILVER{Silver} GOLD{Gold} PLATINUM{Platinum} EMERALD{Emerald} DIAMOND{Diamond} MASTER{Master} GRANDMASTER{Grandmaster} CHALLENGER{Challenger} other{{tier}}}'**
+  String game_stats_tier(String tier);
+
+  /// No description provided for @game_stats_lp.
+  ///
+  /// In en, this message translates to:
+  /// **'{lp} LP'**
+  String game_stats_lp(int lp);
+
+  /// No description provided for @game_stats_unranked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unranked this season'**
+  String get game_stats_unranked;
+
+  /// No description provided for @game_stats_lp_week.
+  ///
+  /// In en, this message translates to:
+  /// **'{lp} LP this week'**
+  String game_stats_lp_week(String lp);
 }
 
 class _AppLocalizationsDelegate

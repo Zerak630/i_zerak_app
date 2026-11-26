@@ -14,7 +14,11 @@ class GameContractCard extends StatelessWidget {
     required this.contract,
     required this.streak,
     required this.onSettings,
+    this.onStats,
   });
+
+  /// Ouvre l'ecran des statistiques de jeu.
+  final VoidCallback? onStats;
 
   final GamingReport report;
   final GameContractSettings settings;
@@ -49,6 +53,12 @@ class GameContractCard extends StatelessWidget {
               ),
             ),
           ),
+          if (onStats != null)
+            IconButton(
+              onPressed: onStats,
+              tooltip: l10n.game_stats_open,
+              icon: const Icon(Icons.insights, size: 20),
+            ),
           IconButton(
             onPressed: onSettings,
             tooltip: l10n.goals_game_settings,
