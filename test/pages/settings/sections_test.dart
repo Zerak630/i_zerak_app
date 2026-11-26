@@ -14,10 +14,12 @@ import 'package:i_zerak_app/pages/settings/sections/notifications_section.dart';
 import 'package:i_zerak_app/services/commute_price_service.dart';
 import 'package:i_zerak_app/services/gaming/gaming_service.dart';
 import 'package:i_zerak_app/services/recap/recap_service.dart';
+import 'package:i_zerak_app/services/reminders/reminder_service.dart';
 import 'package:i_zerak_app/services/screen_time/screen_time_service.dart';
 
 import '../../__mocks__/commute_fakes.dart';
 import '../../__mocks__/recap_fakes.dart';
+import '../../__mocks__/reminder_fakes.dart';
 import '../../__mocks__/screen_time_fakes.dart';
 import '../../__mocks__/sport_fakes.dart';
 import '../../__mocks__/subscription_fakes.dart';
@@ -272,6 +274,35 @@ void main() {
 
       expect(find.text('Bilan quotidien'), findsNothing);
       expect(find.text('Bilan de la semaine'), findsOneWidget);
+    });
+
+    ReminderService reminders(FakeReminderBridge reminderBridge) => ReminderService(
+          commute: MemoryCommute(settings: const CommuteSettings(distanceKm: 12.4)),
+          sport: MemorySport(),
+          preferences: preferences,
+          bridge: reminderBridge,
+          clock: () => now,
+          locale: () => const Locale('fr'),
+        );
+
+    testWidgets('les rappels du soir se reglent en tete, sur Android', (tester) async {
+      final reminderBridge = FakeReminderBridge();
+      await show(tester, NotificationsSection(reminders: reminders(reminderBridge)));
+
+      expect(find.text('Trajet'), findsOneWidget);
+      await tester.tap(find.text('Programme de sport'));
+      await tester.pumpAndSettle();
+      expect(preferences.reminders.sport, isFalse);
+      expect(preferences.reminders.commute, isTrue);
+      expect((reminderBridge.configs.last['sport']! as Map)['enabled'], isFalse);
+    });
+
+    testWidgets('hors Android, pas de rappels a regler', (tester) async {
+      await show(
+          tester, NotificationsSection(reminders: reminders(FakeReminderBridge(supported: false))));
+
+      expect(find.text('Trajet'), findsNothing);
+      expect(find.text('Aucune notification à régler sur cet appareil.'), findsOneWidget);
     });
 
     testWidgets('sans aucun service, la categorie le dit', (tester) async {
