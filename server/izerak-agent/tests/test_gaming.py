@@ -331,6 +331,29 @@ def test_un_nom_avec_demi_caractere_se_sauvegarde(tmp_path: Path) -> None:
     assert gaming.load_state(path)["steam"]["names"]["1"] == "jeu \ud83d"
 
 
+def test_lagent_ne_se_presente_pas_comme_urllib(monkeypatch) -> None:
+    sent = {}
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return b"{}"
+
+    def open_(request, timeout):
+        sent.update({k.lower(): v for k, v in request.header_items()})
+        return Response()
+
+    monkeypatch.setattr(gaming._opener, "open", open_)
+    gaming.fetch_json("https://europe.api.riotgames.com/x", {"X-Riot-Token": "k"})
+    assert sent["user-agent"].startswith("izerak-agent/")
+    assert sent["x-riot-token"] == "k"
+
+
 def test_les_redirections_ne_sont_pas_suivies() -> None:
     handler = gaming._NoRedirect()
     assert handler.redirect_request(None, None, 302, "Found", {}, "http://autre.example/") is None
