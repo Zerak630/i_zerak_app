@@ -108,24 +108,42 @@ def test_un_changement_de_compte_ninvente_pas_de_temps() -> None:
     assert state["steam"]["since"] == "2026-11-23"
 
 
-def match(started: datetime, seconds: int, win: bool, remake: bool = False) -> dict:
+def match(
+    started: datetime, seconds: int, win: bool, remake: bool = False, **player: object
+) -> dict:
     return {
         "info": {
             "gameStartTimestamp": int(started.timestamp() * 1000),
             "gameEndTimestamp": int(started.timestamp() * 1000) + seconds * 1000,
             "gameDuration": seconds,
+            "platformId": "EUW1",
+            "queueId": 420,
             "participants": [
-                {"puuid": "moi", "win": win, "gameEndedInEarlySurrender": remake},
+                {"puuid": "moi", "win": win, "gameEndedInEarlySurrender": remake, **player},
             ],
         }
     }
 
 
-def riot(matches: dict, failing: dict = None):
+SOLO = {"queueType": "RANKED_SOLO_5x5", "tier": "GOLD", "rank": "II", "leaguePoints": 54,
+        "wins": 30, "losses": 25}
+
+
+def riot(matches: dict, failing: dict = None, entries: object = (), versions: object = ("15.23.1",)):
     failing = failing or {}
 
     def fetch(url: str, headers: dict):
+        if url.startswith("https://ddragon.leagueoflegends.com/"):
+            # Data Dragon est public : la cle Riot ne doit pas y partir.
+            assert headers == {}
+            if isinstance(versions, Exception):
+                raise versions
+            return list(versions)
         assert headers["X-Riot-Token"] == "cle-riot"
+        if "/league/v4/" in url:
+            if isinstance(entries, Exception):
+                raise entries
+            return list(entries) if isinstance(entries, tuple) else entries
         if "/accounts/" in url:
             return {"puuid": "moi"}
         if "/ids?" in url:
@@ -438,3 +456,193 @@ def test_le_compte_sea_se_lit_sur_asia() -> None:
 
 def test_les_cles_ne_paraissent_pas_dans_la_representation() -> None:
     assert "cle-steam" not in repr(STEAM_ONLY)
+
+
+# --- Ecran de statistiques : icones, jours, detail des parties, rang ---
+
+ICON = "a" * 40
+
+
+def test_licone_steam_est_gardee_et_lurl_composee_par_lagent() -> None:
+    state = gaming.empty_state()
+    games = [
+        {"appid": 1, "name": "Un", "playtime_forever": 100, "img_icon_url": ICON},
+        {"appid": 2, "name": "Deux", "playtime_forever": 50, "img_icon_url": "../../x"},
+    ]
+    gaming.poll_steam(STEAM_ONLY, state, at(23, 10), lambda u, h: {"response": {"games": games}})
+    games[0]["playtime_forever"] = 160
+    games[1]["playtime_forever"] = 80
+    gaming.poll_steam(STEAM_ONLY, state, at(23, 11), lambda u, h: {"response": {"games": games}})
+
+    assert state["steam"]["icons"] == {"1": ICON}
+    week = gaming.week_summary(STEAM_ONLY, state, date(2026, 11, 23))
+    first, second = week["games"]
+    assert first["icon"] == (
+        f"https://media.steampowered.com/steamcommunity/public/images/apps/1/{ICON}.jpg"
+    )
+    assert first["lifetime_minutes"] == 160
+    assert (first["appid"], first["minutes"]) == ("1", 60)
+    assert second["icon"] is None
+
+
+def test_la_semaine_se_detaille_jour_par_jour() -> None:
+    state = gaming.empty_state()
+    gaming.poll_steam(STEAM_ONLY, state, at(23, 10), steam(a1=100))
+    gaming.poll_steam(STEAM_ONLY, state, at(25, 22), steam(a1=170))
+    days = gaming.week_summary(STEAM_ONLY, state, date(2026, 11, 23))["days"]
+    assert [d["day"] for d in days][:3] == ["2026-11-23", "2026-11-24", "2026-11-25"]
+    assert [d["steam_minutes"] for d in days] == [0, 0, 70, 0, 0, 0, 0]
+    # Un jour sans releve n'est pas un jour a 0 h : l'application le distingue.
+    assert days[1]["measured"] == []
+    assert days[2]["measured"] == ["steam"]
+
+
+def test_le_detail_dune_partie_est_garde() -> None:
+    state = gaming.empty_state()
+    gaming.poll_lol(LOL_ONLY, state, at(23, 8), riot({}))
+    matches = {
+        "EUW1_1": match(
+            at(23, 20), 1800, True, championName="Ahri", kills=8, deaths=2, assists=9
+        ),
+        "EUW1_2": match(at(23, 21), 1500, False, championName="<b>"),
+    }
+    gaming.poll_lol(LOL_ONLY, state, at(23, 23), riot(matches))
+
+    assert state["lol"]["platform"] == "euw1"
+    detail = gaming.week_summary(LOL_ONLY, state, date(2026, 11, 23))["matches"]
+    assert [m["minutes"] for m in detail] == [25, 30]
+    latest, first = detail
+    assert first == {
+        "start": int(at(23, 20).timestamp()),
+        "minutes": 30,
+        "win": True,
+        "champion": "Ahri",
+        "kills": 8,
+        "deaths": 2,
+        "assists": 9,
+        "queue": 420,
+        "portrait": "https://ddragon.leagueoflegends.com/cdn/15.23.1/img/champion/Ahri.png",
+    }
+    assert latest["champion"] is None
+    assert latest["portrait"] is None
+
+
+def test_une_version_data_dragon_douteuse_est_ignoree() -> None:
+    state = gaming.empty_state()
+    gaming.poll_lol(LOL_ONLY, state, at(23, 8), riot({}, versions=("x/../../",)))
+    assert "ddragon" not in state["lol"]
+
+
+def test_le_rang_se_lit_sur_le_serveur_des_parties() -> None:
+    urls = []
+    base = riot({"EUW1_1": match(at(23, 20), 1800, True)}, entries=(SOLO,))
+
+    def fetch(url: str, headers: dict):
+        urls.append(url)
+        return base(url, headers)
+
+    state = gaming.empty_state()
+    gaming.poll_lol(LOL_ONLY, state, at(23, 8), riot({}))
+    # Sans partie, aucun serveur connu : pas de requete de rang.
+    assert "rank" not in state["lol"]
+    gaming.poll_lol(LOL_ONLY, state, at(23, 23), fetch)
+
+    assert any(u.startswith("https://euw1.api.riotgames.com/lol/league/v4/") for u in urls)
+    rank = gaming._rank(state)
+    assert (rank["tier"], rank["division"], rank["lp"], rank["wins"]) == ("GOLD", "II", 54, 30)
+
+
+def test_un_joueur_non_classe_nest_pas_une_erreur() -> None:
+    state = gaming.empty_state()
+    state["lol"]["platform"] = "euw1"
+    gaming.poll(LOL_ONLY, state, at(23, 8), riot({}, entries=[{"queueType": "CHERRY"}]))
+    assert state["errors"] == {}
+    assert state["lol"]["rank"]["tier"] is None
+
+
+def test_une_panne_du_rang_ne_fait_pas_echouer_le_releve() -> None:
+    state = gaming.empty_state()
+    state["lol"]["platform"] = "euw1"
+    state["lol"]["rank"] = {"tier": "GOLD", "division": "II", "lp": 10, "wins": 1, "losses": 1}
+    fetch = riot(
+        {},
+        entries=gaming.GamingError("rate_limited"),
+        versions=gaming.GamingError("unavailable"),
+    )
+    gaming.poll(LOL_ONLY, state, at(23, 8), fetch)
+    assert state["errors"] == {}
+    assert state["lol"]["rank"]["lp"] == 10
+    assert "lol" in state["days"]["2026-11-23"]["measured"]
+
+
+def test_un_serveur_inconnu_ne_recoit_pas_la_cle() -> None:
+    urls = []
+    state = gaming.empty_state()
+    state["lol"]["platform"] = "evil.example.com#"
+    base = riot({}, entries=(SOLO,))
+
+    def fetch(url: str, headers: dict):
+        urls.append(url)
+        return base(url, headers)
+
+    gaming.poll_lol(LOL_ONLY, state, at(23, 8), fetch)
+    assert not any("/league/v4/" in u for u in urls)
+
+
+def snapshot(tier: str, division: str, lp: int) -> dict:
+    return {"tier": tier, "division": division, "lp": lp}
+
+
+def test_les_lp_de_la_semaine_partent_du_dernier_releve_davant() -> None:
+    state = gaming.empty_state()
+    state["lol"]["rank_history"] = {
+        "2026-11-21": snapshot("GOLD", "II", 10),
+        "2026-11-22": snapshot("GOLD", "II", 16),
+        "2026-11-25": snapshot("GOLD", "II", 40),
+        "2026-11-27": snapshot("GOLD", "II", 54),
+    }
+    assert gaming.week_summary(LOL_ONLY, state, date(2026, 11, 23))["lp_change"] == 38
+
+
+def test_un_changement_de_division_ne_donne_pas_de_lp() -> None:
+    state = gaming.empty_state()
+    state["lol"]["rank_history"] = {
+        "2026-11-22": snapshot("GOLD", "III", 90),
+        "2026-11-27": snapshot("GOLD", "II", 4),
+    }
+    assert gaming.week_summary(LOL_ONLY, state, date(2026, 11, 23))["lp_change"] is None
+
+
+def test_le_detail_et_lhistorique_du_rang_vieillissent_comme_les_jours() -> None:
+    state = gaming.empty_state()
+    state["lol"]["matches"] = [{"day": "2026-01-01"}, {"day": "2026-11-20"}]
+    state["lol"]["rank_history"] = {"2026-01-01": snapshot("GOLD", "I", 1)}
+    gaming.poll(GamingConfig(), state, at(23))
+    assert state["lol"]["matches"] == [{"day": "2026-11-20"}]
+    assert state["lol"]["rank_history"] == {}
+
+
+def test_un_etat_davant_lecran_se_relit(tmp_path: Path) -> None:
+    path = tmp_path / "gaming.json"
+    old = gaming.empty_state()
+    old["steam"] = {"totals": {"1": 5}, "names": {"1": "x"}, "since": "2026-11-01"}
+    path.write_text(json.dumps(old), encoding="utf-8")
+    week = gaming.week_summary(BOTH, gaming.load_state(path), date(2026, 11, 23))
+    assert week["matches"] == []
+    assert week["lp_change"] is None
+    assert week["games"] == []
+
+
+def test_le_rapport_porte_le_rang(tmp_path: Path) -> None:
+    path = tmp_path / "gaming.json"
+    state = gaming.empty_state()
+    state["lol"]["rank"] = {
+        "tier": "GOLD", "division": "II", "lp": 54, "wins": 3, "losses": 2, "at": 1,
+    }
+    gaming.save_state(path, state)
+    lol = GamingConfig(
+        riot_api_key="cle-riot", riot_game_name="P", riot_tag_line="T", state_path=str(path)
+    )
+    assert gaming.report(lol, TOKEN, date(2026, 11, 26))["lol_rank"]["tier"] == "GOLD"
+    steam_only = GamingConfig(steam_api_key="k", steam_id="1", state_path=str(path))
+    assert gaming.report(steam_only, TOKEN, date(2026, 11, 26))["lol_rank"] is None
