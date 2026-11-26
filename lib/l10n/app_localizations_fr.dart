@@ -2300,6 +2300,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get bb_sport => 'Sport';
 
   @override
+  String get bb_games => 'Jeux';
+
+  @override
   String get sport_unknown => 'Sport supprimé';
 
   @override

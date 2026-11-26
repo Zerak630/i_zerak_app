@@ -1180,6 +1180,7 @@
 	},
 	"free_over_total": "Time over the limit",
 	"bb_sport": "Sport",
+	"bb_games": "Games",
 	"sport_unknown": "Deleted sport",
 	"sport_strength": "Strength",
 	"sport_cardio": "Cardio",

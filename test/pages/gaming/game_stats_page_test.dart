@@ -54,7 +54,7 @@ void main() {
     lolRank: const LolRank(tier: 'GOLD', division: 'II', lp: 54, wins: 30, losses: 25),
   );
 
-  Future<void> show(WidgetTester tester, {GamingReport? with_, GameStatsTab tab = GameStatsTab.all}) async {
+  Future<void> show(WidgetTester tester, {GamingReport? with_, GameStatsTab tab = GameStatsTab.all, bool embedded = false}) async {
     // Un telephone haut : la liste entiere est construite.
     tester.view.physicalSize = const Size(400, 1800);
     tester.view.devicePixelRatio = 1;
@@ -65,7 +65,7 @@ void main() {
       locale: const Locale('fr'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: GameStatsPage(service: service, clock: clock, initialTab: tab),
+      home: Scaffold(body: GameStatsPage(service: service, clock: clock, initialTab: tab, embedded: embedded)),
     ));
     await tester.pumpAndSettle();
   }
@@ -142,5 +142,13 @@ void main() {
   testWidgets('sans releve, l\'ecran le dit', (tester) async {
     await show(tester, with_: const GamingReport(sources: ['steam']));
     expect(find.text('Pas encore de relevé'), findsWidgets);
+  });
+
+  testWidgets('comme onglet, ni AppBar ni retour, mais le titre et l\'actualisation', (tester) async {
+    await show(tester, embedded: true);
+    expect(find.byType(AppBar), findsNothing);
+    expect(find.text('Temps de jeu'), findsOneWidget);
+    expect(find.byTooltip('Actualiser'), findsOneWidget);
+    expect(find.text('2 h 00'), findsOneWidget);
   });
 }

@@ -6,6 +6,7 @@ import 'package:i_zerak_app/pages/app_tab_ui.dart';
 import 'package:i_zerak_app/pages/commute/commute_page.dart';
 import 'package:i_zerak_app/pages/dashboard/dashboard_page.dart';
 import 'package:i_zerak_app/pages/free_time/free_time_page.dart';
+import 'package:i_zerak_app/pages/gaming/game_stats_page.dart';
 import 'package:i_zerak_app/pages/sport/sport_page.dart';
 import 'package:i_zerak_app/pages/gas_stations/gas_station_page.dart';
 import 'package:i_zerak_app/pages/goals/goals_page.dart';
@@ -216,6 +217,7 @@ class HomePageState extends State<HomePage> {
       AppTab.goals => GoalsPage(),
       AppTab.freeTime => FreeTimePage(),
       AppTab.sport => SportPage(),
+      AppTab.games => GameStatsPage(embedded: true),
       AppTab.torrents => const TorrentsPage(),
       AppTab.system => const SystemPage(),
       AppTab.gas => GasStationPage(),

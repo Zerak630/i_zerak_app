@@ -578,6 +578,7 @@
 	"free_kept_detail": "{count, plural, =1{sur 1 jour mesuré} other{sur {count} jours mesurés}}",
 	"free_over_total": "Temps de trop",
 	"bb_sport": "Sport",
+	"bb_games": "Jeux",
 	"sport_unknown": "Sport supprimé",
 	"sport_strength": "Renforcement",
 	"sport_cardio": "Cardio",

@@ -22,6 +22,7 @@ class GameStatsPage extends StatefulWidget {
     this.ledger,
     this.initialTab = GameStatsTab.all,
     DateTime Function()? clock,
+    this.embedded = false,
   })  : service = service ?? getIt<GamingService>(),
         clock = clock ?? DateTime.now;
 
@@ -32,6 +33,9 @@ class GameStatsPage extends StatefulWidget {
 
   final GameStatsTab initialTab;
   final DateTime Function() clock;
+
+  /// Affichee comme onglet de la page d'accueil, plutot que poussee.
+  final bool embedded;
 
   @override
   State<GameStatsPage> createState() => _GameStatsPageState();
@@ -115,26 +119,22 @@ class _GameStatsPageState extends State<GameStatsPage> {
     final report = _report;
     final week = _selected;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(l10n.game_stats_title),
-          Text(
-            _updatedLine(context, l10n, report?.updatedAt),
-            style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-          ),
-        ]),
-        actions: [
-          IconButton(
-            tooltip: l10n.game_stats_refresh,
-            onPressed: _refreshing ? null : _refresh,
-            icon: _refreshing
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Icon(Icons.refresh),
-          ),
-        ],
+    final title = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(l10n.game_stats_title, style: widget.embedded ? theme.textTheme.titleLarge : null),
+      Text(
+        _updatedLine(context, l10n, report?.updatedAt),
+        style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
       ),
-      body: report == null
+    ]);
+    final refresh = IconButton(
+      tooltip: l10n.game_stats_refresh,
+      onPressed: _refreshing ? null : _refresh,
+      icon: _refreshing
+          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+          : const Icon(Icons.refresh),
+    );
+
+    final content = report == null
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _refresh,
@@ -173,7 +173,22 @@ class _GameStatsPageState extends State<GameStatsPage> {
                   ],
                 ],
               ),
-            ),
+            );
+
+    // Dans la barre de navigation, la page d'accueil fournit deja l'en-tete :
+    // un second AppBar, avec sa fleche de retour, n'y aurait pas de sens.
+    if (widget.embedded) {
+      return Column(children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 8, 4),
+          child: Row(children: [Expanded(child: title), refresh]),
+        ),
+        Expanded(child: content),
+      ]);
+    }
+    return Scaffold(
+      appBar: AppBar(title: title, actions: [refresh]),
+      body: content,
     );
   }
 

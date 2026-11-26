@@ -3567,6 +3567,12 @@ abstract class AppLocalizations {
   /// **'Sport'**
   String get bb_sport;
 
+  /// No description provided for @bb_games.
+  ///
+  /// In en, this message translates to:
+  /// **'Games'**
+  String get bb_games;
+
   /// No description provided for @sport_unknown.
   ///
   /// In en, this message translates to:

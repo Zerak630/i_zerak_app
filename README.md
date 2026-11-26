@@ -52,7 +52,7 @@ doit l'être dans les deux langues.
 
 ```bash
 flutter analyze   # doit rester sans avertissement
-flutter test      # 546 tests
+flutter test      # 547 tests
 ```
 
 Les versions release se construisent **sans élagage des icônes** :
@@ -133,7 +133,8 @@ et ne donne aucun pouvoir sur les services.
 
 ### L'écran Temps de jeu
 
-Il s'ouvre depuis la carte du contrat (icône de statistiques) et depuis la carte Jeu du bilan
+Il a son onglet **Jeux** dans la navigation (à épingler dans la barre ou dans « Plus »), et s'ouvre
+aussi depuis la carte du contrat (icône de statistiques) et depuis la carte Jeu du bilan
 (`lib/pages/gaming/game_stats_page.dart`). Trois onglets, sur la semaine choisie (chevrons, ou un
 appui sur une barre) :
 
